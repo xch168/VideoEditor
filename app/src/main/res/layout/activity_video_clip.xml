@@ -7,4 +7,11 @@
     android:layout_height="match_parent"
     tools:context=".ui.VideoClipActivity">
 
+    <com.kk.taurus.playerbase.widget.BaseVideoView
+        android:id="@+id/video_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="16:9"
+        android:background="#000000"/>
+
 </android.support.constraint.ConstraintLayout>
