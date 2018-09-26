@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.m4399.videoeditor.R;
 import com.m4399.videoeditor.entity.Video;
+import com.m4399.videoeditor.ui.VideoClipActivity;
 import com.m4399.videoeditor.util.TimeUtil;
 
 import java.util.List;
@@ -38,7 +39,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoItemVie
     @Override
     public void onBindViewHolder(@NonNull VideoItemViewHolder holder, int i)
     {
-        Video video = mVideoList.get(i);
+        final Video video = mVideoList.get(i);
         holder.timeView.setText(TimeUtil.format(video.getDuration()));
         Glide.with(mContext).load(video.getVideoPath()).into(holder.imageView);
         holder.itemView.setOnClickListener(new View.OnClickListener()
@@ -46,7 +47,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoItemVie
             @Override
             public void onClick(View v)
             {
-
+                VideoClipActivity.open(mContext, video.getVideoPath());
             }
         });
     }
