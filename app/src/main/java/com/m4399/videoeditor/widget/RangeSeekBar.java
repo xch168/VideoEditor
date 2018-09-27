@@ -18,6 +18,8 @@ public class RangeSeekBar extends View
 
     private Drawable mProgressCursor;
 
+    private OnRangeChangedListener mOnRangeChangedListener;
+
     public RangeSeekBar(Context context)
     {
         super(context);
@@ -69,5 +71,15 @@ public class RangeSeekBar extends View
         super.onDraw(canvas);
 
         mLeftCursor.draw(canvas);
+    }
+
+    public void setOnRangeChangedListener(OnRangeChangedListener listener)
+    {
+        mOnRangeChangedListener = listener;
+    }
+
+    public interface OnRangeChangedListener
+    {
+        void onRangeChanged(RangeSeekBar view, float leftValue, float rightValue);
     }
 }

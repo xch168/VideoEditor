@@ -11,11 +11,13 @@ import android.widget.TextView;
 import com.m4399.videoeditor.R;
 
 
-public class VideoRangeSlider extends FrameLayout
+public class VideoRangeSlider extends FrameLayout implements RangeSeekBar.OnRangeChangedListener
 {
     private TextView mStartTimeView;
     private TextView mEndTimeView;
     private TextView mDurationView;
+
+    private RangeSeekBar mRangeSeekBar;
 
     public VideoRangeSlider(@NonNull Context context)
     {
@@ -46,5 +48,14 @@ public class VideoRangeSlider extends FrameLayout
         mStartTimeView = findViewById(R.id.tv_start_time);
         mEndTimeView = findViewById(R.id.tv_end_time);
         mDurationView = findViewById(R.id.tv_duration);
+
+        mRangeSeekBar = findViewById(R.id.range_seek_bar);
+        mRangeSeekBar.setOnRangeChangedListener(this);
+    }
+
+    @Override
+    public void onRangeChanged(RangeSeekBar view, float leftValue, float rightValue)
+    {
+
     }
 }
