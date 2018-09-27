@@ -87,11 +87,15 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
 
     }
 
+    public void startClipVideo(View view)
+    {
+
+    }
+
     public static void open(Context context, String videoPath)
     {
         Intent intent = new Intent(context, VideoClipActivity.class);
         intent.putExtra("video_path", videoPath);
         context.startActivity(intent);
     }
-
 }
