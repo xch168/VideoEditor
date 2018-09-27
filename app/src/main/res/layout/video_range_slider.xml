@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".ui.VideoListActivity">
+
+
+    <TextView
+        android:id="@+id/tv_start_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="20dp"
+        android:textColor="#333333"
+        android:textSize="16sp"
+        android:text="00:00"/>
+
+    <TextView
+        android:id="@+id/tv_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toRightOf="@id/tv_start_time"
+        app:layout_constraintRight_toLeftOf="@+id/tv_end_time"
+        android:textColor="#FF00"
+        android:textSize="16sp"
+        android:text="00:00"/>
+
+    <TextView
+        android:id="@+id/tv_end_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginRight="20dp"
+        android:textColor="#333333"
+        android:textSize="16sp"
+        android:text="8:35"/>
+
+    <com.m4399.videoeditor.widget.RangeSeekBar
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_duration"
+        android:layout_marginTop="10dp"
+        app:rangeThumb="@drawable/range_thumb"
+        app:progressThumb="@drawable/progress_thumb"/>
+
+</android.support.constraint.ConstraintLayout>

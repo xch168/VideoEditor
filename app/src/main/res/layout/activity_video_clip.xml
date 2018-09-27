@@ -30,4 +30,9 @@
         app:layout_constraintBottom_toBottomOf="@id/video_view"
         android:src="@drawable/play_big"/>
 
+    <com.m4399.videoeditor.widget.VideoRangeSlider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/video_view"
+        android:layout_marginTop="10dp"/>
 </android.support.constraint.ConstraintLayout>
