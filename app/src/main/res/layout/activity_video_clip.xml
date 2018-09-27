@@ -14,4 +14,20 @@
         app:layout_constraintDimensionRatio="16:9"
         android:background="#000000"/>
 
+    <View
+        android:id="@+id/touch_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="16:9"/>
+
+    <ImageView
+        android:id="@+id/iv"
+        android:layout_width="69dp"
+        android:layout_height="69dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/video_view"
+        app:layout_constraintBottom_toBottomOf="@id/video_view"
+        android:src="@drawable/play_big"/>
+
 </android.support.constraint.ConstraintLayout>
