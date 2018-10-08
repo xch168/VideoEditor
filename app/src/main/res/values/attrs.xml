@@ -3,5 +3,7 @@
     <declare-styleable name="RangeSeekBar">
         <attr name="rangeThumb" format="reference"/>
         <attr name="progressThumb" format="reference"/>
+        <attr name="insideRangeLineColor" format="color"/>
+        <attr name="outsideRangeLineColor" format="color"/>
     </declare-styleable>
 </resources>

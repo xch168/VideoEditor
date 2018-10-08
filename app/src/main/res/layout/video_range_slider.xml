@@ -45,6 +45,8 @@
         app:layout_constraintTop_toBottomOf="@id/tv_duration"
         android:layout_marginTop="10dp"
         app:rangeThumb="@drawable/range_thumb"
-        app:progressThumb="@drawable/progress_thumb"/>
+        app:progressThumb="@drawable/progress_thumb"
+        app:insideRangeLineColor="@color/colorPrimary"
+        app:outsideRangeLineColor="#fdb300"/>
 
 </android.support.constraint.ConstraintLayout>
