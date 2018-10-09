@@ -46,7 +46,7 @@
         android:layout_marginTop="10dp"
         app:rangeThumb="@drawable/range_thumb"
         app:progressThumb="@drawable/progress_thumb"
-        app:insideRangeLineColor="@color/colorPrimary"
-        app:outsideRangeLineColor="#fdb300"/>
+        app:insideRangeLineColor="@android:color/transparent"
+        app:outsideRangeLineColor="#59000000"/>
 
 </android.support.constraint.ConstraintLayout>

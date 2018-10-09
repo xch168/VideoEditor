@@ -40,11 +40,16 @@ public class RangeSeekBar extends View
     private Thumb mLeftThumb = new Thumb();
     private Thumb mRightThumb = new Thumb();
 
+    private Thumb mCurrentTouchThumb;
+
     private Drawable mProgressCursor;
 
     private OnRangeChangedListener mOnRangeChangedListener;
 
     private float cellsPercent;
+
+    private float maxValue, minValue;
+    private float reservePercent;
 
     public RangeSeekBar(Context context)
     {
@@ -129,17 +134,117 @@ public class RangeSeekBar extends View
 
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(mOutsideRangeLineColor);
-        if (cellsPercent > 0)
-        {
-            paint.setStrokeWidth(lineCorners * 0.2f);
-        }
-        canvas.drawRect(line, paint);
+
+        // 绘制左边超出范围蒙层
+        canvas.drawRect(0, lineTop,
+                        mLeftThumb.left + mLeftThumb.widthSize / 2 + mLeftThumb.lineWidth * mLeftThumb.currPercent,
+                        lineBottom, paint);
+
+        // 绘制右边超出范围蒙层
+        canvas.drawRect(mRightThumb.left + mRightThumb.widthSize / 2 + mRightThumb.lineWidth * mRightThumb.currPercent, lineTop,
+                        lineRight,
+                        lineBottom, paint);
+
+        // 绘制中间选中范围蒙层
         paint.setColor(mInsideRangeLineColor);
         canvas.drawRect(mLeftThumb.left + mLeftThumb.widthSize / 2 + mLeftThumb.lineWidth * mLeftThumb.currPercent, lineTop,
                         mRightThumb.left + mRightThumb.widthSize / 2 + mRightThumb.lineWidth * mRightThumb.currPercent, lineBottom, paint);
 
+        // 绘制左边边界选择控件
         mLeftThumb.draw(canvas);
+        // 绘制右边边界选择控件
         mRightThumb.draw(canvas);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event)
+    {
+        switch (event.getAction())
+        {
+            case MotionEvent.ACTION_DOWN:
+                boolean touchResult = false;
+                if (mRightThumb.currPercent >= 1 && mLeftThumb.collide(event))
+                {
+                    mCurrentTouchThumb = mLeftThumb;
+                    touchResult = true;
+                }
+                else if (mRightThumb.collide(event))
+                {
+                    mCurrentTouchThumb = mRightThumb;
+                    touchResult = true;
+                }
+                else if (mLeftThumb.collide(event))
+                {
+                    mCurrentTouchThumb = mLeftThumb;
+                    touchResult = true;
+                }
+                return touchResult;
+            case MotionEvent.ACTION_MOVE:
+                float percent;
+                float x = event.getX();
+
+                mCurrentTouchThumb.material = mCurrentTouchThumb.material >= 1 ? 1 : mCurrentTouchThumb.material + 0.1f;
+
+                if (mCurrentTouchThumb == mLeftThumb)
+                {
+                    if (x < lineLeft)
+                    {
+                        percent = 0;
+                    }
+                    else
+                    {
+                        percent = (x - lineLeft) * 1f / (lineWidth - mRightThumb.widthSize);
+                    }
+
+                    if (percent > mRightThumb.currPercent - reservePercent)
+                    {
+                        percent = mRightThumb.currPercent - reservePercent;
+                    }
+                    mLeftThumb.slide(percent);
+                }
+                else if (mCurrentTouchThumb == mRightThumb)
+                {
+                    if (x > lineRight)
+                    {
+                        percent = 1;
+                    }
+                        else
+                    {
+                        percent = (x - lineLeft - mLeftThumb.widthSize) * 1f / (lineWidth - mLeftThumb.widthSize);
+                    }
+                    if (percent < mLeftThumb.currPercent + reservePercent)
+                    {
+                        percent = mLeftThumb.currPercent + reservePercent;
+                    }
+                    mRightThumb.slide(percent);
+                }
+
+                if (mOnRangeChangedListener != null)
+                {
+                    float[] result = getCurrentRange();
+                    mOnRangeChangedListener.onRangeChanged(this, result[0], result[1]);
+                }
+                invalidate();
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                mCurrentTouchThumb.materialRestore();
+
+                if (mOnRangeChangedListener != null)
+                {
+                    float[] result = getCurrentRange();
+                    mOnRangeChangedListener.onRangeChanged(this, result[0], result[1]);
+                }
+                break;
+        }
+        return super.onTouchEvent(event);
+    }
+
+    public float[] getCurrentRange()
+    {
+        float range = maxValue - minValue;
+        return new float[]{minValue + range * mLeftThumb.currPercent,
+                           minValue + range * mRightThumb.currPercent};
     }
 
     public void setOnRangeChangedListener(OnRangeChangedListener listener)
