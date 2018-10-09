@@ -3,19 +3,14 @@ package com.m4399.videoeditor.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.RadialGradient;
 import android.graphics.RectF;
-import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -29,7 +24,6 @@ public class RangeSeekBar extends View
     private Paint paint = new Paint();
 
     private int lineTop, lineBottom, lineLeft, lineRight;
-    private int lineCorners;
     private int lineWidth;
     private RectF line = new RectF();
 
@@ -46,10 +40,7 @@ public class RangeSeekBar extends View
 
     private OnRangeChangedListener mOnRangeChangedListener;
 
-    private float cellsPercent;
-
     private float maxValue, minValue;
-    private float reservePercent;
 
     public RangeSeekBar(Context context)
     {
@@ -111,17 +102,15 @@ public class RangeSeekBar extends View
     {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        int seekBarRadius = h / 2;
-
         lineLeft = 0;
         lineRight = w;
-        lineTop = 10;
-        lineBottom = h - 10;
+        lineTop = 15;
+        lineBottom = h - 15;
         lineWidth = lineRight - lineLeft;
         line.set(lineLeft, lineTop, lineRight, lineBottom);
 
-        mLeftThumb.onSizeChanged(seekBarRadius, seekBarRadius, h, lineWidth, mThumbResId, getContext());
-        mRightThumb.onSizeChanged(seekBarRadius, seekBarRadius, h, lineWidth, mThumbResId, getContext());
+        mLeftThumb.onSizeChanged(h, lineWidth, mThumbResId, getContext());
+        mRightThumb.onSizeChanged(h, lineWidth, mThumbResId, getContext());
 
         mRightThumb.left += mLeftThumb.widthSize;
         mRightThumb.right += mLeftThumb.widthSize;
@@ -150,9 +139,8 @@ public class RangeSeekBar extends View
         canvas.drawRect(mLeftThumb.left + mLeftThumb.widthSize / 2 + mLeftThumb.lineWidth * mLeftThumb.currPercent, lineTop,
                         mRightThumb.left + mRightThumb.widthSize / 2 + mRightThumb.lineWidth * mRightThumb.currPercent, lineBottom, paint);
 
-        // 绘制左边边界选择控件
+        // 绘制左、右边界选择thumb
         mLeftThumb.draw(canvas);
-        // 绘制右边边界选择控件
         mRightThumb.draw(canvas);
     }
 
@@ -196,9 +184,9 @@ public class RangeSeekBar extends View
                         percent = (x - lineLeft) * 1f / (lineWidth - mRightThumb.widthSize);
                     }
 
-                    if (percent > mRightThumb.currPercent - reservePercent)
+                    if (percent > mRightThumb.currPercent)
                     {
-                        percent = mRightThumb.currPercent - reservePercent;
+                        percent = mRightThumb.currPercent;
                     }
                     mLeftThumb.slide(percent);
                 }
@@ -208,13 +196,13 @@ public class RangeSeekBar extends View
                     {
                         percent = 1;
                     }
-                        else
+                    else
                     {
                         percent = (x - lineLeft - mLeftThumb.widthSize) * 1f / (lineWidth - mLeftThumb.widthSize);
                     }
-                    if (percent < mLeftThumb.currPercent + reservePercent)
+                    if (percent < mLeftThumb.currPercent)
                     {
-                        percent = mLeftThumb.currPercent + reservePercent;
+                        percent = mLeftThumb.currPercent;
                     }
                     mRightThumb.slide(percent);
                 }
@@ -247,6 +235,16 @@ public class RangeSeekBar extends View
                            minValue + range * mRightThumb.currPercent};
     }
 
+    public void setMinValue(float minValue)
+    {
+        this.minValue = minValue;
+    }
+
+    public void setMaxValue(float maxValue)
+    {
+        this.maxValue = maxValue;
+    }
+
     public void setOnRangeChangedListener(OnRangeChangedListener listener)
     {
         mOnRangeChangedListener = listener;
@@ -259,8 +257,6 @@ public class RangeSeekBar extends View
 
     private class Thumb
     {
-        RadialGradient shadowGradient;
-        Paint defaultPaint;
         int lineWidth;
         int widthSize, heightSize;
         float currPercent;
@@ -269,47 +265,21 @@ public class RangeSeekBar extends View
 
         float material = 0;
         ValueAnimator anim;
-        final TypeEvaluator<Integer> te = new TypeEvaluator<Integer>()
-        {
-            @Override
-            public Integer evaluate(float fraction, Integer startValue, Integer endValue)
-            {
-                int alpha = (int) (Color.alpha(startValue) + fraction * (Color.alpha(endValue) - Color.alpha(startValue)));
-                int red = (int) (Color.red(startValue) + fraction * (Color.red(endValue) - Color.red(startValue)));
-                int green = (int) (Color.green(startValue) + fraction * (Color.green(endValue) - Color.green(startValue)));
-                int blue = (int) (Color.blue(startValue) + fraction * (Color.blue(endValue) - Color.blue(startValue)));
-                return Color.argb(alpha, red, green, blue);
-            }
-        };
 
-        void onSizeChanged(int centerX, int centerY, int hSize, int parentLineWidth, int bmpResId, Context context)
+        void onSizeChanged(int hSize, int parentLineWidth, int bmpResId, Context context)
         {
             heightSize = hSize;
-            widthSize = (int) (heightSize * 0.8f);
-            left = centerX - widthSize / 2;
-            right = centerX + widthSize / 2;
-            top = centerY - heightSize / 2;
-            bottom = centerY + heightSize / 2;
+            widthSize = (int) (hSize * 0.2);
+            left = hSize / 2 - widthSize / 2;
+            right = hSize / 2 + widthSize / 2;
+            top = hSize / 2 - heightSize / 2;
+            bottom = hSize / 2 + heightSize / 2;
 
             lineWidth = parentLineWidth - widthSize;
 
             if (bmpResId > 0)
             {
-                Bitmap original = BitmapFactory.decodeResource(context.getResources(), bmpResId);
-                Matrix matrix = new Matrix();
-                float scaleWidth = ((float) widthSize) / original.getWidth();
-                float scaleHeight = ((float) heightSize) / original.getHeight();
-                matrix.postScale(scaleWidth, scaleHeight);
-                bmp = Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(), matrix, true);
-            }
-            else
-            {
-                defaultPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                int radius = (int) (widthSize * 0.5f);
-                int barShadowRadius = (int) (radius * 0.95f);
-                int mShadowCenterX = widthSize / 2;
-                int mShadowCenterY = heightSize / 2;
-                shadowGradient = new RadialGradient(mShadowCenterX, mShadowCenterY, barShadowRadius, Color.BLACK, Color.TRANSPARENT, Shader.TileMode.CLAMP);
+                bmp = BitmapFactory.decodeResource(context.getResources(), bmpResId);
             }
         }
 
@@ -328,7 +298,6 @@ public class RangeSeekBar extends View
             currPercent = percent;
         }
 
-
         void draw(Canvas canvas)
         {
             int offset = (int) (lineWidth * currPercent);
@@ -338,36 +307,7 @@ public class RangeSeekBar extends View
             {
                 canvas.drawBitmap(bmp, left, top, null);
             }
-            else
-            {
-                canvas.translate(left, 0);
-                drawDefault(canvas);
-            }
             canvas.restore();
-        }
-
-        private void drawDefault(Canvas canvas)
-        {
-            int centerX = widthSize / 2;
-            int centerY = heightSize / 2;
-            int radius = (int) (widthSize * 0.5f);
-            // draw shadow
-            defaultPaint.setStyle(Paint.Style.FILL);
-            canvas.save();
-            canvas.translate(0, radius * 0.25f);
-            canvas.scale(1 + (0.1f * material), 1 + (0.1f * material), centerX, centerY);
-            defaultPaint.setShader(shadowGradient);
-            canvas.drawCircle(centerX, centerY, radius, defaultPaint);
-            defaultPaint.setShader(null);
-            canvas.restore();
-            // draw body
-            defaultPaint.setStyle(Paint.Style.FILL);
-            defaultPaint.setColor(te.evaluate(material, 0xFFFFFFFF, 0xFFE7E7E7));
-            canvas.drawCircle(centerX, centerY, radius, defaultPaint);
-            // draw border
-            defaultPaint.setStyle(Paint.Style.STROKE);
-            defaultPaint.setColor(0xFFD7D7D7);
-            canvas.drawCircle(centerX, centerY, radius, defaultPaint);
         }
 
         private void materialRestore()
