@@ -38,6 +38,14 @@
         android:textSize="16sp"
         android:text="8:35"/>
 
+    <LinearLayout
+        android:id="@+id/video_thumbnails"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:orientation="horizontal"
+        android:background="#FDB300"
+        app:layout_constraintTop_toTopOf="@+id/range_seek_bar"/>
+
     <com.m4399.videoeditor.widget.RangeSeekBar
         android:id="@+id/range_seek_bar"
         android:layout_width="match_parent"

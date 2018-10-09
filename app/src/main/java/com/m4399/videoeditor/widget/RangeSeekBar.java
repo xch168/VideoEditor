@@ -11,7 +11,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -28,6 +27,7 @@ public class RangeSeekBar extends View
     private RectF line = new RectF();
 
     private int mThumbResId;
+    private int mProgressResId;
     private int mInsideRangeLineColor;
     private int mOutsideRangeLineColor;
 
@@ -36,7 +36,7 @@ public class RangeSeekBar extends View
 
     private Thumb mCurrentTouchThumb;
 
-    private Drawable mProgressCursor;
+    private Thumb mProgressCursor = new Thumb();
 
     private OnRangeChangedListener mOnRangeChangedListener;
 
@@ -70,7 +70,7 @@ public class RangeSeekBar extends View
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.RangeSeekBar);
 
         mThumbResId = typedArray.getResourceId(R.styleable.RangeSeekBar_rangeThumb, 0);
-        mProgressCursor = typedArray.getDrawable(R.styleable.RangeSeekBar_progressThumb);
+        mProgressResId = typedArray.getResourceId(R.styleable.RangeSeekBar_progressThumb, 0);
         mInsideRangeLineColor = typedArray.getColor(R.styleable.RangeSeekBar_insideRangeLineColor, 0xFF4BD962);
         mOutsideRangeLineColor = typedArray.getColor(R.styleable.RangeSeekBar_outsideRangeLineColor, 0xFFD7D7D7);
 
@@ -112,6 +112,8 @@ public class RangeSeekBar extends View
         mLeftThumb.onSizeChanged(h, lineWidth, mThumbResId, getContext());
         mRightThumb.onSizeChanged(h, lineWidth, mThumbResId, getContext());
 
+        mProgressCursor.onSizeChanged(h, lineWidth, mProgressResId, getContext());
+
         mRightThumb.left += mLeftThumb.widthSize;
         mRightThumb.right += mLeftThumb.widthSize;
     }
@@ -142,6 +144,9 @@ public class RangeSeekBar extends View
         // 绘制左、右边界选择thumb
         mLeftThumb.draw(canvas);
         mRightThumb.draw(canvas);
+
+        // 绘制进度
+        mProgressCursor.draw(canvas);
     }
 
     @Override
@@ -189,6 +194,7 @@ public class RangeSeekBar extends View
                         percent = mRightThumb.currPercent;
                     }
                     mLeftThumb.slide(percent);
+                    mProgressCursor.slide(percent);
                 }
                 else if (mCurrentTouchThumb == mRightThumb)
                 {
