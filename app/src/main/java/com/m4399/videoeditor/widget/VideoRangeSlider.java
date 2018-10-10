@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.m4399.videoeditor.R;
 
 
-public class VideoRangeSlider extends FrameLayout implements RangeSeekBar.OnRangeChangedListener
+public class VideoRangeSlider extends FrameLayout implements RangeSeekBar.OnRangeSeekBarChangeListener
 {
     private static final String TAG = "VideoRangeSlider";
 
@@ -43,7 +43,6 @@ public class VideoRangeSlider extends FrameLayout implements RangeSeekBar.OnRang
     {
         super(context, attrs, defStyleAttr);
 
-
         initView();
     }
 
@@ -58,20 +57,35 @@ public class VideoRangeSlider extends FrameLayout implements RangeSeekBar.OnRang
         mVideoThumbnailGallery = findViewById(R.id.video_thumbnails);
 
         mRangeSeekBar = findViewById(R.id.range_seek_bar);
-        mRangeSeekBar.setOnRangeChangedListener(this);
-
-        mRangeSeekBar.setMinValue(0);
-        mRangeSeekBar.setMaxValue(1000);
-    }
-
-    @Override
-    public void onRangeChanged(RangeSeekBar view, float leftValue, float rightValue)
-    {
-        Log.i(TAG, "left:" + leftValue + " right:" + rightValue);
+        mRangeSeekBar.setOnRangeSeekBarChangeListener(this);
     }
 
     private void loadVideoThumbnails()
     {
 
+    }
+
+    public void setFrameProgress(float percent)
+    {
+        mRangeSeekBar.showFrameProgress(true);
+        mRangeSeekBar.setFrameProgress(percent);
+    }
+
+    @Override
+    public void onRangeChange(int witchSide, float leftValue, float rightValue)
+    {
+        Log.i(TAG, "left:" + leftValue + " right:" + rightValue);
+    }
+
+    @Override
+    public void onStartTrackingTouch()
+    {
+        Log.i(TAG, "onStartTrackingTouch");
+    }
+
+    @Override
+    public void onStopTrackingTouch()
+    {
+        Log.i(TAG, "onStopTrackingTouch");
     }
 }

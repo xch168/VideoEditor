@@ -1,17 +1,14 @@
 package com.m4399.videoeditor.widget;
 
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.RectF;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,325 +17,488 @@ import com.m4399.videoeditor.R;
 
 public class RangeSeekBar extends View
 {
-    private Paint paint = new Paint();
+    private static String TAG = "RangeSeekBar";
+    private static int MERGIN_PADDING = 20;
+    private static final int DRAG_OFFSET = 50;
 
-    private int lineTop, lineBottom, lineLeft, lineRight;
-    private int lineWidth;
-    private RectF line = new RectF();
+    enum SelectThumb
+    {
+        /**
+         * 没有选中滑块
+         */
+        SELECT_THUMB_NONE,
 
-    private int mThumbResId;
-    private int mProgressResId;
-    private int mInsideRangeLineColor;
-    private int mOutsideRangeLineColor;
+         /**
+          * 选中左边滑块
+          */
+        SELECT_THUMB_LEFT,
+        /**
+         * 选中左边滑块的左侧
+         */
+        SELECT_THUMB_MORE_LEFT,
+        /**
+         * 选中右边滑块
+         */
+        SELECT_THUMB_RIGHT,
 
-    private Thumb mLeftThumb = new Thumb();
-    private Thumb mRightThumb = new Thumb();
+        /**
+         * 选中右边滑块的右侧
+         */
+        SELECT_THUMB_MORE_RIGHT
+    }
 
-    private Thumb mCurrentTouchThumb;
+    //params
+    private Bitmap thumbSlice;
+    private Bitmap thumbSliceRight;
+    private Bitmap thumbFrame;
+    private int progressMinDiff = 25; //percentage
+    private int progressHalfHeight = 0;
+    private int thumbPadding = 0;
+    private float maxValue = 100f;
 
-    private Thumb mProgressCursor = new Thumb();
+    private int progressMinDiffPixels;
+    private int thumbSliceLeftX, thumbSliceRightX, thumbMaxSliceRightx;
+    private float thumbSliceLeftValue, thumbSliceRightValue;
+    private Paint paintThumb = new Paint();
+    private SelectThumb selectedThumb;
+    private SelectThumb lastSelectedThumb = SelectThumb.SELECT_THUMB_NONE;
+    private int thumbSliceHalfWidth;
+    private OnRangeSeekBarChangeListener mOnRangeSeekBarChangeListener;
+    private int resSweepLeft = R.drawable.ic_progress_left;
+    private int resSweepRight = R.drawable.ic_progress_right;
+    private int resFrame = R.drawable.progress_thumb;
+    private int resBackground = R.color.colorMask;
+    private int resPaddingColor = android.R.color.holo_red_dark;
 
-    private OnRangeChangedListener mOnRangeChangedListener;
+    private boolean blocked;
+    private boolean isInited;
 
-    private float maxValue, minValue;
+    private boolean isTouch = false;
+    private boolean isDefaultSeekTotal;
+    private int prevX;
+    private int downX;
+
+    private int screenWidth;
+
+    private int lastDrawLeft;
+    private int lastDrawRight;
+
+    private boolean needFrameProgress;
+    private float frameProgress;
+
+    private static final int PADDING_BOTTOM_TOP = 10;
+    private static final int PADDING_LEFT_RIGHT = 5;
 
     public RangeSeekBar(Context context)
     {
         super(context);
+        initView(context);
     }
 
-    public RangeSeekBar(Context context, @Nullable AttributeSet attrs)
+    public RangeSeekBar(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-
         initAttrs(attrs);
-
-        initView();
+        initView(context);
     }
 
-    public RangeSeekBar(Context context, @Nullable AttributeSet attrs, int defStyleAttr)
+    public RangeSeekBar(Context context, AttributeSet attrs, int defStyle)
     {
-        super(context, attrs, defStyleAttr);
-
+        super(context, attrs, defStyle);
         initAttrs(attrs);
-
-        initView();
+        initView(context);
     }
 
     private void initAttrs(AttributeSet attrs)
     {
-        TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.RangeSeekBar);
-
-        mThumbResId = typedArray.getResourceId(R.styleable.RangeSeekBar_rangeThumb, 0);
-        mProgressResId = typedArray.getResourceId(R.styleable.RangeSeekBar_progressThumb, 0);
-        mInsideRangeLineColor = typedArray.getColor(R.styleable.RangeSeekBar_insideRangeLineColor, 0xFF4BD962);
-        mOutsideRangeLineColor = typedArray.getColor(R.styleable.RangeSeekBar_outsideRangeLineColor, 0xFFD7D7D7);
-
-        typedArray.recycle();
+        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.RangeSeekBar);
+        resSweepLeft = a.getResourceId(R.styleable.RangeSeekBar_leftThumbDrawable, R.drawable.ic_progress_left);
+        resSweepRight = a.getResourceId(R.styleable.RangeSeekBar_rightThumbDrawable, R.drawable.ic_progress_right);
+        resFrame = a.getResourceId(R.styleable.RangeSeekBar_progressThumb, R.drawable.progress_thumb);
+        resBackground = a.getResourceId(R.styleable.RangeSeekBar_maskColor, R.color.colorMask);
+        resPaddingColor = a.getResourceId(R.styleable.RangeSeekBar_paddingColor, android.R.color.holo_red_dark);
+        a.recycle();
     }
 
-    private void initView()
+    private void initView(Context context)
     {
-
+        thumbSlice = BitmapFactory.decodeResource(getResources(), resSweepLeft);
+        thumbSliceRight = BitmapFactory.decodeResource(getResources(), resSweepRight);
+        thumbFrame = BitmapFactory.decodeResource(getResources(), resFrame);
+        screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+        int itemWidth = screenWidth / 8;
+        float ratio = (float) itemWidth / (float) thumbSlice.getHeight();
+        Matrix matrix = new Matrix();
+        matrix.postScale(ratio, ratio);
+        float frameRatio = (float) itemWidth / (float) thumbFrame.getHeight();
+        Matrix frameMatrix = new Matrix();
+        frameMatrix.postScale(frameRatio, frameRatio);
+        thumbSlice = Bitmap.createBitmap(thumbSlice, 0, 0, thumbSlice.getWidth(), thumbSlice.getHeight(), matrix, false);
+        thumbSliceRight = Bitmap.createBitmap(thumbSliceRight, 0, 0, thumbSliceRight.getWidth(), thumbSliceRight.getHeight(), matrix, false);
+        thumbFrame = Bitmap.createBitmap(thumbFrame, 0, 0, thumbFrame.getWidth(), thumbFrame.getHeight(), frameMatrix, false);
+        invalidate();
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
+    public void onWindowFocusChanged(boolean hasWindowFocus)
     {
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-        if (heightSize * 1.8f > widthSize)
+        super.onWindowFocusChanged(hasWindowFocus);
+        if (!isInited)
         {
-            setMeasuredDimension(widthSize, (int) (widthSize / 1.8f));
-        }
-        else
-        {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            isInited = true;
+            init();
         }
     }
 
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh)
+    private void init()
     {
-        super.onSizeChanged(w, h, oldw, oldh);
+        if (thumbSlice.getHeight() > getHeight())
+        {
+            getLayoutParams().height = thumbSlice.getHeight();
+        }
 
-        lineLeft = 0;
-        lineRight = w;
-        lineTop = 15;
-        lineBottom = h - 15;
-        lineWidth = lineRight - lineLeft;
-        line.set(lineLeft, lineTop, lineRight, lineBottom);
+        thumbSliceHalfWidth = thumbSlice.getWidth() / 2;
+        progressMinDiffPixels = calculateCorrds(progressMinDiff) - 2 * thumbPadding;
 
-        mLeftThumb.onSizeChanged(h, lineWidth, mThumbResId, getContext());
-        mRightThumb.onSizeChanged(h, lineWidth, mThumbResId, getContext());
-
-        mProgressCursor.onSizeChanged(h, lineWidth, mProgressResId, getContext());
-
-        mRightThumb.left += mLeftThumb.widthSize;
-        mRightThumb.right += mLeftThumb.widthSize;
+        selectedThumb = SelectThumb.SELECT_THUMB_NONE;
+        setLeftProgress(0);
+        setRightProgress(100);
+        setThumbMaxSliceRightx(screenWidth);
+        invalidate();
     }
 
+    @SuppressLint("DrawAllocation")
     @Override
     protected void onDraw(Canvas canvas)
     {
         super.onDraw(canvas);
+        int drawLeft = thumbSliceLeftX;
+        int drawRight = thumbSliceRightX;
 
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(mOutsideRangeLineColor);
-
-        // 绘制左边超出范围蒙层
-        canvas.drawRect(0, lineTop,
-                        mLeftThumb.left + mLeftThumb.widthSize / 2 + mLeftThumb.lineWidth * mLeftThumb.currPercent,
-                        lineBottom, paint);
-
-        // 绘制右边超出范围蒙层
-        canvas.drawRect(mRightThumb.left + mRightThumb.widthSize / 2 + mRightThumb.lineWidth * mRightThumb.currPercent, lineTop,
-                        lineRight,
-                        lineBottom, paint);
-
-        // 绘制中间选中范围蒙层
-        paint.setColor(mInsideRangeLineColor);
-        canvas.drawRect(mLeftThumb.left + mLeftThumb.widthSize / 2 + mLeftThumb.lineWidth * mLeftThumb.currPercent, lineTop,
-                        mRightThumb.left + mRightThumb.widthSize / 2 + mRightThumb.lineWidth * mRightThumb.currPercent, lineBottom, paint);
-
-        // 绘制左、右边界选择thumb
-        mLeftThumb.draw(canvas);
-        mRightThumb.draw(canvas);
-
-        // 绘制进度
-        mProgressCursor.draw(canvas);
+        paintThumb.setColor(getResources().getColor(resPaddingColor));
+        canvas.drawRect(drawLeft + thumbSlice.getWidth() - PADDING_LEFT_RIGHT, 0f, drawRight + PADDING_LEFT_RIGHT, PADDING_BOTTOM_TOP, paintThumb);
+        canvas.drawRect(drawLeft + thumbSlice.getWidth() - PADDING_LEFT_RIGHT, thumbSlice.getHeight() - PADDING_BOTTOM_TOP,
+                        drawRight + PADDING_LEFT_RIGHT, thumbSlice.getHeight(), paintThumb);
+        paintThumb.setColor(getResources().getColor(resBackground));
+        paintThumb.setAlpha((int) (255 * 0.9));
+        canvas.drawRect(0, 0, drawLeft + PADDING_LEFT_RIGHT, getHeight(), paintThumb);
+        canvas.drawRect(drawRight + thumbSliceRight.getWidth() - PADDING_LEFT_RIGHT, 0, getWidth(), getHeight(), paintThumb);
+        canvas.drawBitmap(thumbSlice, drawLeft, 0, paintThumb);
+        canvas.drawBitmap(thumbSliceRight, drawRight, 0, paintThumb);
+        if (needFrameProgress)
+        {
+            float progress = frameProgress * (getWidth() - thumbSliceHalfWidth * 2) - thumbFrame.getWidth() / 2;
+            if (progress > drawRight + thumbSliceHalfWidth * 2)
+            {
+                progress = drawRight + thumbSliceHalfWidth * 2;
+            }
+            canvas.drawBitmap(thumbFrame, progress, 0, paintThumb);
+        }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-        switch (event.getAction())
+        if (!blocked)
         {
-            case MotionEvent.ACTION_DOWN:
-                boolean touchResult = false;
-                if (mRightThumb.currPercent >= 1 && mLeftThumb.collide(event))
-                {
-                    mCurrentTouchThumb = mLeftThumb;
-                    touchResult = true;
-                }
-                else if (mRightThumb.collide(event))
-                {
-                    mCurrentTouchThumb = mRightThumb;
-                    touchResult = true;
-                }
-                else if (mLeftThumb.collide(event))
-                {
-                    mCurrentTouchThumb = mLeftThumb;
-                    touchResult = true;
-                }
-                return touchResult;
-            case MotionEvent.ACTION_MOVE:
-                float percent;
-                float x = event.getX();
+            int mx = (int) event.getX();
 
-                mCurrentTouchThumb.material = mCurrentTouchThumb.material >= 1 ? 1 : mCurrentTouchThumb.material + 0.1f;
+            switch (event.getAction())
+            {
+                case MotionEvent.ACTION_DOWN:
+                    if (mx <= thumbSliceLeftX + thumbSliceHalfWidth * 2 + DRAG_OFFSET)
+                    {
+                        if (mx >= thumbSliceLeftX)
+                        {
+                            selectedThumb = SelectThumb.SELECT_THUMB_LEFT;
+                        }
+                        else
+                        {
+                            selectedThumb = SelectThumb.SELECT_THUMB_MORE_LEFT;
+                        }
+                    }
+                    else if (mx >= thumbSliceRightX - thumbSliceHalfWidth * 2 - DRAG_OFFSET)
+                    {
+                        if (mx <= thumbSliceRightX)
+                        {
+                            selectedThumb = SelectThumb.SELECT_THUMB_RIGHT;
+                        }
+                        else
+                        {
+                            selectedThumb = SelectThumb.SELECT_THUMB_MORE_RIGHT;
+                        }
 
-                if (mCurrentTouchThumb == mLeftThumb)
-                {
-                    if (x < lineLeft)
-                    {
-                        percent = 0;
                     }
-                    else
+                    downX = mx;
+                    prevX = mx;
+                    if (mOnRangeSeekBarChangeListener != null)
                     {
-                        percent = (x - lineLeft) * 1f / (lineWidth - mRightThumb.widthSize);
+                        mOnRangeSeekBarChangeListener.onStartTrackingTouch();
+                    }
+                    break;
+                case MotionEvent.ACTION_MOVE:
+
+                    if (selectedThumb == SelectThumb.SELECT_THUMB_LEFT)
+                    {
+                        thumbSliceLeftX = mx;
+                    }
+                    else if (selectedThumb == SelectThumb.SELECT_THUMB_RIGHT)
+                    {
+                        thumbSliceRightX = mx;
+                    }
+                    else if (selectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT)
+                    {
+                        int distance = mx - prevX;
+                        thumbSliceRightX += distance;
+                    }
+                    else if (selectedThumb == SelectThumb.SELECT_THUMB_MORE_LEFT)
+                    {
+                        int distance = mx - prevX;
+                        thumbSliceLeftX += distance;
                     }
 
-                    if (percent > mRightThumb.currPercent)
+                    if (adjustSliceXY(mx))
                     {
-                        percent = mRightThumb.currPercent;
+                        break;
                     }
-                    mLeftThumb.slide(percent);
-                    mProgressCursor.slide(percent);
-                }
-                else if (mCurrentTouchThumb == mRightThumb)
-                {
-                    if (x > lineRight)
+                    prevX = mx;
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    downX = mx;
+                    adjustSliceXY(mx);
+                    selectedThumb = SelectThumb.SELECT_THUMB_NONE;
+                    if (mOnRangeSeekBarChangeListener != null)
                     {
-                        percent = 1;
+                        mOnRangeSeekBarChangeListener.onStopTrackingTouch();
                     }
-                    else
-                    {
-                        percent = (x - lineLeft - mLeftThumb.widthSize) * 1f / (lineWidth - mLeftThumb.widthSize);
-                    }
-                    if (percent < mLeftThumb.currPercent)
-                    {
-                        percent = mLeftThumb.currPercent;
-                    }
-                    mRightThumb.slide(percent);
-                }
+                    break;
+                default:
+                    break;
+            }
 
-                if (mOnRangeChangedListener != null)
-                {
-                    float[] result = getCurrentRange();
-                    mOnRangeChangedListener.onRangeChanged(this, result[0], result[1]);
-                }
-                invalidate();
-                break;
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP:
-                mCurrentTouchThumb.materialRestore();
-
-                if (mOnRangeChangedListener != null)
-                {
-                    float[] result = getCurrentRange();
-                    mOnRangeChangedListener.onRangeChanged(this, result[0], result[1]);
-                }
-                break;
+            if (mx != downX)
+            {
+                isTouch = true;
+                notifySeekBarValueChanged();
+            }
         }
-        return super.onTouchEvent(event);
+        return true;
     }
 
-    public float[] getCurrentRange()
+    public void setFrameProgress(float percent)
     {
-        float range = maxValue - minValue;
-        return new float[]{minValue + range * mLeftThumb.currPercent,
-                           minValue + range * mRightThumb.currPercent};
+        frameProgress = percent;
+        invalidate();
     }
 
-    public void setMinValue(float minValue)
+    public void showFrameProgress(boolean isShow)
     {
-        this.minValue = minValue;
+        needFrameProgress = isShow;
     }
 
-    public void setMaxValue(float maxValue)
+    private boolean adjustSliceXY(int mx)
+    {
+        boolean isNoneArea = false;
+        int thumbSliceDistance = thumbSliceRightX - thumbSliceLeftX;
+        if (thumbSliceDistance <= progressMinDiffPixels && selectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT && mx <= downX || thumbSliceDistance <= progressMinDiffPixels && selectedThumb == SelectThumb.SELECT_THUMB_MORE_LEFT && mx >= downX)
+        {
+            isNoneArea = true;
+        }
+
+        if (thumbSliceDistance <= progressMinDiffPixels && selectedThumb == SelectThumb.SELECT_THUMB_RIGHT && mx <= downX || thumbSliceDistance <= progressMinDiffPixels && selectedThumb == SelectThumb.SELECT_THUMB_LEFT && mx >= downX)
+        {
+            isNoneArea = true;
+        }
+
+        if (isNoneArea)
+        {
+            if (selectedThumb == SelectThumb.SELECT_THUMB_RIGHT || selectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT)
+            {
+                thumbSliceRightX = thumbSliceLeftX + progressMinDiffPixels;
+            }
+            else if (selectedThumb == SelectThumb.SELECT_THUMB_LEFT || selectedThumb == SelectThumb.SELECT_THUMB_MORE_LEFT)
+            {
+                thumbSliceLeftX = thumbSliceRightX - progressMinDiffPixels;
+            }
+            return true;
+        }
+
+        if (mx > thumbMaxSliceRightx && (selectedThumb == SelectThumb.SELECT_THUMB_RIGHT || selectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT))
+        {
+            thumbSliceRightX = thumbMaxSliceRightx;
+            return true;
+        }
+
+        if (thumbSliceRightX >= (getWidth() - thumbSliceHalfWidth * 2) - MERGIN_PADDING)
+        {
+            thumbSliceRightX = getWidth() - thumbSliceHalfWidth * 2;
+        }
+
+        if (thumbSliceLeftX < MERGIN_PADDING)
+        {
+            thumbSliceLeftX = 0;
+        }
+
+        return false;
+    }
+
+    private void notifySeekBarValueChanged()
+    {
+        if (thumbSliceLeftX < thumbPadding)
+        {
+            thumbSliceLeftX = thumbPadding;
+        }
+
+        if (thumbSliceRightX < thumbPadding)
+        {
+            thumbSliceRightX = thumbPadding;
+        }
+
+        if (thumbSliceLeftX > getWidth() - thumbPadding)
+        {
+            thumbSliceLeftX = getWidth() - thumbPadding;
+        }
+
+        if (thumbSliceRightX > getWidth() - thumbPadding)
+        {
+            thumbSliceRightX = getWidth() - thumbPadding;
+        }
+
+        invalidate();
+        if (mOnRangeSeekBarChangeListener != null)
+        {
+            calculateThumbValue();
+
+            if (isTouch)
+            {
+                if (selectedThumb == SelectThumb.SELECT_THUMB_LEFT || selectedThumb == SelectThumb.SELECT_THUMB_MORE_LEFT)
+                {
+                    mOnRangeSeekBarChangeListener.onRangeChange(0, thumbSliceLeftValue, thumbSliceRightValue);
+                }
+                else if (selectedThumb == SelectThumb.SELECT_THUMB_RIGHT || selectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT)
+                {
+                    mOnRangeSeekBarChangeListener.onRangeChange(1, thumbSliceLeftValue, thumbSliceRightValue);
+                }
+                else
+                {
+                    mOnRangeSeekBarChangeListener.onRangeChange(2, thumbSliceLeftValue, thumbSliceRightValue);
+                }
+            }
+        }
+
+        isTouch = false;
+    }
+
+    private void calculateThumbValue()
+    {
+        if (0 == getWidth())
+        {
+            return;
+        }
+        thumbSliceLeftValue = maxValue * thumbSliceLeftX / (getWidth() - thumbSliceHalfWidth * 2);
+        thumbSliceRightValue = maxValue * thumbSliceRightX / (getWidth() - thumbSliceHalfWidth * 2);
+    }
+
+
+    private int calculateCorrds(int progress)
+    {
+        return (int) ((getWidth() - thumbSliceHalfWidth * 2) / maxValue * progress);
+    }
+
+    public void setLeftProgress(int progress)
+    {
+        if (progress <= thumbSliceRightValue - progressMinDiff)
+        {
+            thumbSliceLeftX = calculateCorrds(progress);
+        }
+        notifySeekBarValueChanged();
+    }
+
+    public void setRightProgress(int progress)
+    {
+        if (progress >= thumbSliceLeftValue + progressMinDiff)
+        {
+            thumbSliceRightX = calculateCorrds(progress);
+            if (!isDefaultSeekTotal)
+            {
+                isDefaultSeekTotal = true;
+            }
+        }
+        notifySeekBarValueChanged();
+    }
+
+    public float getLeftProgress()
+    {
+        return thumbSliceLeftValue;
+    }
+
+    public float getRightProgress()
+    {
+        return thumbSliceRightValue;
+    }
+
+    public void setProgress(int leftProgress, int rightProgress)
+    {
+        if (rightProgress - leftProgress >= progressMinDiff)
+        {
+            thumbSliceLeftX = calculateCorrds(leftProgress);
+            thumbSliceRightX = calculateCorrds(rightProgress);
+        }
+        notifySeekBarValueChanged();
+    }
+
+    public void setSliceBlocked(boolean isBLock)
+    {
+        blocked = isBLock;
+        invalidate();
+    }
+
+    public void setMaxValue(int maxValue)
     {
         this.maxValue = maxValue;
     }
 
-    public void setOnRangeChangedListener(OnRangeChangedListener listener)
+    public void setProgressMinDiff(int progressMinDiff)
     {
-        mOnRangeChangedListener = listener;
+        this.progressMinDiff = progressMinDiff;
+        progressMinDiffPixels = calculateCorrds(progressMinDiff);
     }
 
-    public interface OnRangeChangedListener
+    public void setProgressHeight(int progressHeight)
     {
-        void onRangeChanged(RangeSeekBar view, float leftValue, float rightValue);
+        this.progressHalfHeight = progressHalfHeight / 2;
+        invalidate();
     }
 
-    private class Thumb
+    public void setThumbSlice(Bitmap thumbSlice)
     {
-        int lineWidth;
-        int widthSize, heightSize;
-        float currPercent;
-        int left, right, top, bottom;
-        Bitmap bmp;
+        this.thumbSlice = thumbSlice;
+        init();
+    }
 
-        float material = 0;
-        ValueAnimator anim;
+    public void setThumbPadding(int thumbPadding)
+    {
+        this.thumbPadding = thumbPadding;
+        invalidate();
+    }
 
-        void onSizeChanged(int hSize, int parentLineWidth, int bmpResId, Context context)
-        {
-            heightSize = hSize;
-            widthSize = (int) (hSize * 0.2);
-            left = hSize / 2 - widthSize / 2;
-            right = hSize / 2 + widthSize / 2;
-            top = hSize / 2 - heightSize / 2;
-            bottom = hSize / 2 + heightSize / 2;
+    public void setThumbMaxSliceRightx(int maxRightThumb)
+    {
+        this.thumbMaxSliceRightx = maxRightThumb;
+    }
 
-            lineWidth = parentLineWidth - widthSize;
+    public void setOnRangeSeekBarChangeListener(OnRangeSeekBarChangeListener listener)
+    {
+        this.mOnRangeSeekBarChangeListener = listener;
+    }
 
-            if (bmpResId > 0)
-            {
-                bmp = BitmapFactory.decodeResource(context.getResources(), bmpResId);
-            }
-        }
+    public interface OnRangeSeekBarChangeListener
+    {
+        void onRangeChange(int witchSide, float leftThumb, float rightThumb);
 
-        boolean collide(MotionEvent event)
-        {
-            float x = event.getX();
-            float y = event.getY();
-            int offset = (int) (lineWidth * currPercent);
-            return x > left + offset && x < right + offset && y > top && y < bottom;
-        }
+        void onStartTrackingTouch();
 
-        void slide(float percent)
-        {
-            if (percent < 0) percent = 0;
-            else if (percent > 1) percent = 1;
-            currPercent = percent;
-        }
-
-        void draw(Canvas canvas)
-        {
-            int offset = (int) (lineWidth * currPercent);
-            canvas.save();
-            canvas.translate(offset, 0);
-            if (bmp != null)
-            {
-                canvas.drawBitmap(bmp, left, top, null);
-            }
-            canvas.restore();
-        }
-
-        private void materialRestore()
-        {
-            if (anim != null) anim.cancel();
-            anim = ValueAnimator.ofFloat(material, 0);
-            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener()
-            {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation)
-                {
-                    material = (float) animation.getAnimatedValue();
-                    invalidate();
-                }
-            });
-            anim.addListener(new AnimatorListenerAdapter()
-            {
-                @Override
-                public void onAnimationEnd(Animator animation)
-                {
-                    material = 0;
-                    invalidate();
-                }
-            });
-            anim.start();
-        }
+        void onStopTrackingTouch();
     }
 }
