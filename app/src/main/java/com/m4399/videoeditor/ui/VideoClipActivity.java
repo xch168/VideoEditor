@@ -66,6 +66,7 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
         mTouchView.setOnClickListener(this);
 
         mVideoRangeSlider = findViewById(R.id.video_range_slider);
+        mVideoRangeSlider.setDataSource(videoPath);
 
         mVideoView = findViewById(R.id.video_view);
         mVideoView.setDataSource(new DataSource(videoPath));

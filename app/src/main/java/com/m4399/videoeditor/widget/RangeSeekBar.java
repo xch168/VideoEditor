@@ -68,7 +68,7 @@ public class RangeSeekBar extends View
     private int resSweepRight = R.drawable.ic_progress_right;
     private int resFrame = R.drawable.progress_thumb;
     private int resBackground = R.color.colorMask;
-    private int resPaddingColor = android.R.color.holo_red_dark;
+    private int resPaddingColor = R.color.colorStroke;
 
     private boolean blocked;
     private boolean isInited;
@@ -116,7 +116,7 @@ public class RangeSeekBar extends View
         resSweepRight = a.getResourceId(R.styleable.RangeSeekBar_rightThumbDrawable, R.drawable.ic_progress_right);
         resFrame = a.getResourceId(R.styleable.RangeSeekBar_progressThumb, R.drawable.progress_thumb);
         resBackground = a.getResourceId(R.styleable.RangeSeekBar_maskColor, R.color.colorMask);
-        resPaddingColor = a.getResourceId(R.styleable.RangeSeekBar_paddingColor, android.R.color.holo_red_dark);
+        resPaddingColor = a.getResourceId(R.styleable.RangeSeekBar_paddingColor, R.color.colorStroke);
         a.recycle();
     }
 
@@ -175,16 +175,23 @@ public class RangeSeekBar extends View
         int drawLeft = thumbSliceLeftX;
         int drawRight = thumbSliceRightX;
 
+        // 绘制边框
         paintThumb.setColor(getResources().getColor(resPaddingColor));
         canvas.drawRect(drawLeft + thumbSlice.getWidth() - PADDING_LEFT_RIGHT, 0f, drawRight + PADDING_LEFT_RIGHT, PADDING_BOTTOM_TOP, paintThumb);
         canvas.drawRect(drawLeft + thumbSlice.getWidth() - PADDING_LEFT_RIGHT, thumbSlice.getHeight() - PADDING_BOTTOM_TOP,
                         drawRight + PADDING_LEFT_RIGHT, thumbSlice.getHeight(), paintThumb);
+
+        // 绘制超出范围的蒙层
         paintThumb.setColor(getResources().getColor(resBackground));
-        paintThumb.setAlpha((int) (255 * 0.9));
         canvas.drawRect(0, 0, drawLeft + PADDING_LEFT_RIGHT, getHeight(), paintThumb);
         canvas.drawRect(drawRight + thumbSliceRight.getWidth() - PADDING_LEFT_RIGHT, 0, getWidth(), getHeight(), paintThumb);
+
+        // 绘制左右thumb
+        paintThumb.setAlpha(255);
         canvas.drawBitmap(thumbSlice, drawLeft, 0, paintThumb);
         canvas.drawBitmap(thumbSliceRight, drawRight, 0, paintThumb);
+
+        // 绘制进度
         if (needFrameProgress)
         {
             float progress = frameProgress * (getWidth() - thumbSliceHalfWidth * 2) - thumbFrame.getWidth() / 2;
