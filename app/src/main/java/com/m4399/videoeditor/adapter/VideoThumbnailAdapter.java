@@ -84,10 +84,11 @@ public class VideoThumbnailAdapter extends RecyclerView.Adapter<VideoThumbnailAd
         }
     }
 
-    public void fetchDuration()
+    public long fetchDuration()
     {
         mDuration = mFrameExtractor.getVideoDuration();
         notifyDataSetChanged();
+        return mDuration;
     }
 
     static class ThumbViewHolder extends RecyclerView.ViewHolder implements FrameExtractor.Callback

@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.m4399.videoeditor.R;
 import com.m4399.videoeditor.adapter.VideoThumbnailAdapter;
 import com.m4399.videoeditor.media.FrameExtractor;
+import com.m4399.videoeditor.util.TimeUtil;
 
 
 public class VideoRangeSlider extends FrameLayout implements RangeSeekBar.OnRangeSeekBarChangeListener
@@ -30,6 +31,8 @@ public class VideoRangeSlider extends FrameLayout implements RangeSeekBar.OnRang
     private VideoThumbnailAdapter mThumbnailAdapter;
 
     private FrameExtractor mFrameExtractor;
+
+    private long mTotalTime;
 
     public VideoRangeSlider(@NonNull Context context)
     {
@@ -81,13 +84,22 @@ public class VideoRangeSlider extends FrameLayout implements RangeSeekBar.OnRang
     {
         mFrameExtractor.setDataSource(path);
 
-        mThumbnailAdapter.fetchDuration();
+        mTotalTime = mThumbnailAdapter.fetchDuration();
+        mEndTimeView.setText(TimeUtil.format(mTotalTime));
+        mDurationView.setText(TimeUtil.format(mTotalTime));
     }
 
     @Override
     public void onRangeChange(int witchSide, float leftValue, float rightValue)
     {
         Log.i(TAG, "left:" + leftValue + " right:" + rightValue);
+        long startTime = (long) (leftValue / 100 * mTotalTime);
+        long endTime = (long) (rightValue / 100 * mTotalTime);
+        long duration = endTime - startTime;
+
+        mStartTimeView.setText(TimeUtil.format(startTime));
+        mEndTimeView.setText(TimeUtil.format(endTime));
+        mDurationView.setText(TimeUtil.format(duration));
     }
 
     @Override
