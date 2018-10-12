@@ -6,24 +6,26 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.kk.taurus.playerbase.widget.BaseVideoView;
 import com.m4399.videoeditor.R;
 import com.m4399.videoeditor.adapter.VideoThumbnailAdapter;
 import com.m4399.videoeditor.media.FrameExtractor;
 import com.m4399.videoeditor.util.TimeUtil;
 
 
-public class VideoRangeSlider extends FrameLayout implements RangeSeekBar.OnRangeSeekBarChangeListener
+public class VideoRangeSlider extends FrameLayout
 {
     private static final String TAG = "VideoRangeSlider";
 
     private TextView mStartTimeView;
     private TextView mEndTimeView;
     private TextView mDurationView;
+
+    private BaseVideoView mVideoView;
 
     private RecyclerView mVideoThumbnailGallery;
     private RangeSeekBar mRangeSeekBar;
@@ -71,7 +73,6 @@ public class VideoRangeSlider extends FrameLayout implements RangeSeekBar.OnRang
         mVideoThumbnailGallery.setAdapter(mThumbnailAdapter);
 
         mRangeSeekBar = findViewById(R.id.range_seek_bar);
-        mRangeSeekBar.setOnRangeSeekBarChangeListener(this);
     }
 
     public void setFrameProgress(float percent)
@@ -85,32 +86,37 @@ public class VideoRangeSlider extends FrameLayout implements RangeSeekBar.OnRang
         mFrameExtractor.setDataSource(path);
 
         mTotalTime = mThumbnailAdapter.fetchDuration();
-        mEndTimeView.setText(TimeUtil.format(mTotalTime));
-        mDurationView.setText(TimeUtil.format(mTotalTime));
+        setEndTime(mTotalTime);
+        setDuration(mTotalTime);
     }
 
-    @Override
-    public void onRangeChange(int witchSide, float leftValue, float rightValue)
+    public void setVideoView(BaseVideoView videoView)
     {
-        Log.i(TAG, "left:" + leftValue + " right:" + rightValue);
-        long startTime = (long) (leftValue / 100 * mTotalTime);
-        long endTime = (long) (rightValue / 100 * mTotalTime);
-        long duration = endTime - startTime;
+        mVideoView = videoView;
+    }
 
+    public void setStartTime(long startTime)
+    {
         mStartTimeView.setText(TimeUtil.format(startTime));
+    }
+
+    public void setEndTime(long endTime)
+    {
         mEndTimeView.setText(TimeUtil.format(endTime));
+    }
+
+    public void setDuration(long duration)
+    {
         mDurationView.setText(TimeUtil.format(duration));
     }
 
-    @Override
-    public void onStartTrackingTouch()
+    public long getTotalTime()
     {
-        Log.i(TAG, "onStartTrackingTouch");
+        return mTotalTime;
     }
 
-    @Override
-    public void onStopTrackingTouch()
+    public void setOnRangeSeekBarChangeListener(RangeSeekBar.OnRangeSeekBarChangeListener listener)
     {
-        Log.i(TAG, "onStopTrackingTouch");
+        mRangeSeekBar.setOnRangeSeekBarChangeListener(listener);
     }
 }
