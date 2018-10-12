@@ -18,7 +18,10 @@ import com.m4399.videoeditor.R;
 public class RangeSeekBar extends View
 {
     private static String TAG = "RangeSeekBar";
-    private static int MERGIN_PADDING = 20;
+
+    private static final int PADDING_LEFT_RIGHT = 5;
+    private static final int PADDING_BOTTOM_TOP = 10;
+    private static final int MARGIN_PADDING = 20;
     private static final int DRAG_OFFSET = 50;
 
     enum SelectThumb
@@ -47,28 +50,43 @@ public class RangeSeekBar extends View
         SELECT_THUMB_MORE_RIGHT
     }
 
-    //params
-    private Bitmap thumbSlice;
-    private Bitmap thumbSliceRight;
-    private Bitmap thumbFrame;
+    /**
+     * 左滑块
+     */
+    private Bitmap mLeftThumb;
+    /**
+     * 右滑块
+     */
+    private Bitmap mRightThumb;
+    /**
+     * 进度滑块
+     */
+    private Bitmap mProgressThumb;
+
+    private Paint mPaint = new Paint();
+
+    private SelectThumb mSelectedThumb;
+
+    private int mLeftThumbRes = R.drawable.ic_progress_left;
+    private int mRightThumbRes = R.drawable.ic_progress_right;
+    private int mProgressThumbRes = R.drawable.progress_thumb;
+    private int mMaskRes = R.color.colorMask;
+    private int mStrokeRes = R.color.colorStroke;
+
     private int progressMinDiff = 25; //percentage
     private int progressHalfHeight = 0;
     private int thumbPadding = 0;
     private float maxValue = 100f;
 
+    private int mLeftThumbX;
+    private int mRightThumbX;
+    private int mRightThumbMaxX;
+
     private int progressMinDiffPixels;
-    private int thumbSliceLeftX, thumbSliceRightX, thumbMaxSliceRightx;
-    private float thumbSliceLeftValue, thumbSliceRightValue;
-    private Paint paintThumb = new Paint();
-    private SelectThumb selectedThumb;
-    private SelectThumb lastSelectedThumb = SelectThumb.SELECT_THUMB_NONE;
-    private int thumbSliceHalfWidth;
-    private OnRangeSeekBarChangeListener mOnRangeSeekBarChangeListener;
-    private int resSweepLeft = R.drawable.ic_progress_left;
-    private int resSweepRight = R.drawable.ic_progress_right;
-    private int resFrame = R.drawable.progress_thumb;
-    private int resBackground = R.color.colorMask;
-    private int resPaddingColor = R.color.colorStroke;
+    private float mLeftThumbValue;
+    private float mRightThumbValue;
+
+    private int mThumbHalfWidth;
 
     private boolean blocked;
     private boolean isInited;
@@ -78,16 +96,12 @@ public class RangeSeekBar extends View
     private int prevX;
     private int downX;
 
-    private int screenWidth;
-
-    private int lastDrawLeft;
-    private int lastDrawRight;
+    private int mScreenWidth;
 
     private boolean needFrameProgress;
-    private float frameProgress;
+    private float mFrameProgress;
 
-    private static final int PADDING_BOTTOM_TOP = 10;
-    private static final int PADDING_LEFT_RIGHT = 5;
+    private OnRangeSeekBarChangeListener mOnRangeSeekBarChangeListener;
 
     public RangeSeekBar(Context context)
     {
@@ -112,30 +126,31 @@ public class RangeSeekBar extends View
     private void initAttrs(AttributeSet attrs)
     {
         TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.RangeSeekBar);
-        resSweepLeft = a.getResourceId(R.styleable.RangeSeekBar_leftThumbDrawable, R.drawable.ic_progress_left);
-        resSweepRight = a.getResourceId(R.styleable.RangeSeekBar_rightThumbDrawable, R.drawable.ic_progress_right);
-        resFrame = a.getResourceId(R.styleable.RangeSeekBar_progressThumb, R.drawable.progress_thumb);
-        resBackground = a.getResourceId(R.styleable.RangeSeekBar_maskColor, R.color.colorMask);
-        resPaddingColor = a.getResourceId(R.styleable.RangeSeekBar_paddingColor, R.color.colorStroke);
+        mLeftThumbRes = a.getResourceId(R.styleable.RangeSeekBar_leftThumbDrawable, R.drawable.ic_progress_left);
+        mRightThumbRes = a.getResourceId(R.styleable.RangeSeekBar_rightThumbDrawable, R.drawable.ic_progress_right);
+        mProgressThumbRes = a.getResourceId(R.styleable.RangeSeekBar_progressThumb, R.drawable.progress_thumb);
+        mMaskRes = a.getResourceId(R.styleable.RangeSeekBar_maskColor, R.color.colorMask);
+        mStrokeRes = a.getResourceId(R.styleable.RangeSeekBar_paddingColor, R.color.colorStroke);
         a.recycle();
     }
 
     private void initView(Context context)
     {
-        thumbSlice = BitmapFactory.decodeResource(getResources(), resSweepLeft);
-        thumbSliceRight = BitmapFactory.decodeResource(getResources(), resSweepRight);
-        thumbFrame = BitmapFactory.decodeResource(getResources(), resFrame);
-        screenWidth = context.getResources().getDisplayMetrics().widthPixels;
-        int itemWidth = screenWidth / 8;
-        float ratio = (float) itemWidth / (float) thumbSlice.getHeight();
+        mLeftThumb = BitmapFactory.decodeResource(getResources(), mLeftThumbRes);
+        mRightThumb = BitmapFactory.decodeResource(getResources(), mRightThumbRes);
+        mProgressThumb = BitmapFactory.decodeResource(getResources(), mProgressThumbRes);
+
+        mScreenWidth = context.getResources().getDisplayMetrics().widthPixels;
+        int itemWidth = mScreenWidth / 8;
+        float ratio = (float) itemWidth / (float) mLeftThumb.getHeight();
         Matrix matrix = new Matrix();
         matrix.postScale(ratio, ratio);
-        float frameRatio = (float) itemWidth / (float) thumbFrame.getHeight();
+        float frameRatio = (float) itemWidth / (float) mProgressThumb.getHeight();
         Matrix frameMatrix = new Matrix();
         frameMatrix.postScale(frameRatio, frameRatio);
-        thumbSlice = Bitmap.createBitmap(thumbSlice, 0, 0, thumbSlice.getWidth(), thumbSlice.getHeight(), matrix, false);
-        thumbSliceRight = Bitmap.createBitmap(thumbSliceRight, 0, 0, thumbSliceRight.getWidth(), thumbSliceRight.getHeight(), matrix, false);
-        thumbFrame = Bitmap.createBitmap(thumbFrame, 0, 0, thumbFrame.getWidth(), thumbFrame.getHeight(), frameMatrix, false);
+        mLeftThumb = Bitmap.createBitmap(mLeftThumb, 0, 0, mLeftThumb.getWidth(), mLeftThumb.getHeight(), matrix, false);
+        mRightThumb = Bitmap.createBitmap(mRightThumb, 0, 0, mRightThumb.getWidth(), mRightThumb.getHeight(), matrix, false);
+        mProgressThumb = Bitmap.createBitmap(mProgressThumb, 0, 0, mProgressThumb.getWidth(), mProgressThumb.getHeight(), frameMatrix, false);
         invalidate();
     }
 
@@ -152,18 +167,18 @@ public class RangeSeekBar extends View
 
     private void init()
     {
-        if (thumbSlice.getHeight() > getHeight())
+        if (mLeftThumb.getHeight() > getHeight())
         {
-            getLayoutParams().height = thumbSlice.getHeight();
+            getLayoutParams().height = mLeftThumb.getHeight();
         }
 
-        thumbSliceHalfWidth = thumbSlice.getWidth() / 2;
+        mThumbHalfWidth = mLeftThumb.getWidth() / 2;
         progressMinDiffPixels = calculateCorrds(progressMinDiff) - 2 * thumbPadding;
 
-        selectedThumb = SelectThumb.SELECT_THUMB_NONE;
+        mSelectedThumb = SelectThumb.SELECT_THUMB_NONE;
         setLeftProgress(0);
         setRightProgress(100);
-        setThumbMaxSliceRightx(screenWidth);
+        setRightThumbMaxX(mScreenWidth - mRightThumb.getWidth());
         invalidate();
     }
 
@@ -172,34 +187,34 @@ public class RangeSeekBar extends View
     protected void onDraw(Canvas canvas)
     {
         super.onDraw(canvas);
-        int drawLeft = thumbSliceLeftX;
-        int drawRight = thumbSliceRightX;
+        int drawLeft = mLeftThumbX;
+        int drawRight = mRightThumbX;
 
         // 绘制边框
-        paintThumb.setColor(getResources().getColor(resPaddingColor));
-        canvas.drawRect(drawLeft + thumbSlice.getWidth() - PADDING_LEFT_RIGHT, 0f, drawRight + PADDING_LEFT_RIGHT, PADDING_BOTTOM_TOP, paintThumb);
-        canvas.drawRect(drawLeft + thumbSlice.getWidth() - PADDING_LEFT_RIGHT, thumbSlice.getHeight() - PADDING_BOTTOM_TOP,
-                        drawRight + PADDING_LEFT_RIGHT, thumbSlice.getHeight(), paintThumb);
+        mPaint.setColor(getResources().getColor(mStrokeRes));
+        canvas.drawRect(drawLeft + mLeftThumb.getWidth() - PADDING_LEFT_RIGHT, 0f, drawRight + PADDING_LEFT_RIGHT, PADDING_BOTTOM_TOP, mPaint);
+        canvas.drawRect(drawLeft + mLeftThumb.getWidth() - PADDING_LEFT_RIGHT, mLeftThumb.getHeight() - PADDING_BOTTOM_TOP,
+                        drawRight + PADDING_LEFT_RIGHT, mLeftThumb.getHeight(), mPaint);
 
         // 绘制超出范围的蒙层
-        paintThumb.setColor(getResources().getColor(resBackground));
-        canvas.drawRect(0, 0, drawLeft + PADDING_LEFT_RIGHT, getHeight(), paintThumb);
-        canvas.drawRect(drawRight + thumbSliceRight.getWidth() - PADDING_LEFT_RIGHT, 0, getWidth(), getHeight(), paintThumb);
+        mPaint.setColor(getResources().getColor(mMaskRes));
+        canvas.drawRect(0, 0, drawLeft + PADDING_LEFT_RIGHT, getHeight(), mPaint);
+        canvas.drawRect(drawRight + mRightThumb.getWidth() - PADDING_LEFT_RIGHT, 0, getWidth(), getHeight(), mPaint);
 
         // 绘制左右thumb
-        paintThumb.setAlpha(255);
-        canvas.drawBitmap(thumbSlice, drawLeft, 0, paintThumb);
-        canvas.drawBitmap(thumbSliceRight, drawRight, 0, paintThumb);
+        mPaint.setAlpha(255);
+        canvas.drawBitmap(mLeftThumb, drawLeft, 0, mPaint);
+        canvas.drawBitmap(mRightThumb, drawRight, 0, mPaint);
 
         // 绘制进度
         if (needFrameProgress)
         {
-            float progress = frameProgress * (getWidth() - thumbSliceHalfWidth * 2) - thumbFrame.getWidth() / 2;
-            if (progress > drawRight + thumbSliceHalfWidth * 2)
+            float progress = (mLeftThumbX + mLeftThumb.getWidth()) + mFrameProgress * (mRightThumbX - mLeftThumbX - mLeftThumb.getWidth());
+            if (progress > drawRight - mProgressThumb.getWidth())
             {
-                progress = drawRight + thumbSliceHalfWidth * 2;
+                progress = drawRight - mProgressThumb.getWidth();
             }
-            canvas.drawBitmap(thumbFrame, progress, 0, paintThumb);
+            canvas.drawBitmap(mProgressThumb, progress, 0, mPaint);
         }
     }
 
@@ -213,26 +228,26 @@ public class RangeSeekBar extends View
             switch (event.getAction())
             {
                 case MotionEvent.ACTION_DOWN:
-                    if (mx <= thumbSliceLeftX + thumbSliceHalfWidth * 2 + DRAG_OFFSET)
+                    if (mx <= mLeftThumbX + mThumbHalfWidth * 2 + DRAG_OFFSET)
                     {
-                        if (mx >= thumbSliceLeftX)
+                        if (mx >= mLeftThumbX)
                         {
-                            selectedThumb = SelectThumb.SELECT_THUMB_LEFT;
+                            mSelectedThumb = SelectThumb.SELECT_THUMB_LEFT;
                         }
                         else
                         {
-                            selectedThumb = SelectThumb.SELECT_THUMB_MORE_LEFT;
+                            mSelectedThumb = SelectThumb.SELECT_THUMB_MORE_LEFT;
                         }
                     }
-                    else if (mx >= thumbSliceRightX - thumbSliceHalfWidth * 2 - DRAG_OFFSET)
+                    else if (mx >= mRightThumbX - mThumbHalfWidth * 2 - DRAG_OFFSET)
                     {
-                        if (mx <= thumbSliceRightX)
+                        if (mx <= mRightThumbX)
                         {
-                            selectedThumb = SelectThumb.SELECT_THUMB_RIGHT;
+                            mSelectedThumb = SelectThumb.SELECT_THUMB_RIGHT;
                         }
                         else
                         {
-                            selectedThumb = SelectThumb.SELECT_THUMB_MORE_RIGHT;
+                            mSelectedThumb = SelectThumb.SELECT_THUMB_MORE_RIGHT;
                         }
 
                     }
@@ -245,26 +260,26 @@ public class RangeSeekBar extends View
                     break;
                 case MotionEvent.ACTION_MOVE:
 
-                    if (selectedThumb == SelectThumb.SELECT_THUMB_LEFT)
+                    if (mSelectedThumb == SelectThumb.SELECT_THUMB_LEFT)
                     {
-                        thumbSliceLeftX = mx;
+                        mLeftThumbX = mx;
                     }
-                    else if (selectedThumb == SelectThumb.SELECT_THUMB_RIGHT)
+                    else if (mSelectedThumb == SelectThumb.SELECT_THUMB_RIGHT)
                     {
-                        thumbSliceRightX = mx;
+                        mRightThumbX = mx;
                     }
-                    else if (selectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT)
+                    else if (mSelectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT)
                     {
                         int distance = mx - prevX;
-                        thumbSliceRightX += distance;
+                        mRightThumbX += distance;
                     }
-                    else if (selectedThumb == SelectThumb.SELECT_THUMB_MORE_LEFT)
+                    else if (mSelectedThumb == SelectThumb.SELECT_THUMB_MORE_LEFT)
                     {
                         int distance = mx - prevX;
-                        thumbSliceLeftX += distance;
+                        mLeftThumbX += distance;
                     }
 
-                    if (adjustSliceXY(mx))
+                    if (adjustThumbXY(mx))
                     {
                         break;
                     }
@@ -273,8 +288,8 @@ public class RangeSeekBar extends View
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     downX = mx;
-                    adjustSliceXY(mx);
-                    selectedThumb = SelectThumb.SELECT_THUMB_NONE;
+                    adjustThumbXY(mx);
+                    mSelectedThumb = SelectThumb.SELECT_THUMB_NONE;
                     if (mOnRangeSeekBarChangeListener != null)
                     {
                         mOnRangeSeekBarChangeListener.onStopTrackingTouch();
@@ -295,7 +310,7 @@ public class RangeSeekBar extends View
 
     public void setFrameProgress(float percent)
     {
-        frameProgress = percent;
+        mFrameProgress = percent;
         invalidate();
     }
 
@@ -304,47 +319,47 @@ public class RangeSeekBar extends View
         needFrameProgress = isShow;
     }
 
-    private boolean adjustSliceXY(int mx)
+    private boolean adjustThumbXY(int mx)
     {
         boolean isNoneArea = false;
-        int thumbSliceDistance = thumbSliceRightX - thumbSliceLeftX;
-        if (thumbSliceDistance <= progressMinDiffPixels && selectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT && mx <= downX || thumbSliceDistance <= progressMinDiffPixels && selectedThumb == SelectThumb.SELECT_THUMB_MORE_LEFT && mx >= downX)
+        int thumbSliceDistance = mRightThumbX - mLeftThumbX;
+        if (thumbSliceDistance <= progressMinDiffPixels && mSelectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT && mx <= downX || thumbSliceDistance <= progressMinDiffPixels && mSelectedThumb == SelectThumb.SELECT_THUMB_MORE_LEFT && mx >= downX)
         {
             isNoneArea = true;
         }
 
-        if (thumbSliceDistance <= progressMinDiffPixels && selectedThumb == SelectThumb.SELECT_THUMB_RIGHT && mx <= downX || thumbSliceDistance <= progressMinDiffPixels && selectedThumb == SelectThumb.SELECT_THUMB_LEFT && mx >= downX)
+        if (thumbSliceDistance <= progressMinDiffPixels && mSelectedThumb == SelectThumb.SELECT_THUMB_RIGHT && mx <= downX || thumbSliceDistance <= progressMinDiffPixels && mSelectedThumb == SelectThumb.SELECT_THUMB_LEFT && mx >= downX)
         {
             isNoneArea = true;
         }
 
         if (isNoneArea)
         {
-            if (selectedThumb == SelectThumb.SELECT_THUMB_RIGHT || selectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT)
+            if (mSelectedThumb == SelectThumb.SELECT_THUMB_RIGHT || mSelectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT)
             {
-                thumbSliceRightX = thumbSliceLeftX + progressMinDiffPixels;
+                mRightThumbX = mLeftThumbX + progressMinDiffPixels;
             }
-            else if (selectedThumb == SelectThumb.SELECT_THUMB_LEFT || selectedThumb == SelectThumb.SELECT_THUMB_MORE_LEFT)
+            else if (mSelectedThumb == SelectThumb.SELECT_THUMB_LEFT || mSelectedThumb == SelectThumb.SELECT_THUMB_MORE_LEFT)
             {
-                thumbSliceLeftX = thumbSliceRightX - progressMinDiffPixels;
+                mLeftThumbX = mRightThumbX - progressMinDiffPixels;
             }
             return true;
         }
 
-        if (mx > thumbMaxSliceRightx && (selectedThumb == SelectThumb.SELECT_THUMB_RIGHT || selectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT))
+        if (mx > mRightThumbMaxX && (mSelectedThumb == SelectThumb.SELECT_THUMB_RIGHT || mSelectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT))
         {
-            thumbSliceRightX = thumbMaxSliceRightx;
+            mRightThumbX = mRightThumbMaxX;
             return true;
         }
 
-        if (thumbSliceRightX >= (getWidth() - thumbSliceHalfWidth * 2) - MERGIN_PADDING)
+        if (mRightThumbX >= (getWidth() - mThumbHalfWidth * 2) - MARGIN_PADDING)
         {
-            thumbSliceRightX = getWidth() - thumbSliceHalfWidth * 2;
+            mRightThumbX = getWidth() - mThumbHalfWidth * 2;
         }
 
-        if (thumbSliceLeftX < MERGIN_PADDING)
+        if (mLeftThumbX < MARGIN_PADDING)
         {
-            thumbSliceLeftX = 0;
+            mLeftThumbX = 0;
         }
 
         return false;
@@ -352,24 +367,24 @@ public class RangeSeekBar extends View
 
     private void notifySeekBarValueChanged()
     {
-        if (thumbSliceLeftX < thumbPadding)
+        if (mLeftThumbX < thumbPadding)
         {
-            thumbSliceLeftX = thumbPadding;
+            mLeftThumbX = thumbPadding;
         }
 
-        if (thumbSliceRightX < thumbPadding)
+        if (mRightThumbX < thumbPadding)
         {
-            thumbSliceRightX = thumbPadding;
+            mRightThumbX = thumbPadding;
         }
 
-        if (thumbSliceLeftX > getWidth() - thumbPadding)
+        if (mLeftThumbX > getWidth() - thumbPadding)
         {
-            thumbSliceLeftX = getWidth() - thumbPadding;
+            mLeftThumbX = getWidth() - thumbPadding;
         }
 
-        if (thumbSliceRightX > getWidth() - thumbPadding)
+        if (mRightThumbX > getWidth() - thumbPadding)
         {
-            thumbSliceRightX = getWidth() - thumbPadding;
+            mRightThumbX = getWidth() - thumbPadding;
         }
 
         invalidate();
@@ -379,17 +394,17 @@ public class RangeSeekBar extends View
 
             if (isTouch)
             {
-                if (selectedThumb == SelectThumb.SELECT_THUMB_LEFT || selectedThumb == SelectThumb.SELECT_THUMB_MORE_LEFT)
+                if (mSelectedThumb == SelectThumb.SELECT_THUMB_LEFT || mSelectedThumb == SelectThumb.SELECT_THUMB_MORE_LEFT)
                 {
-                    mOnRangeSeekBarChangeListener.onRangeChange(0, thumbSliceLeftValue, thumbSliceRightValue);
+                    mOnRangeSeekBarChangeListener.onRangeChange(0, mLeftThumbValue, mRightThumbValue);
                 }
-                else if (selectedThumb == SelectThumb.SELECT_THUMB_RIGHT || selectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT)
+                else if (mSelectedThumb == SelectThumb.SELECT_THUMB_RIGHT || mSelectedThumb == SelectThumb.SELECT_THUMB_MORE_RIGHT)
                 {
-                    mOnRangeSeekBarChangeListener.onRangeChange(1, thumbSliceLeftValue, thumbSliceRightValue);
+                    mOnRangeSeekBarChangeListener.onRangeChange(1, mLeftThumbValue, mRightThumbValue);
                 }
                 else
                 {
-                    mOnRangeSeekBarChangeListener.onRangeChange(2, thumbSliceLeftValue, thumbSliceRightValue);
+                    mOnRangeSeekBarChangeListener.onRangeChange(2, mLeftThumbValue, mRightThumbValue);
                 }
             }
         }
@@ -403,30 +418,30 @@ public class RangeSeekBar extends View
         {
             return;
         }
-        thumbSliceLeftValue = maxValue * thumbSliceLeftX / (getWidth() - thumbSliceHalfWidth * 2);
-        thumbSliceRightValue = maxValue * thumbSliceRightX / (getWidth() - thumbSliceHalfWidth * 2);
+        mLeftThumbValue = maxValue * mLeftThumbX / (getWidth() - mThumbHalfWidth * 2);
+        mRightThumbValue = maxValue * mRightThumbX / (getWidth() - mThumbHalfWidth * 2);
     }
 
 
     private int calculateCorrds(int progress)
     {
-        return (int) ((getWidth() - thumbSliceHalfWidth * 2) / maxValue * progress);
+        return (int) ((getWidth() - mThumbHalfWidth * 2) / maxValue * progress);
     }
 
     public void setLeftProgress(int progress)
     {
-        if (progress <= thumbSliceRightValue - progressMinDiff)
+        if (progress <= mRightThumbValue - progressMinDiff)
         {
-            thumbSliceLeftX = calculateCorrds(progress);
+            mLeftThumbX = calculateCorrds(progress);
         }
         notifySeekBarValueChanged();
     }
 
     public void setRightProgress(int progress)
     {
-        if (progress >= thumbSliceLeftValue + progressMinDiff)
+        if (progress >= mLeftThumbValue + progressMinDiff)
         {
-            thumbSliceRightX = calculateCorrds(progress);
+            mRightThumbX = calculateCorrds(progress);
             if (!isDefaultSeekTotal)
             {
                 isDefaultSeekTotal = true;
@@ -437,27 +452,27 @@ public class RangeSeekBar extends View
 
     public float getLeftProgress()
     {
-        return thumbSliceLeftValue;
+        return mLeftThumbValue;
     }
 
     public float getRightProgress()
     {
-        return thumbSliceRightValue;
+        return mRightThumbValue;
     }
 
     public void setProgress(int leftProgress, int rightProgress)
     {
         if (rightProgress - leftProgress >= progressMinDiff)
         {
-            thumbSliceLeftX = calculateCorrds(leftProgress);
-            thumbSliceRightX = calculateCorrds(rightProgress);
+            mLeftThumbX = calculateCorrds(leftProgress);
+            mRightThumbX = calculateCorrds(rightProgress);
         }
         notifySeekBarValueChanged();
     }
 
-    public void setSliceBlocked(boolean isBLock)
+    public void setThumbBlocked(boolean isBlock)
     {
-        blocked = isBLock;
+        blocked = isBlock;
         invalidate();
     }
 
@@ -480,7 +495,7 @@ public class RangeSeekBar extends View
 
     public void setThumbSlice(Bitmap thumbSlice)
     {
-        this.thumbSlice = thumbSlice;
+        this.mLeftThumb = thumbSlice;
         init();
     }
 
@@ -490,9 +505,9 @@ public class RangeSeekBar extends View
         invalidate();
     }
 
-    public void setThumbMaxSliceRightx(int maxRightThumb)
+    public void setRightThumbMaxX(int maxRightThumb)
     {
-        this.thumbMaxSliceRightx = maxRightThumb;
+        this.mRightThumbMaxX = maxRightThumb;
     }
 
     public void setOnRangeSeekBarChangeListener(OnRangeSeekBarChangeListener listener)

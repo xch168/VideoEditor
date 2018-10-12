@@ -54,6 +54,12 @@ public class VideoThumbnailAdapter extends RecyclerView.Adapter<VideoThumbnailAd
     {
         perSecond = (float)mDuration / getItemCount()/1000;
 
+        if (holder.mBitmap != null)
+        {
+            holder.mBitmap.release();
+            holder.mBitmap = null;
+        }
+
         ViewGroup.LayoutParams params = holder.thumbLayout.getLayoutParams();
         params.width = screenWidth / getItemCount();
         holder.thumbLayout.setLayoutParams(params);
