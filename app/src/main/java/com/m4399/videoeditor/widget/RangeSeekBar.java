@@ -187,32 +187,30 @@ public class RangeSeekBar extends View
     protected void onDraw(Canvas canvas)
     {
         super.onDraw(canvas);
-        int drawLeft = mLeftThumbX;
-        int drawRight = mRightThumbX;
 
         // 绘制边框
         mPaint.setColor(getResources().getColor(mStrokeRes));
-        canvas.drawRect(drawLeft + mLeftThumb.getWidth() - PADDING_LEFT_RIGHT, 0f, drawRight + PADDING_LEFT_RIGHT, PADDING_BOTTOM_TOP, mPaint);
-        canvas.drawRect(drawLeft + mLeftThumb.getWidth() - PADDING_LEFT_RIGHT, mLeftThumb.getHeight() - PADDING_BOTTOM_TOP,
-                        drawRight + PADDING_LEFT_RIGHT, mLeftThumb.getHeight(), mPaint);
+        canvas.drawRect(mLeftThumbX + mLeftThumb.getWidth() - PADDING_LEFT_RIGHT, 0f, mRightThumbX + PADDING_LEFT_RIGHT, PADDING_BOTTOM_TOP, mPaint);
+        canvas.drawRect(mLeftThumbX + mLeftThumb.getWidth() - PADDING_LEFT_RIGHT, mLeftThumb.getHeight() - PADDING_BOTTOM_TOP,
+                        mRightThumbX + PADDING_LEFT_RIGHT, mLeftThumb.getHeight(), mPaint);
 
         // 绘制超出范围的蒙层
         mPaint.setColor(getResources().getColor(mMaskRes));
-        canvas.drawRect(0, 0, drawLeft + PADDING_LEFT_RIGHT, getHeight(), mPaint);
-        canvas.drawRect(drawRight + mRightThumb.getWidth() - PADDING_LEFT_RIGHT, 0, getWidth(), getHeight(), mPaint);
+        canvas.drawRect(0, 0, mLeftThumbX + PADDING_LEFT_RIGHT, getHeight(), mPaint);
+        canvas.drawRect(mRightThumbX + mRightThumb.getWidth() - PADDING_LEFT_RIGHT, 0, getWidth(), getHeight(), mPaint);
 
         // 绘制左右thumb
         mPaint.setAlpha(255);
-        canvas.drawBitmap(mLeftThumb, drawLeft, 0, mPaint);
-        canvas.drawBitmap(mRightThumb, drawRight, 0, mPaint);
+        canvas.drawBitmap(mLeftThumb, mLeftThumbX, 0, mPaint);
+        canvas.drawBitmap(mRightThumb, mRightThumbX, 0, mPaint);
 
         // 绘制进度
         if (needFrameProgress)
         {
             float progress = (mLeftThumbX + mLeftThumb.getWidth()) + mFrameProgress * (mRightThumbX - mLeftThumbX - mLeftThumb.getWidth());
-            if (progress > drawRight - mProgressThumb.getWidth())
+            if (progress > mRightThumbX - mProgressThumb.getWidth())
             {
-                progress = drawRight - mProgressThumb.getWidth();
+                progress = mRightThumbX - mProgressThumb.getWidth();
             }
             canvas.drawBitmap(mProgressThumb, progress, 0, mPaint);
         }
