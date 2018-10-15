@@ -1,23 +1,37 @@
 package com.m4399.ffmpeg_cmd;
 
-/**
- * Project Name: VideoEditor
- * File Name:    FFmpegCmd.java
- * ClassName:    FFmpegCmd
- *
- * Description: TODO.
- *
- * @author XuCanHui
- * @date 2018年09月26日 14:27
- *
- * Copyright (c) 2018年, 4399 Network CO.ltd. All Rights Reserved.
- */
+
 public class FFmpegCmd
 {
     static
     {
-        System.loadLibrary("native-lib");
+        System.loadLibrary("ffmpeg-cmd");
     }
 
-    public native String stringFromJNI();
+    private static OnCmdExecListener sOnCmdExecListener;
+    private static long sDuration;
+
+    public static native int exec(int argc, String[] argv);
+
+    public static native void exit();
+
+    public static void exec(String[] cmds, long duration, OnCmdExecListener listener)
+    {
+        sOnCmdExecListener = listener;
+        sDuration = duration;
+
+        exec(cmds.length, cmds);
+    }
+
+
+    public interface OnCmdExecListener
+    {
+        void onSuccess();
+
+        void onFailure();
+
+        void onProgress(float progress);
+    }
+
+
 }
