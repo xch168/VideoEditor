@@ -1,3 +1,5 @@
+#include "ffmpeg_cmd.h"
+
 #include <jni.h>
 #include <string.h>
 #include "ffmpeg_thread.h"
@@ -14,13 +16,13 @@ static jclass m_clazz = NULL;//当前类(面向java)
  */
 void callJavaMethod(JNIEnv *env, jclass clazz,int ret) {
     if (clazz == NULL) {
-       // LOGE("---------------clazz isNULL---------------");
+        LOGE("---------------clazz isNULL---------------");
         return;
     }
     //获取方法ID (I)V指的是方法签名 通过javap -s -public FFmpegCmd 命令生成
     jmethodID methodID = (*env)->GetStaticMethodID(env, clazz, "onExecuted", "(I)V");
     if (methodID == NULL) {
-        //LOGE("---------------methodID isNULL---------------");
+        LOGE("---------------methodID isNULL---------------");
         return;
     }
     //调用该java方法
@@ -28,13 +30,13 @@ void callJavaMethod(JNIEnv *env, jclass clazz,int ret) {
 }
 void callJavaMethodProgress(JNIEnv *env, jclass clazz,float ret) {
     if (clazz == NULL) {
-        //LOGE("---------------clazz isNULL---------------");
+        LOGE("---------------clazz isNULL---------------");
         return;
     }
     //获取方法ID (I)V指的是方法签名 通过javap -s -public FFmpegCmd 命令生成
     jmethodID methodID = (*env)->GetStaticMethodID(env, clazz, "onProgress", "(F)V");
     if (methodID == NULL) {
-        //LOGE("---------------methodID isNULL---------------");
+        LOGE("---------------methodID isNULL---------------");
         return;
     }
     //调用该java方法

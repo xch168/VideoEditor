@@ -19,7 +19,7 @@ public class VideoEditor
         CmdList cmd = new CmdList();
         cmd.append("ffmpeg");
         cmd.append("-y");
-        cmd.append("-ss").append(startTime).append("-t").append(endTime).append("-accurate_seek");
+        cmd.append("-ss").append(startTime/ 1000).append("-t").append(endTime / 1000).append("-accurate_seek");
         cmd.append("-i").append(videoPath);
         cmd.append("-codec").append("copy").append(getSavePath());
 
@@ -32,7 +32,7 @@ public class VideoEditor
         String cmdLog = "";
         for (String ss : cmds)
         {
-            cmdLog += ss;
+            cmdLog = cmdLog + " " + ss;
         }
         Log.i(TAG, "cmd:" + cmdLog);
         FFmpegCmd.exec(cmds, duration, new FFmpegCmd.OnCmdExecListener()

@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.kk.taurus.playerbase.entity.DataSource;
 import com.kk.taurus.playerbase.event.OnPlayerEventListener;
@@ -178,13 +179,28 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
             @Override
             public void onSuccess()
             {
-                hideProgressDialog();
+                runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        hideProgressDialog();
+                        Toast.makeText(VideoClipActivity.this, "视频处理成功", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override
             public void onFailure()
             {
-                hideProgressDialog();
+                runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        hideProgressDialog();
+                    }
+                });
             }
 
             @Override

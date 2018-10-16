@@ -100,6 +100,7 @@
 #endif
 
 #include <time.h>
+#include <ffmpeg_cmd.h>
 
 #include "ffmpeg.h"
 #include "cmdutils.h"
@@ -1520,6 +1521,7 @@ static void print_report(int is_last_report, int64_t timer_start, int64_t cur_ti
     int hours, mins, secs, us;
     int ret;
     float t;
+    float mss;
 
     if (!print_stats && !is_last_report && !progress_avio)
         return;
@@ -1621,6 +1623,7 @@ static void print_report(int is_last_report, int64_t timer_start, int64_t cur_ti
 
     secs = FFABS(pts) / AV_TIME_BASE;
     us = FFABS(pts) % AV_TIME_BASE;
+    mss = secs + ((float) us / AV_TIME_BASE);
     mins = secs / 60;
     secs %= 60;
     hours = mins / 60;
@@ -1638,6 +1641,7 @@ static void print_report(int is_last_report, int64_t timer_start, int64_t cur_ti
     snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf),
              "%02d:%02d:%02d.%02d ", hours, mins, secs,
              (100 * us) / AV_TIME_BASE);
+    ffmpeg_progress(mss);
 
     if (bitrate < 0) {
         snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf),"bitrate=N/A");

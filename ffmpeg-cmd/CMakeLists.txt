@@ -23,7 +23,7 @@ add_library( # Sets the name of the library.
         src/main/cpp/ffmpeg/ffmpeg_filter.c
         src/main/cpp/ffmpeg/ffmpeg_opt.c
 
-        src/main/cpp/ffmpeg-cmd.c
+        src/main/cpp/ffmpeg_cmd.c
 
         src/main/cpp/ffmpeg_thread.c)
 
