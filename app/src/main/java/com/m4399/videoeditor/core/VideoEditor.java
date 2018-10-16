@@ -13,17 +13,17 @@ public class VideoEditor
 {
     private static final String TAG = "VideoEditor";
 
-    public static void cropVideo(String videoPath, long startTime, long endTime, long duration, FFmpegCmd.OnCmdExecListener listener)
+    public static void cropVideo(String videoPath, long startTime, long endTime, FFmpegCmd.OnCmdExecListener listener)
     {
-
+        long duration = endTime - startTime;
         CmdList cmd = new CmdList();
         cmd.append("ffmpeg");
         cmd.append("-y");
-        cmd.append("-ss").append(startTime/ 1000).append("-t").append(endTime / 1000).append("-accurate_seek");
+        cmd.append("-ss").append(startTime/ 1000).append("-t").append(duration / 1000).append("-accurate_seek");
         cmd.append("-i").append(videoPath);
         cmd.append("-codec").append("copy").append(getSavePath());
 
-        execCmd(cmd, (endTime - startTime), listener);
+        execCmd(cmd, duration, listener);
     }
 
     private static void execCmd(CmdList cmd, long duration, final FFmpegCmd.OnCmdExecListener listener)

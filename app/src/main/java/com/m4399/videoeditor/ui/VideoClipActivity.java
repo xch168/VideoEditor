@@ -175,7 +175,7 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
     public void startClipVideo(View view)
     {
         showProgressDialog();
-        VideoEditor.cropVideo(videoPath, mStartTime, mEndTime, mVideoRangeSlider.getTotalTime(), new FFmpegCmd.OnCmdExecListener()
+        VideoEditor.cropVideo(videoPath, mStartTime, mEndTime, new FFmpegCmd.OnCmdExecListener()
         {
             @Override
             public void onSuccess()
