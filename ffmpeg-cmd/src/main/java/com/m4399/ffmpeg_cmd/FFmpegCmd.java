@@ -23,6 +23,33 @@ public class FFmpegCmd
         exec(cmds.length, cmds);
     }
 
+    public static void onExecuted(int ret)
+    {
+        if (sOnCmdExecListener != null)
+        {
+            if (ret == 0)
+            {
+                sOnCmdExecListener.onProgress(1);
+                sOnCmdExecListener.onSuccess();
+            }
+            else
+            {
+                sOnCmdExecListener.onFailure();
+            }
+        }
+    }
+
+    public static void onProgress(float progress)
+    {
+        if (sOnCmdExecListener != null)
+        {
+            if (sDuration != 0)
+            {
+                sOnCmdExecListener.onProgress(progress / (sDuration / 1000000) * 0.95f);
+            }
+        }
+    }
+
 
     public interface OnCmdExecListener
     {
