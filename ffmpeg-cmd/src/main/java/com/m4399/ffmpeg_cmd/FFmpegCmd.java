@@ -29,7 +29,7 @@ public class FFmpegCmd
         {
             if (ret == 0)
             {
-                sOnCmdExecListener.onProgress(1);
+                sOnCmdExecListener.onProgress(sDuration);
                 sOnCmdExecListener.onSuccess();
             }
             else
@@ -45,7 +45,7 @@ public class FFmpegCmd
         {
             if (sDuration != 0)
             {
-                sOnCmdExecListener.onProgress(progress / (sDuration / 1000000) * 0.95f);
+                sOnCmdExecListener.onProgress(progress / (sDuration / 1000) * 0.95f);
             }
         }
     }

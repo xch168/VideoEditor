@@ -23,7 +23,7 @@ public class VideoEditor
         cmd.append("-i").append(videoPath);
         cmd.append("-codec").append("copy").append(getSavePath());
 
-        execCmd(cmd, duration, listener);
+        execCmd(cmd, (endTime - startTime), listener);
     }
 
     private static void execCmd(CmdList cmd, long duration, final FFmpegCmd.OnCmdExecListener listener)

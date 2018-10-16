@@ -93,6 +93,7 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
         mVideoRangeSlider.setDataSource(videoPath);
 
         mTotalTime = mVideoRangeSlider.getTotalTime();
+        mEndTime = mTotalTime;
 
         initProgressDialog();
     }
