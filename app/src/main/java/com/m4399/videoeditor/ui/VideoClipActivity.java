@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -187,6 +188,7 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
                     {
                         hideProgressDialog();
                         Toast.makeText(VideoClipActivity.this, "视频处理成功", Toast.LENGTH_SHORT).show();
+                        VideoPreviewActivity.open(VideoClipActivity.this, getSavePath());
                     }
                 });
             }
@@ -276,5 +278,10 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
     private void updateProgress(float progress)
     {
         mProgressDialog.setProgress((int) (progress * 100));
+    }
+
+    private static String getSavePath()
+    {
+        return Environment.getExternalStorageDirectory().getPath() + "/VideoEditor/out.mp4";
     }
 }
