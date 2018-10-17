@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
 import com.kk.taurus.playerbase.assist.OnVideoViewEventHandler;
 import com.kk.taurus.playerbase.entity.DataSource;
@@ -29,6 +30,8 @@ public class VideoPreviewActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_preview);
 
+        setTitle("视频预览");
+
         mVideoPath = getIntent().getStringExtra("video_path");
 
         mReceiverGroup = new ReceiverGroup(null);
@@ -40,6 +43,11 @@ public class VideoPreviewActivity extends AppCompatActivity
         mVideoView.setReceiverGroup(mReceiverGroup);
         mVideoView.setDataSource(new DataSource(mVideoPath));
         mVideoView.start();
+    }
+
+    public void toChooseVideoCover(View view)
+    {
+        EditThumbActivity.open(this, mVideoPath);
     }
 
     public static void open(Context context, String videoPath)

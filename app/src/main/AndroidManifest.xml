@@ -26,6 +26,8 @@
         </activity>
         <activity android:name=".ui.VideoPreviewActivity">
         </activity>
+        <activity android:name=".ui.EditThumbActivity">
+        </activity>
     </application>
 
 </manifest>
