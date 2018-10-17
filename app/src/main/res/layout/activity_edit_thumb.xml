@@ -21,4 +21,14 @@
         app:layout_constraintTop_toBottomOf="@id/video_view"
         android:layout_marginTop="10dp"/>
 
+    <ImageView
+        android:id="@+id/iv_thumb"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:scaleType="centerInside"
+        app:layout_constraintDimensionRatio="16:9"
+        app:layout_constraintTop_toBottomOf="@id/video_range_slider"
+        android:background="#000000"/>
+
 </android.support.constraint.ConstraintLayout>

@@ -2,9 +2,11 @@ package com.m4399.videoeditor.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 
 import com.kk.taurus.playerbase.entity.DataSource;
@@ -21,10 +23,15 @@ public class EditThumbActivity extends AppCompatActivity implements SeekBar.OnSe
 
     private BaseVideoView mVideoView;
     private VideoThumbProgressBar mVideoThumbProgressBar;
+    private ImageView mThumbView;
 
     private long mTotalTime;
 
     private String mVideoPath;
+
+    private long mCurrentPosition;
+
+    private Bitmap mThumbBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -45,6 +52,8 @@ public class EditThumbActivity extends AppCompatActivity implements SeekBar.OnSe
         mVideoThumbProgressBar = findViewById(R.id.video_range_slider);
         mVideoThumbProgressBar.setOnSeekBarChangeListener(this);
         mVideoThumbProgressBar.setDataSource(mVideoPath);
+
+        mThumbView = findViewById(R.id.iv_thumb);
 
         mTotalTime = mVideoThumbProgressBar.getTotalTime();
     }
@@ -79,6 +88,9 @@ public class EditThumbActivity extends AppCompatActivity implements SeekBar.OnSe
         {
             mVideoView.seekTo(progress);
         }
+
+        mCurrentPosition = progress;
+
     }
 
     @Override
@@ -90,6 +102,18 @@ public class EditThumbActivity extends AppCompatActivity implements SeekBar.OnSe
     @Override
     public void onStopTrackingTouch(SeekBar seekBar)
     {
+        loadThumb();
+    }
 
+    private void loadThumb()
+    {
+        Log.i(TAG, "currentPos:" + mCurrentPosition);
+        if (mThumbBitmap != null)
+        {
+            mThumbView.setImageBitmap(null);
+            mThumbBitmap.recycle();
+        }
+        mThumbBitmap = mVideoThumbProgressBar.getFrameExtractor().getFrameAt(mVideoView.getCurrentPosition() * 1000L);
+        mThumbView.setImageBitmap(mThumbBitmap);
     }
 }

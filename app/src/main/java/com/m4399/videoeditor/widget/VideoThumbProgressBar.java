@@ -61,11 +61,6 @@ public class VideoThumbProgressBar extends FrameLayout
         mSeekBar.setPadding(0, 0, 0 , 0);
     }
 
-    public void setFrameProgress(float percent)
-    {
-        mSeekBar.setProgress((int) percent);
-    }
-
     public void setDataSource(String path)
     {
         mFrameExtractor.setDataSource(path);
@@ -78,6 +73,10 @@ public class VideoThumbProgressBar extends FrameLayout
         return mTotalTime;
     }
 
+    public FrameExtractor getFrameExtractor()
+    {
+        return mFrameExtractor;
+    }
 
     public void setOnSeekBarChangeListener(SeekBar.OnSeekBarChangeListener listener)
     {
