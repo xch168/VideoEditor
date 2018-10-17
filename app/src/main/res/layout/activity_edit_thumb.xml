@@ -7,4 +7,18 @@
     android:layout_height="match_parent"
     tools:context=".ui.EditThumbActivity">
 
+    <com.kk.taurus.playerbase.widget.BaseVideoView
+        android:id="@+id/video_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="16:9"
+        android:background="#000000"/>
+
+    <com.m4399.videoeditor.widget.VideoThumbProgressBar
+        android:id="@+id/video_range_slider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/video_view"
+        android:layout_marginTop="10dp"/>
+
 </android.support.constraint.ConstraintLayout>
