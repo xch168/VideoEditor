@@ -6,4 +6,7 @@
 
     <color name="colorMask">#A0000000</color>
     <color name="colorStroke">#FF584C</color>
+
+    <color name="controller_bg_dark">#66000000</color>
+    <color name="controller_bg_light">#00000000</color>
 </resources>
