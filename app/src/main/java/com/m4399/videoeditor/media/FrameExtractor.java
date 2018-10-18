@@ -192,9 +192,4 @@ public class FrameExtractor
 
         mBitmapPool.release();
     }
-
-    public Bitmap getFrameAt(long position)
-    {
-        return mRetriever.getFrameAtTime(position);
-    }
 }

@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.TextureView;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
@@ -29,9 +31,9 @@ public class EditThumbActivity extends AppCompatActivity implements SeekBar.OnSe
 
     private String mVideoPath;
 
-    private long mCurrentPosition;
-
     private Bitmap mThumbBitmap;
+
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -72,6 +74,7 @@ public class EditThumbActivity extends AppCompatActivity implements SeekBar.OnSe
         {
             case PLAYER_EVENT_ON_START:
                 mVideoView.pause();
+                loadThumb();
                 break;
         }
     }
@@ -88,9 +91,6 @@ public class EditThumbActivity extends AppCompatActivity implements SeekBar.OnSe
         {
             mVideoView.seekTo(progress);
         }
-
-        mCurrentPosition = progress;
-
     }
 
     @Override
@@ -107,13 +107,21 @@ public class EditThumbActivity extends AppCompatActivity implements SeekBar.OnSe
 
     private void loadThumb()
     {
-        Log.i(TAG, "currentPos:" + mCurrentPosition);
-        if (mThumbBitmap != null)
+        mHandler.postDelayed(new Runnable()
         {
-            mThumbView.setImageBitmap(null);
-            mThumbBitmap.recycle();
-        }
-        mThumbBitmap = mVideoThumbProgressBar.getFrameExtractor().getFrameAt(mVideoView.getCurrentPosition() * 1000L);
-        mThumbView.setImageBitmap(mThumbBitmap);
+            @Override
+            public void run()
+            {
+                if (mThumbBitmap != null)
+                {
+                    mThumbBitmap.recycle();
+                    mThumbBitmap = null;
+                }
+                mThumbBitmap = ((TextureView)mVideoView.getRender().getRenderView()).getBitmap();
+                mThumbView.setImageBitmap(null);
+                mThumbView.setImageBitmap(mThumbBitmap);
+            }
+        }, 500);
     }
+
 }
