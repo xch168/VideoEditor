@@ -4,7 +4,6 @@ package com.m4399.videoeditor.widget;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -43,13 +42,7 @@ public class ImageSeekBar extends ViewGroup
 
         mThumbView = new ThumbView(context);
 
-        ViewGroup.LayoutParams params = new ViewPager.LayoutParams();
-        params.width = 120;
-        params.height = 90;
-
-        //setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
-
-        addView(mThumbView, params);
+        addView(mThumbView);
 
         setWillNotDraw(false);
     }
@@ -179,7 +172,7 @@ public class ImageSeekBar extends ViewGroup
 
     public void setThumbBitmap(Bitmap bitmap)
     {
-        mThumbView.setImageBitmap(bitmap);
+        mThumbView.setThumb(bitmap);
     }
 
     public void setOnSeekBarChangeListener(ImageSeekBar.OnSeekBarChangeListener listener)
