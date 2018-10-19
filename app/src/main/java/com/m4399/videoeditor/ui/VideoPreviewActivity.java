@@ -50,6 +50,11 @@ public class VideoPreviewActivity extends AppCompatActivity
         EditThumbActivity.open(this, mVideoPath);
     }
 
+    public void toChooseVideoCover2(View view)
+    {
+        EditThumb2Activity.open(this, mVideoPath);
+    }
+
     public static void open(Context context, String videoPath)
     {
         Intent intent = new Intent(context, VideoPreviewActivity.class);

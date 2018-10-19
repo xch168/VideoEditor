@@ -28,6 +28,9 @@
         </activity>
         <activity android:name=".ui.EditThumbActivity">
         </activity>
+
+        <activity android:name=".ui.EditThumb2Activity">
+        </activity>
     </application>
 
 </manifest>
