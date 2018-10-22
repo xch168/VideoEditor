@@ -20,7 +20,7 @@ public class RangeSeekBar extends View
     private static String TAG = "RangeSeekBar";
 
     private static final int PADDING_LEFT_RIGHT = 5;
-    private static final int PADDING_BOTTOM_TOP = 10;
+    private static final int PADDING_BOTTOM_TOP = 5;
     private static final int MARGIN_PADDING = 20;
     private static final int DRAG_OFFSET = 50;
 
