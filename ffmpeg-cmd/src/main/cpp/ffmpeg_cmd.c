@@ -98,6 +98,8 @@ Java_com_m4399_ffmpeg_1cmd_FFmpegCmd_exec(JNIEnv *env, jclass clazz, jint cmdnum
 JNIEXPORT void JNICALL
 Java_com_m4399_ffmpeg_1cmd_FFmpegCmd_exit(JNIEnv *env, jclass type)
 {
-
+    (*env)->GetJavaVM(env, &jvm);
+    m_clazz = (*env)->NewGlobalRef(env, type);
+    ffmpeg_thread_cancel();
 
 }
