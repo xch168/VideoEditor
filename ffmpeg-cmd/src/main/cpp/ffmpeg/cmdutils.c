@@ -60,6 +60,8 @@
 #if HAVE_SYS_RESOURCE_H
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <ffmpeg_thread.h>
+
 #endif
 #ifdef _WIN32
 #include <windows.h>
@@ -137,7 +139,10 @@ void exit_program(int ret)
     if (program_exit)
         program_exit(ret);
 
-    exit(ret);
+    // 退出线程
+    ffmpeg_thread_exit(ret);
+
+    //exit(ret);
 }
 
 double parse_number_or_die(const char *context, const char *numstr, int type,

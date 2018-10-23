@@ -4872,6 +4872,6 @@ int ffmpeg_exec(int argc, char **argv)
     if ((decode_error_stat[0] + decode_error_stat[1]) * max_error_rate < decode_error_stat[1])
         exit_program(69);
 
-    //exit_program(received_nb_signals ? 255 : main_return_code);
+    exit_program(received_nb_signals ? 255 : main_return_code);
     return main_return_code;
 }
