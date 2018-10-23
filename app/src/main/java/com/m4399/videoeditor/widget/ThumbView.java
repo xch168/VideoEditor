@@ -17,7 +17,7 @@ import android.widget.ImageView;
 import com.m4399.videoeditor.R;
 import com.m4399.videoeditor.util.SizeUtil;
 
-public class ThumbView extends ImageView
+public class ThumbView extends android.support.v7.widget.AppCompatImageView
 {
     private Paint mOutsidePaint;
     private Paint mInsidePaint;

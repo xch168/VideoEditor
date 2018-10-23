@@ -16,32 +16,36 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef AVUTIL_TIME_INTERNAL_H
-#define AVUTIL_TIME_INTERNAL_H
 
-#include <time.h>
-#include "ffmpeg/config.h"
+#ifndef AVUTIL_HWCONTEXT_CUDA_H
+#define AVUTIL_HWCONTEXT_CUDA_H
 
-#if !HAVE_GMTIME_R && !defined(gmtime_r)
-static inline struct tm *gmtime_r(const time_t* clock, struct tm *result)
-{
-    struct tm *ptr = gmtime(clock);
-    if (!ptr)
-        return NULL;
-    *result = *ptr;
-    return result;
-}
+#ifndef CUDA_VERSION
+#include <cuda.h>
 #endif
 
-#if !HAVE_LOCALTIME_R && !defined(localtime_r)
-static inline struct tm *localtime_r(const time_t* clock, struct tm *result)
-{
-    struct tm *ptr = localtime(clock);
-    if (!ptr)
-        return NULL;
-    *result = *ptr;
-    return result;
-}
-#endif
+#include "pixfmt.h"
 
-#endif /* AVUTIL_TIME_INTERNAL_H */
+/**
+ * @file
+ * An API-specific header for AV_HWDEVICE_TYPE_CUDA.
+ *
+ * This API supports dynamic frame pools. AVHWFramesContext.pool must return
+ * AVBufferRefs whose data pointer is a CUdeviceptr.
+ */
+
+typedef struct AVCUDADeviceContextInternal AVCUDADeviceContextInternal;
+
+/**
+ * This struct is allocated as AVHWDeviceContext.hwctx
+ */
+typedef struct AVCUDADeviceContext {
+    CUcontext cuda_ctx;
+    AVCUDADeviceContextInternal *internal;
+} AVCUDADeviceContext;
+
+/**
+ * AVHWFramesContext.hwctx is currently not used
+ */
+
+#endif /* AVUTIL_HWCONTEXT_CUDA_H */

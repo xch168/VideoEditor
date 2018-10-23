@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <stdint.h>
 
-#include "ffmpeg/config.h"
+#include "config.h"
 #include "libavutil/error.h"
 #include "os_support.h"
 #include "avio.h"
