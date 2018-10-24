@@ -105,6 +105,7 @@
 #include <time.h>
 
 #include "ffmpeg_cmd.h"
+#include "android_log.h"
 
 #include "ffmpeg.h"
 #include "cmdutils.h"
@@ -4804,6 +4805,12 @@ static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl)
 
 int ffmpeg_exec(int argc, char **argv)
 {
+    if (use_log_report) {
+        av_log_set_callback(ffp_log_callback_report);
+    } else {
+        av_log_set_callback(ffp_log_callback_brief);
+    }
+
     int i, ret;
     int64_t ti;
 
