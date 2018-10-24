@@ -5,19 +5,19 @@
 static int use_log_report = 0;
 
 
-#define FF_LOG_TAG     "FFmpeg_EpMedia"
+#define FF_LOG_TAG     "FFmpeg_VideoEditor"
 
 
-#define FF_LOG_UNKNOWN     ANDROID_LOG_UNKNOWN
+#define FF_LOG_UNKNOWN        ANDROID_LOG_UNKNOWN
 #define FF_LOG_DEFAULT        ANDROID_LOG_DEFAULT
 
 
-#define FF_LOG_VERBOSE     ANDROID_LOG_VERBOSE
-#define FF_LOG_DEBUG         ANDROID_LOG_DEBUG
-#define FF_LOG_INFO              ANDROID_LOG_INFO
+#define FF_LOG_VERBOSE        ANDROID_LOG_VERBOSE
+#define FF_LOG_DEBUG          ANDROID_LOG_DEBUG
+#define FF_LOG_INFO           ANDROID_LOG_INFO
 #define FF_LOG_WARN           ANDROID_LOG_WARN
-#define FF_LOG_ERROR        ANDROID_LOG_ERROR
-#define FF_LOG_FATAL           ANDROID_LOG_FATAL
+#define FF_LOG_ERROR          ANDROID_LOG_ERROR
+#define FF_LOG_FATAL          ANDROID_LOG_FATAL
 #define FF_LOG_SILENT         ANDROID_LOG_SILENT
 
 
