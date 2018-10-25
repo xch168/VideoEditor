@@ -19,6 +19,7 @@ import com.kk.taurus.playerbase.event.OnPlayerEventListener;
 import com.kk.taurus.playerbase.player.IPlayer;
 import com.kk.taurus.playerbase.render.IRender;
 import com.kk.taurus.playerbase.widget.BaseVideoView;
+import com.m4399.ffmpeg_cmd.OnVideoProcessListener;
 import com.m4399.videoeditor.R;
 import com.m4399.videoeditor.core.VideoEditor;
 import com.m4399.videoeditor.widget.RangeSeekBar;
@@ -175,7 +176,7 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
     public void startClipVideo(View view)
     {
 
-        VideoEditor.cropVideo(videoPath, mStartTime, mEndTime, new VideoEditor.OnVideoProcessListener()
+        VideoEditor.cropVideo(videoPath, mStartTime, mEndTime, getSavePath(), new OnVideoProcessListener()
         {
             @Override
             public void onProcessStart()
@@ -187,13 +188,11 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
             public void onProcessProgress(float progress)
             {
                 updateProgress(progress);
-                Log.i("asdf", "onProcessProgress:" + Thread.currentThread().getName());
             }
 
             @Override
             public void onProcessSuccess()
             {
-                Log.i("asdf", "onProcessSuccess:" + Thread.currentThread().getName());
                 runOnUiThread(new Runnable()
                 {
                     @Override
