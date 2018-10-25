@@ -19,7 +19,6 @@ import com.kk.taurus.playerbase.event.OnPlayerEventListener;
 import com.kk.taurus.playerbase.player.IPlayer;
 import com.kk.taurus.playerbase.render.IRender;
 import com.kk.taurus.playerbase.widget.BaseVideoView;
-import com.m4399.ffmpeg_cmd.FFmpegCmd;
 import com.m4399.videoeditor.R;
 import com.m4399.videoeditor.core.VideoEditor;
 import com.m4399.videoeditor.widget.RangeSeekBar;
@@ -175,12 +174,26 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
 
     public void startClipVideo(View view)
     {
-        showProgressDialog();
-        VideoEditor.cropVideo(videoPath, mStartTime, mEndTime, new FFmpegCmd.OnCmdExecListener()
+
+        VideoEditor.cropVideo(videoPath, mStartTime, mEndTime, new VideoEditor.OnVideoProcessListener()
         {
             @Override
-            public void onSuccess()
+            public void onProcessStart()
             {
+                showProgressDialog();
+            }
+
+            @Override
+            public void onProcessProgress(float progress)
+            {
+                updateProgress(progress);
+                Log.i("asdf", "onProcessProgress:" + Thread.currentThread().getName());
+            }
+
+            @Override
+            public void onProcessSuccess()
+            {
+                Log.i("asdf", "onProcessSuccess:" + Thread.currentThread().getName());
                 runOnUiThread(new Runnable()
                 {
                     @Override
@@ -194,7 +207,7 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
             }
 
             @Override
-            public void onFailure()
+            public void onProcessFailure()
             {
                 runOnUiThread(new Runnable()
                 {
@@ -204,12 +217,6 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
                         hideProgressDialog();
                     }
                 });
-            }
-
-            @Override
-            public void onProgress(float progress)
-            {
-                updateProgress(progress);
             }
         });
     }

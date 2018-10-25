@@ -13,7 +13,7 @@ public class VideoEditor
 {
     private static final String TAG = "VideoEditor";
 
-    public static void cropVideo(String videoPath, long startTime, long endTime, FFmpegCmd.OnCmdExecListener listener)
+    public static void cropVideo(String videoPath, long startTime, long endTime, OnVideoProcessListener listener)
     {
         long duration = endTime - startTime;
         CmdList cmd = new CmdList();
@@ -26,7 +26,7 @@ public class VideoEditor
         execCmd(cmd, duration, listener);
     }
 
-    private static void execCmd(CmdList cmd, long duration, final FFmpegCmd.OnCmdExecListener listener)
+    private static void execCmd(CmdList cmd, long duration, final OnVideoProcessListener listener)
     {
         String[] cmds = cmd.toArray(new String[cmd.size()]);
         String cmdLog = "";
@@ -35,24 +35,25 @@ public class VideoEditor
             cmdLog = cmdLog + " " + ss;
         }
         Log.i(TAG, "cmd:" + cmdLog);
+        listener.onProcessStart();
         FFmpegCmd.exec(cmds, duration, new FFmpegCmd.OnCmdExecListener()
         {
             @Override
             public void onSuccess()
             {
-                listener.onSuccess();
+                listener.onProcessSuccess();
             }
 
             @Override
             public void onFailure()
             {
-                listener.onFailure();
+                listener.onProcessFailure();
             }
 
             @Override
             public void onProgress(float progress)
             {
-                listener.onProgress(progress);
+                listener.onProcessProgress(progress);
             }
         });
     }
@@ -65,5 +66,16 @@ public class VideoEditor
             file.mkdirs();
         }
         return savePath + "out.mp4";
+    }
+
+    public interface OnVideoProcessListener
+    {
+        void onProcessStart();
+
+        void onProcessProgress(float progress);
+
+        void onProcessSuccess();
+
+        void onProcessFailure();
     }
 }
