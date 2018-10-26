@@ -1,55 +1,47 @@
-# For more information about using CMake with Android Studio, read the
-# documentation: https://d.android.com/studio/projects/add-native-code.html
-
-# Sets the minimum version of CMake required to build the native library.
-
 cmake_minimum_required(VERSION 3.4.1)
-
-# Creates and names a library, sets it as either STATIC
-# or SHARED, and provides the relative paths to its source code.
-# You can define multiple libraries, and CMake builds them for you.
-# Gradle automatically packages shared libraries with your APK.
-
-add_library( # Sets the name of the library.
-        ffmpeg-cmd
-
-        # Sets the library as a shared library.
-        SHARED
-
-        # Provides a relative path to your source file(s).
-
-        src/main/cpp/ffmpeg/cmdutils.c
-        src/main/cpp/ffmpeg/ffmpeg.c
-        src/main/cpp/ffmpeg/ffmpeg_filter.c
-        src/main/cpp/ffmpeg/ffmpeg_opt.c
-
-        src/main/cpp/ffmpeg_cmd.c
-
-        src/main/cpp/ffmpeg_thread.c)
-
-add_library( ffmpeg
-        SHARED
-        IMPORTED )
-set_target_properties( ffmpeg
-        PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/armeabi-v7a/libffmpeg.so )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
-include_directories(src/main/cpp)
-include_directories(src/main/cpp/ffmpeg)
-include_directories(src/main/cpp/include)
+# 添加头文件路径
+include_directories(
+        ./src/main/cpp
+        ./src/main/cpp/ffmpeg
+        ./src/main/cpp/include
+)
 
-find_library( # Sets the name of the path variable.
+# 定义源码所在目录
+aux_source_directory(./src/main/cpp SRC)
+aux_source_directory(./src/main/cpp/ffmpeg SRC_FFMPEG)
+
+# 将 SRC_FFMPEG 添加到 SRC 中
+list(APPEND SRC ${SRC_FFMPEG})
+
+# 设置ffmpeg库所在路径的目录
+set(distribution_DIR ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI})
+
+# 编译一个ffmpeg-cmd库
+add_library(  ffmpeg-cmd   # 库名称
+        SHARED             # 库类型
+        ${SRC})            # 编译进库的源码
+
+# 添加libffmpeg.so库
+add_library( ffmpeg
+        SHARED
+        IMPORTED )
+# 指定libffmpeg.so库的位置
+set_target_properties( ffmpeg
+        PROPERTIES IMPORTED_LOCATION
+        ${distribution_DIR}/libffmpeg.so )
+
+# 查找日志库
+find_library(
         log-lib
         log )
 
-target_link_libraries( # Specifies the target library.
-        ffmpeg-cmd
+# 将其他库链接到目标库ffmpeg-cmd
+target_link_libraries( ffmpeg-cmd
         ffmpeg
-        -landroid #native_window
-        -ljnigraphics #bitmap
-        -lOpenSLES #openSLES
-        # Links the target library to the log library
-        # included in the NDK.
+        -landroid     # native_window
+        -ljnigraphics # bitmap
+        -lOpenSLES    # openSLES
         ${log-lib} )
