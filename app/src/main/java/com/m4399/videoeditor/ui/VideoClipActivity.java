@@ -25,6 +25,8 @@ import com.m4399.videoeditor.core.VideoEditor;
 import com.m4399.videoeditor.widget.RangeSeekBar;
 import com.m4399.videoeditor.widget.VideoRangeSlider;
 
+import java.io.File;
+
 public class VideoClipActivity extends AppCompatActivity implements OnPlayerEventListener,
                                                                     View.OnClickListener,
                                                                     RangeSeekBar.OnRangeSeekBarChangeListener
@@ -288,6 +290,12 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
 
     private static String getSavePath()
     {
-        return Environment.getExternalStorageDirectory().getPath() + "/VideoEditor/out.mp4";
+        String dirPath = Environment.getExternalStorageDirectory().getPath() + "/VideoEditor/";
+        File dir = new File(dirPath);
+        if (!dir.exists())
+        {
+            dir.mkdirs();
+        }
+        return dirPath + "out.mp4";
     }
 }

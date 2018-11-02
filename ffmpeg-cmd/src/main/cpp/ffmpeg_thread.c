@@ -52,6 +52,9 @@ void ffmpeg_thread_exit(int ret){
  * 取消线程
  */
 void ffmpeg_thread_cancel(){
+    LOGI("ffmpeg_thread_cancel");
+    ffmpeg_cancel();
+
     void *ret=NULL;
     pthread_join(ntid, &ret);
 }

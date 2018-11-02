@@ -678,4 +678,6 @@ int hwaccel_decode_init(AVCodecContext *avctx);
 
 int ffmpeg_exec(int argc, char **argv);
 
+void ffmpeg_cancel();
+
 #endif /* FFTOOLS_FFMPEG_H */

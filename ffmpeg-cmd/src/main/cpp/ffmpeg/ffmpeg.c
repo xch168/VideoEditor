@@ -157,6 +157,8 @@ int         nb_output_files   = 0;
 FilterGraph **filtergraphs;
 int        nb_filtergraphs;
 
+int ffmpeg_canceled = 0;
+
 #if HAVE_TERMIOS_H
 
 /* init terminal so that we can grab keys */
@@ -626,6 +628,8 @@ static void ffmpeg_cleanup(int ret)
     nb_output_streams = 0;
     nb_input_files = 0;
     nb_input_streams = 0;
+
+    ffmpeg_canceled = 0;
 }
 
 void remove_avoptions(AVDictionary **a, AVDictionary *b)
@@ -4627,6 +4631,12 @@ static int transcode(void)
     while (!received_sigterm) {
         int64_t cur_time= av_gettime_relative();
 
+        if (ffmpeg_canceled)
+        {
+            LOGI("Stop the FFmpeg command");
+            exit_program(1);
+        }
+
         /* if 'q' pressed, exits */
         if (stdin_interaction)
             if (check_keyboard_interaction(cur_time) < 0)
@@ -4807,6 +4817,11 @@ int hwaccel_decode_init(AVCodecContext *avctx)
 
 static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl)
 {
+}
+
+void ffmpeg_cancel()
+{
+    ffmpeg_canceled = 1;
 }
 
 int ffmpeg_exec(int argc, char **argv)
