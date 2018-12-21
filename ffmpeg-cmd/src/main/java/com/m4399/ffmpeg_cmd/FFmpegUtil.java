@@ -20,11 +20,24 @@ public class FFmpegUtil
         CmdList cmd = new CmdList();
         cmd.append("ffmpeg");
         cmd.append("-y");
-        cmd.append("-ss").append(startTime/ 1000).append("-t").append(duration / 1000).append("-accurate_seek");
+        cmd.append("-ss").append(startTime/ 1000).append("-t").append(duration / 1000);
+        cmd.append("-accurate_seek");
         cmd.append("-i").append(srcFile);
-        cmd.append("-codec").append("copy").append(destFile);
+        cmd.append("-codec").append("copy").append("-avoid_negative_ts").append("1").append("-strict").append("-2").append(destFile);
 
         execCmd(cmd, duration, listener);
+    }
+
+    public static void extractFrameAt(String videoPath, long timeMs, String framePath, OnVideoProcessListener listener)
+    {
+        CmdList cmd = new CmdList();
+        cmd.append("ffmpeg");
+        cmd.append("-ss").append(0);
+        cmd.append("-i").append(videoPath);
+        cmd.append("-f").append("image2");
+        cmd.append("-y").append(framePath);
+
+        execCmd(cmd, 10, listener);
     }
 
     private static void execCmd(CmdList cmd, long duration, final OnVideoProcessListener listener)

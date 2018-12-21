@@ -13,4 +13,9 @@ public class VideoEditor
         FFmpegUtil.cropVideo(videoPath, startTime, endTime, destPath, listener);
     }
 
+    public static void extractFrameAt(String videoPath, long time, String framePath, OnVideoProcessListener listener)
+    {
+        FFmpegUtil.extractFrameAt(videoPath, time, framePath, listener);
+    }
+
 }

@@ -111,6 +111,10 @@ public class VideoListActivity extends AppCompatActivity
         for(int count = 0; count < fileNum; count++)
         {
             String videoPath = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA));
+            if (videoPath == null)
+            {
+                continue;
+            }
             File file = new File(videoPath);
 
             if (!file.exists())
