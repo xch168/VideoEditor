@@ -112,6 +112,8 @@
 
 #include "libavutil/avassert.h"
 
+#include "ffmpeg_hw.c"
+
 const char program_name[] = "ffmpeg";
 const int program_birth_year = 2000;
 
@@ -4789,30 +4791,6 @@ static int64_t getmaxrss(void)
 #else
     return 0;
 #endif
-}
-
-HWDevice *hw_device_get_by_name(const char *name)
-{
-}
-
-int hw_device_init_from_string(const char *arg, HWDevice **dev)
-{
-}
-
-void hw_device_free_all(void)
-{
-}
-
-int hw_device_setup_for_decode(InputStream *ist)
-{
-}
-
-int hw_device_setup_for_encode(OutputStream *ost)
-{
-}
-
-int hwaccel_decode_init(AVCodecContext *avctx)
-{
 }
 
 static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl)

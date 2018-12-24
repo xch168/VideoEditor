@@ -50,39 +50,32 @@ public class VideoPreviewActivity extends AppCompatActivity
         mVideoView.setDataSource(new DataSource(mVideoPath));
         mVideoView.start();
 
-        mVideoView.postDelayed(new Runnable()
+        VideoEditor.extractFrameAt(mVideoPath, 10, getFrameSavePath(), new OnVideoProcessListener()
         {
             @Override
-            public void run()
+            public void onProcessStart()
             {
-                VideoEditor.extractFrameAt(mVideoPath, 10, getFrameSavePath(), new OnVideoProcessListener()
-                {
-                    @Override
-                    public void onProcessStart()
-                    {
 
-                    }
-
-                    @Override
-                    public void onProcessProgress(float progress)
-                    {
-
-                    }
-
-                    @Override
-                    public void onProcessSuccess()
-                    {
-                        Log.i("cmd", "onProcessSuccess");
-                    }
-
-                    @Override
-                    public void onProcessFailure()
-                    {
-                        Log.i("cmd", "onProcessFailure");
-                    }
-                });
             }
-        }, 3000);
+
+            @Override
+            public void onProcessProgress(float progress)
+            {
+
+            }
+
+            @Override
+            public void onProcessSuccess()
+            {
+                Log.i("cmd", "onProcessSuccess");
+            }
+
+            @Override
+            public void onProcessFailure()
+            {
+                Log.i("cmd", "onProcessFailure");
+            }
+        });
 
     }
 

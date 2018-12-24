@@ -32,9 +32,9 @@ public class FFmpegUtil
     {
         CmdList cmd = new CmdList();
         cmd.append("ffmpeg");
-        cmd.append("-ss").append(0);
+        cmd.append("-ss").append(timeMs);
         cmd.append("-i").append(videoPath);
-        cmd.append("-f").append("image2");
+        cmd.append("-vframes").append("1");
         cmd.append("-y").append(framePath);
 
         execCmd(cmd, 10, listener);
