@@ -25,6 +25,8 @@ function build_android
         --enable-static \
         --enable-small \
         --enable-neon \
+        --enable-asm \
+        --enable-zlib \
         --disable-shared \
         --disable-filters \
         --disable-encoders \
@@ -33,15 +35,10 @@ function build_android
         --disable-parsers \
         --disable-protocols \
         --enable-protocol=file \
-        --enable-jni \
-        --enable-gpl \
-        --enable-mediacodec \
         --enable-encoder=png \
         --enable-decoder=png \
         --enable-decoder=h264 \
         --enable-encoder=h264 \
-        --enable-asm \
-        --enable-zlib \
         --enable-filter=scale \
         --enable-swscale-alpha \
         --enable-ffmpeg \
