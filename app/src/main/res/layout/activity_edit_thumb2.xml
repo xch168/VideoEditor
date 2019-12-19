@@ -13,9 +13,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintDimensionRatio="16:9"
+        app:layout_constraintTop_toTopOf="parent"
         android:background="#000000"/>
 
-    <com.m4399.videoeditor.widget.VideoThumbSeekBar
+    <com.github.xch168.videoeditor.widget.VideoThumbSeekBar
         android:id="@+id/video_range_slider"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.m4399.videoeditor"
+        applicationId "com.github.xch168.videoeditor"
         minSdkVersion 15
         targetSdkVersion 28
         versionCode 1

@@ -13,6 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:layout_marginLeft="20dp"
         android:textColor="#333333"
         android:textSize="16sp"
@@ -24,6 +25,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toRightOf="@id/tv_start_time"
         app:layout_constraintRight_toLeftOf="@+id/tv_end_time"
+        app:layout_constraintTop_toTopOf="parent"
         android:textColor="#FF00"
         android:textSize="16sp"
         android:text="00:00"/>
@@ -33,6 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:layout_marginRight="20dp"
         android:textColor="#333333"
         android:textSize="16sp"
@@ -50,7 +53,7 @@
             android:layout_height="match_parent"
             app:layout_constraintTop_toTopOf="@+id/range_seek_bar"/>
 
-        <com.m4399.videoeditor.widget.RangeSeekBar
+        <com.github.xch168.videoeditor.widget.RangeSeekBar
             android:id="@+id/range_seek_bar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

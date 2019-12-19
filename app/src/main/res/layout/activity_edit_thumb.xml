@@ -11,6 +11,8 @@
         android:id="@+id/label1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
         android:text="视频预览画面："/>
 
     <com.kk.taurus.playerbase.widget.BaseVideoView
@@ -21,7 +23,7 @@
         app:layout_constraintTop_toBottomOf="@id/label1"
         android:background="#000000"/>
 
-    <com.m4399.videoeditor.widget.VideoThumbProgressBar
+    <com.github.xch168.videoeditor.widget.VideoThumbProgressBar
         android:id="@+id/video_range_slider"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,6 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/video_range_slider"
+        app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginTop="10dp"
         android:text="选中封面图："/>
 

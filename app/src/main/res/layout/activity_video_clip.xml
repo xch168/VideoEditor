@@ -12,12 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintDimensionRatio="16:9"
+        app:layout_constraintTop_toTopOf="parent"
         android:background="#000000"/>
 
     <View
         android:id="@+id/touch_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintDimensionRatio="16:9"/>
 
     <ImageView
@@ -30,7 +32,7 @@
         app:layout_constraintBottom_toBottomOf="@id/video_view"
         android:src="@drawable/play_big"/>
 
-    <com.m4399.videoeditor.widget.VideoRangeSlider
+    <com.github.xch168.videoeditor.widget.VideoRangeSlider
         android:id="@+id/video_range_slider"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
