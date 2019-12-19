@@ -1,10 +1,12 @@
 package com.m4399.videoeditor.ui;
 
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-public class BaseActivity extends AppCompatActivity {
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class BaseActivity extends AppCompatActivity
+{
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -19,7 +21,7 @@ public class BaseActivity extends AppCompatActivity {
     protected void setBackBtnVisible(boolean visible) {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(visible);
         }
     }
 }

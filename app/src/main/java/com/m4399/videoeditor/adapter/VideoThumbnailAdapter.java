@@ -3,8 +3,6 @@ package com.m4399.videoeditor.adapter;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,8 +16,10 @@ import com.m4399.videoeditor.media.ShareableBitmap;
 
 import java.util.concurrent.TimeUnit;
 
-public class VideoThumbnailAdapter extends RecyclerView.Adapter<VideoThumbnailAdapter.ThumbViewHolder>
-{
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+public class VideoThumbnailAdapter extends RecyclerView.Adapter<VideoThumbnailAdapter.ThumbViewHolder> {
     private Context mContext;
 
     private static final int DEFAULT_FRAME_COUNT = 10;
@@ -34,8 +34,7 @@ public class VideoThumbnailAdapter extends RecyclerView.Adapter<VideoThumbnailAd
     private int maxRight;
     private float perSecond;
 
-    public VideoThumbnailAdapter(Context context, FrameExtractor frameExtractor)
-    {
+    public VideoThumbnailAdapter(Context context, FrameExtractor frameExtractor) {
         mContext = context;
         mFrameExtractor = frameExtractor;
 
@@ -44,18 +43,15 @@ public class VideoThumbnailAdapter extends RecyclerView.Adapter<VideoThumbnailAd
     }
 
     @Override
-    public ThumbViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i)
-    {
+    public ThumbViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         return new ThumbViewHolder(LayoutInflater.from(mContext).inflate(R.layout.video_thumb_item, viewGroup, false));
     }
 
     @Override
-    public void onBindViewHolder(ThumbViewHolder holder, int position)
-    {
+    public void onBindViewHolder(ThumbViewHolder holder, int position) {
         perSecond = (float)mDuration / getItemCount()/1000;
 
-        if (holder.mBitmap != null)
-        {
+        if (holder.mBitmap != null) {
             holder.mBitmap.release();
             holder.mBitmap = null;
         }
@@ -68,39 +64,31 @@ public class VideoThumbnailAdapter extends RecyclerView.Adapter<VideoThumbnailAd
     }
 
     @Override
-    public int getItemCount()
-    {
-        if (mDuration == 0)
-        {
+    public int getItemCount() {
+        if (mDuration == 0) {
             return 0;
         }
-        if ((int) (mDuration / 1000) > mDurationLimit)
-        {
+        if ((int) (mDuration / 1000) > mDurationLimit) {
             return Math.round((mDuration / 1000 / mDurationLimit) * DEFAULT_FRAME_COUNT);
-        }
-        else
-        {
+        } else {
             return DEFAULT_FRAME_COUNT;
         }
     }
 
-    public long fetchDuration()
-    {
+    public long fetchDuration() {
         mDuration = mFrameExtractor.getVideoDuration();
         notifyDataSetChanged();
         return mDuration;
     }
 
-    static class ThumbViewHolder extends RecyclerView.ViewHolder implements FrameExtractor.Callback
-    {
+    static class ThumbViewHolder extends RecyclerView.ViewHolder implements FrameExtractor.Callback {
         FrameLayout thumbLayout;
         ImageView thumbImage;
 
         ShareableBitmap mBitmap;
         AsyncTask<?, ?, ?> task;
 
-        ThumbViewHolder(@NonNull View itemView)
-        {
+        ThumbViewHolder(@NonNull View itemView) {
             super(itemView);
 
             thumbLayout = itemView.findViewById(R.id.thumb_layout);
@@ -108,10 +96,8 @@ public class VideoThumbnailAdapter extends RecyclerView.Adapter<VideoThumbnailAd
         }
 
         @Override
-        public void onFrameExtracted(ShareableBitmap bitmap, long timestamp)
-        {
-            if (bitmap != null)
-            {
+        public void onFrameExtracted(ShareableBitmap bitmap, long timestamp) {
+            if (bitmap != null) {
                 mBitmap = bitmap;
                 thumbImage.setImageBitmap(bitmap.getData());
             }

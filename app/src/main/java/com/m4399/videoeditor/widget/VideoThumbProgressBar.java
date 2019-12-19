@@ -2,8 +2,6 @@ package com.m4399.videoeditor.widget;
 
 
 import android.content.Context;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
@@ -13,8 +11,10 @@ import com.m4399.videoeditor.R;
 import com.m4399.videoeditor.adapter.VideoThumbnailAdapter;
 import com.m4399.videoeditor.media.FrameExtractor;
 
-public class VideoThumbProgressBar extends FrameLayout
-{
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+public class VideoThumbProgressBar extends FrameLayout {
     private RecyclerView mVideoThumbnailGallery;
     private SeekBar mSeekBar;
 
@@ -24,29 +24,25 @@ public class VideoThumbProgressBar extends FrameLayout
 
     private long mTotalTime;
 
-    public VideoThumbProgressBar(Context context)
-    {
+    public VideoThumbProgressBar(Context context) {
         super(context);
 
         initView();
     }
 
-    public VideoThumbProgressBar(Context context, AttributeSet attrs)
-    {
+    public VideoThumbProgressBar(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         initView();
     }
 
-    public VideoThumbProgressBar(Context context, AttributeSet attrs, int defStyleAttr)
-    {
+    public VideoThumbProgressBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
         initView();
     }
 
-    private void initView()
-    {
+    private void initView() {
         LayoutInflater.from(getContext()).inflate(R.layout.video_thumb_progress_bar, this);
 
         mFrameExtractor = new FrameExtractor();
@@ -61,25 +57,21 @@ public class VideoThumbProgressBar extends FrameLayout
         mSeekBar.setPadding(0, 0, 0 , 0);
     }
 
-    public void setDataSource(String path)
-    {
+    public void setDataSource(String path) {
         mFrameExtractor.setDataSource(path);
 
         mTotalTime = mThumbnailAdapter.fetchDuration();
     }
 
-    public long getTotalTime()
-    {
+    public long getTotalTime() {
         return mTotalTime;
     }
 
-    public FrameExtractor getFrameExtractor()
-    {
+    public FrameExtractor getFrameExtractor() {
         return mFrameExtractor;
     }
 
-    public void setOnSeekBarChangeListener(SeekBar.OnSeekBarChangeListener listener)
-    {
+    public void setOnSeekBarChangeListener(SeekBar.OnSeekBarChangeListener listener) {
         mSeekBar.setOnSeekBarChangeListener(listener);
     }
 }

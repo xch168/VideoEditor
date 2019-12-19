@@ -9,12 +9,10 @@ import com.m4399.ffmpeg_cmd.FFmpegCmd;
 
 import java.io.File;
 
-public class VideoEditor
-{
+public class VideoEditor {
     private static final String TAG = "VideoEditor";
 
-    public static void cropVideo(String videoPath, long startTime, long endTime, FFmpegCmd.OnCmdExecListener listener)
-    {
+    public static void cropVideo(String videoPath, long startTime, long endTime, FFmpegCmd.OnCmdExecListener listener) {
         long duration = endTime - startTime;
         CmdList cmd = new CmdList();
         cmd.append("ffmpeg");
@@ -26,39 +24,32 @@ public class VideoEditor
         execCmd(cmd, duration, listener);
     }
 
-    private static void execCmd(CmdList cmd, long duration, final FFmpegCmd.OnCmdExecListener listener)
-    {
+    private static void execCmd(CmdList cmd, long duration, final FFmpegCmd.OnCmdExecListener listener) {
         String[] cmds = cmd.toArray(new String[cmd.size()]);
         String cmdLog = "";
-        for (String ss : cmds)
-        {
+        for (String ss : cmds) {
             cmdLog = cmdLog + " " + ss;
         }
         Log.i(TAG, "cmd:" + cmdLog);
-        FFmpegCmd.exec(cmds, duration, new FFmpegCmd.OnCmdExecListener()
-        {
+        FFmpegCmd.exec(cmds, duration, new FFmpegCmd.OnCmdExecListener() {
             @Override
-            public void onSuccess()
-            {
+            public void onSuccess() {
                 listener.onSuccess();
             }
 
             @Override
-            public void onFailure()
-            {
+            public void onFailure() {
                 listener.onFailure();
             }
 
             @Override
-            public void onProgress(float progress)
-            {
+            public void onProgress(float progress) {
                 listener.onProgress(progress);
             }
         });
     }
 
-    private static String getSavePath()
-    {
+    private static String getSavePath() {
         String savePath = Environment.getExternalStorageDirectory().getPath() + "/VideoEditor/";
         File file = new File(savePath);
         if (!file.exists()) {

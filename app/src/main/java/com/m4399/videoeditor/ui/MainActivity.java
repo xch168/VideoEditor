@@ -1,14 +1,13 @@
 package com.m4399.videoeditor.ui;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
 import com.m4399.videoeditor.R;
 import com.m4399.videoeditor.util.AppUtil;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
     public static final int TYPE_CLIP = 0;
     public static final int TYPE_CLIP_COMPOSE = 1;
 

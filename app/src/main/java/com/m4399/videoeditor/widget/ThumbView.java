@@ -10,15 +10,15 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Xfermode;
-import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
 import com.m4399.videoeditor.R;
 import com.m4399.videoeditor.util.SizeUtil;
 
-public class ThumbView extends ImageView
-{
+import androidx.annotation.ColorInt;
+
+public class ThumbView extends ImageView {
     private Paint mOutsidePaint;
     private Paint mInsidePaint;
     private Paint mRoundPaint = new Paint();
@@ -34,25 +34,21 @@ public class ThumbView extends ImageView
     private RectF mOutsideRectF;
     private float[] mRadii;
 
-    public ThumbView(Context context)
-    {
+    public ThumbView(Context context) {
         this(context, null);
     }
 
-    public ThumbView(Context context, AttributeSet attrs)
-    {
+    public ThumbView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public ThumbView(Context context, AttributeSet attrs, int defStyleAttr)
-    {
+    public ThumbView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
         initView();
     }
 
-    private void initView()
-    {
+    private void initView() {
         mRadii = new float[8];
         mRectF = new RectF();
         mInsideRectF = new RectF();
@@ -74,25 +70,21 @@ public class ThumbView extends ImageView
 
         setScaleType(ImageView.ScaleType.CENTER_CROP);
         int index = 0;
-        while (index < mRadii.length)
-        {
+        while (index < mRadii.length) {
             mRadii[index] = (mRadius / 2 - mOutsidePadding / 2.0F);
             index += 1;
         }
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
-    {
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.EXACTLY));
     }
 
     @Override
-    protected void onDraw(Canvas canvas)
-    {
-        if (mHeight > 0 && mWidth > 0)
-        {
+    protected void onDraw(Canvas canvas) {
+        if (mHeight > 0 && mWidth > 0) {
             canvas.saveLayer(mRectF, null, Canvas.ALL_SAVE_FLAG);
             super.onDraw(canvas);
             mPath.reset();
@@ -111,8 +103,7 @@ public class ThumbView extends ImageView
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh)
-    {
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
         mWidth = w;
@@ -121,29 +112,24 @@ public class ThumbView extends ImageView
         mRectF.set(mInsidePadding / 2.0F, mInsidePadding / 2.0F, mWidth - mInsidePadding / 2.0F, mHeight - mInsidePadding / 2.0F);
     }
 
-    public void setThumb(Bitmap bitmap)
-    {
+    public void setThumb(Bitmap bitmap) {
         setImageBitmap(bitmap);
         invalidate();
     }
 
-    public void setBorderColor(@ColorInt int color)
-    {
+    public void setBorderColor(@ColorInt int color) {
 
     }
 
-    public void setBorderWidth(float width)
-    {
+    public void setBorderWidth(float width) {
 
     }
 
-    public void setCornerRadius(float radius)
-    {
+    public void setCornerRadius(float radius) {
 
     }
 
-    public boolean isInTarget(int x, int y)
-    {
+    public boolean isInTarget(int x, int y) {
         Rect rect = new Rect();
         getHitRect(rect);
         return rect.contains(x, y);

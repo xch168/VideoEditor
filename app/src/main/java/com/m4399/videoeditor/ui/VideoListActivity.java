@@ -12,13 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.view.MenuItem;
 
 import com.m4399.videoeditor.R;
 import com.m4399.videoeditor.adapter.VideoAdapter;
@@ -28,6 +22,10 @@ import com.m4399.videoeditor.util.SpacingDecoration;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class VideoListActivity extends BaseActivity implements VideoAdapter.OnItemClickListener {
     private static final int MSG_NOTIFY_DATA_CHANGED = 100;

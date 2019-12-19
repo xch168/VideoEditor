@@ -2,23 +2,19 @@ package com.m4399.videoeditor.common;
 
 import com.m4399.videoeditor.media.ShareableBitmap;
 
-public class BitmapAllocator implements Allocator<ShareableBitmap>
-{
+public class BitmapAllocator implements Allocator<ShareableBitmap> {
 
     private final int width;
     private final int height;
 
-    public BitmapAllocator(int w, int h)
-    {
+    public BitmapAllocator(int w, int h) {
         width = w;
         height = h;
     }
 
     @Override
-    public ShareableBitmap allocate(Recycler<ShareableBitmap> recycler, ShareableBitmap reused)
-    {
-        if (reused != null)
-        {
+    public ShareableBitmap allocate(Recycler<ShareableBitmap> recycler, ShareableBitmap reused) {
+        if (reused != null) {
             reused.reset();
             return reused;
         }
@@ -27,14 +23,12 @@ public class BitmapAllocator implements Allocator<ShareableBitmap>
     }
 
     @Override
-    public void recycle(ShareableBitmap object)
-    {
+    public void recycle(ShareableBitmap object) {
 
     }
 
     @Override
-    public void release(ShareableBitmap object)
-    {
+    public void release(ShareableBitmap object) {
         object.getData().recycle();
     }
 

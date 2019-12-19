@@ -1,10 +1,6 @@
 package com.m4399.videoeditor.widget;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
@@ -16,9 +12,13 @@ import com.m4399.videoeditor.adapter.VideoThumbnailAdapter;
 import com.m4399.videoeditor.media.FrameExtractor;
 import com.m4399.videoeditor.util.TimeUtil;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-public class VideoRangeSlider extends FrameLayout
-{
+
+public class VideoRangeSlider extends FrameLayout {
     private static final String TAG = "VideoRangeSlider";
 
     private TextView mStartTimeView;
@@ -36,29 +36,25 @@ public class VideoRangeSlider extends FrameLayout
 
     private long mTotalTime;
 
-    public VideoRangeSlider(@NonNull Context context)
-    {
+    public VideoRangeSlider(@NonNull Context context) {
         super(context);
 
         initView();
     }
 
-    public VideoRangeSlider(@NonNull Context context, @Nullable AttributeSet attrs)
-    {
+    public VideoRangeSlider(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
         initView();
     }
 
-    public VideoRangeSlider(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr)
-    {
+    public VideoRangeSlider(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
         initView();
     }
 
-    private void initView()
-    {
+    private void initView() {
         LayoutInflater.from(getContext()).inflate(R.layout.video_range_slider, this);
 
         mFrameExtractor = new FrameExtractor();
@@ -75,14 +71,12 @@ public class VideoRangeSlider extends FrameLayout
         mRangeSeekBar = findViewById(R.id.range_seek_bar);
     }
 
-    public void setFrameProgress(float percent)
-    {
+    public void setFrameProgress(float percent) {
         mRangeSeekBar.showFrameProgress(true);
         mRangeSeekBar.setFrameProgress(percent);
     }
 
-    public void setDataSource(String path)
-    {
+    public void setDataSource(String path) {
         mFrameExtractor.setDataSource(path);
 
         mTotalTime = mThumbnailAdapter.fetchDuration();
@@ -90,33 +84,27 @@ public class VideoRangeSlider extends FrameLayout
         setDuration(mTotalTime);
     }
 
-    public void setVideoView(BaseVideoView videoView)
-    {
+    public void setVideoView(BaseVideoView videoView) {
         mVideoView = videoView;
     }
 
-    public void setStartTime(long startTime)
-    {
+    public void setStartTime(long startTime) {
         mStartTimeView.setText(TimeUtil.format(startTime));
     }
 
-    public void setEndTime(long endTime)
-    {
+    public void setEndTime(long endTime) {
         mEndTimeView.setText(TimeUtil.format(endTime));
     }
 
-    public void setDuration(long duration)
-    {
+    public void setDuration(long duration) {
         mDurationView.setText(TimeUtil.format(duration));
     }
 
-    public long getTotalTime()
-    {
+    public long getTotalTime() {
         return mTotalTime;
     }
 
-    public void setOnRangeSeekBarChangeListener(RangeSeekBar.OnRangeSeekBarChangeListener listener)
-    {
+    public void setOnRangeSeekBarChangeListener(RangeSeekBar.OnRangeSeekBarChangeListener listener) {
         mRangeSeekBar.setOnRangeSeekBarChangeListener(listener);
     }
 }

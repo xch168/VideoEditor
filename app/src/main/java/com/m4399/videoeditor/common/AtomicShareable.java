@@ -1,12 +1,10 @@
 package com.m4399.videoeditor.common;
 
 
-public abstract class AtomicShareable<T> extends AtomicRefCounted
-{
+public abstract class AtomicShareable<T> extends AtomicRefCounted {
     protected final Recycler<T> _Recycler;
 
-    public AtomicShareable(Recycler<T> recycler)
-    {
+    public AtomicShareable(Recycler<T> recycler) {
         this._Recycler = recycler;
     }
 

@@ -16,8 +16,7 @@ public class VideoClipComposeActivity extends BaseActivity {
         setBackBtnVisible(true);
     }
 
-    public static void open(Context context, String videoPath)
-    {
+    public static void open(Context context, String videoPath) {
         Intent intent = new Intent(context, VideoClipComposeActivity.class);
         intent.putExtra("video_path", videoPath);
         context.startActivity(intent);

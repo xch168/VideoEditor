@@ -10,8 +10,7 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
-public class ImageSeekBar extends ViewGroup
-{
+public class ImageSeekBar extends ViewGroup {
     private ThumbView mThumbView;
 
     private boolean mIsDragging;
@@ -34,8 +33,7 @@ public class ImageSeekBar extends ViewGroup
         this(context, attrs, 0);
     }
 
-    public ImageSeekBar(Context context, AttributeSet attrs, int defStyleAttr)
-    {
+    public ImageSeekBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
@@ -48,44 +46,38 @@ public class ImageSeekBar extends ViewGroup
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
-    {
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         widthMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         mThumbView.measure(widthMeasureSpec, heightMeasureSpec);
     }
 
     @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b)
-    {
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
         final int thumbWidth = mThumbView.getMeasuredWidth();
         final int thumbHeight = mThumbView.getMeasuredHeight();
         mThumbView.layout(0, 0, thumbWidth, thumbHeight);
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh)
-    {
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
     }
 
     @Override
-    protected void onDraw(Canvas canvas)
-    {
+    protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event)
-    {
+    public boolean onTouchEvent(MotionEvent event) {
         if (!isEnabled()) {
             return false;
         }
 
         boolean handle = false;
 
-        switch (event.getAction())
-        {
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 int x = (int) event.getX();
                 int y = (int) event.getY();
@@ -93,12 +85,10 @@ public class ImageSeekBar extends ViewGroup
                 mLastX = mOriginalX = x;
                 mIsDragging = false;
 
-                if (!mThumbView.isPressed() && mThumbView.isInTarget(x, y))
-                {
+                if (!mThumbView.isPressed() && mThumbView.isInTarget(x, y)) {
                     mThumbView.setPressed(true);
                     handle = true;
-                    if (mOnSeekBarChangeListener != null)
-                    {
+                    if (mOnSeekBarChangeListener != null) {
                         mOnSeekBarChangeListener.onStartTrackingTouch(this);
                     }
                 }
@@ -109,13 +99,11 @@ public class ImageSeekBar extends ViewGroup
                 mIsDragging = false;
                 mOriginalX = mLastX = 0;
                 getParent().requestDisallowInterceptTouchEvent(false);
-                if (mThumbView.isPressed())
-                {
+                if (mThumbView.isPressed()) {
                     mThumbView.setPressed(false);
                     invalidate();
                     handle = true;
-                    if (mOnSeekBarChangeListener != null)
-                    {
+                    if (mOnSeekBarChangeListener != null) {
                         mOnSeekBarChangeListener.onStopTrackingTouch(this);
                     }
                 }
@@ -124,15 +112,12 @@ public class ImageSeekBar extends ViewGroup
             case MotionEvent.ACTION_MOVE:
                 x = (int) event.getX();
 
-                if (!mIsDragging && Math.abs(x - mOriginalX) > mTouchSlop)
-                {
+                if (!mIsDragging && Math.abs(x - mOriginalX) > mTouchSlop) {
                     mIsDragging = true;
                 }
-                if (mIsDragging)
-                {
+                if (mIsDragging) {
                     int moveX = x - mLastX;
-                    if (mThumbView.isPressed())
-                    {
+                    if (mThumbView.isPressed()) {
                         getParent().requestDisallowInterceptTouchEvent(true);
                         moveThumbByPixel(moveX);
                         handle = true;
@@ -147,17 +132,14 @@ public class ImageSeekBar extends ViewGroup
         return handle;
     }
 
-    private void moveThumbByPixel(int pixel)
-    {
+    private void moveThumbByPixel(int pixel) {
         float x = mThumbView.getX() + pixel;
 
         Log.i("asdf", "getX:" + getX() + " width:" + getWidth() + "  x:" + x);
 
-        if (x >= getX() && x <= getX() + getWidth() - mThumbView.getWidth())
-        {
+        if (x >= getX() && x <= getX() + getWidth() - mThumbView.getWidth()) {
             mThumbView.setX(x);
-            if (mOnSeekBarChangeListener != null)
-            {
+            if (mOnSeekBarChangeListener != null) {
                 mPercent = (mThumbView.getX() - getX()) / (getWidth() - mThumbView.getWidth());
                 mProgress = (int) (mPercent * mMax);
                 mOnSeekBarChangeListener.onProgressChanged(this, mProgress, mPercent);
@@ -165,23 +147,19 @@ public class ImageSeekBar extends ViewGroup
         }
     }
 
-    public void setMax(int max)
-    {
+    public void setMax(int max) {
         mMax = max;
     }
 
-    public void setThumbBitmap(Bitmap bitmap)
-    {
+    public void setThumbBitmap(Bitmap bitmap) {
         mThumbView.setThumb(bitmap);
     }
 
-    public void setOnSeekBarChangeListener(ImageSeekBar.OnSeekBarChangeListener listener)
-    {
+    public void setOnSeekBarChangeListener(ImageSeekBar.OnSeekBarChangeListener listener) {
         mOnSeekBarChangeListener = listener;
     }
 
-    public interface OnSeekBarChangeListener
-    {
+    public interface OnSeekBarChangeListener {
         void onProgressChanged(ImageSeekBar seekBar, int progress, float percent);
 
         void onStartTrackingTouch(ImageSeekBar seekBar);
