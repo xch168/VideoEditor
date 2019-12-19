@@ -8,8 +8,9 @@ import com.github.xch168.videoeditor.R;
 import com.github.xch168.videoeditor.util.AppUtil;
 
 public class MainActivity extends BaseActivity {
-    public static final int TYPE_CLIP = 0;
-    public static final int TYPE_CLIP_COMPOSE = 1;
+    public static final int TYPE_VIDEO_CLIP = 0;
+    public static final int TYPE_VIDEO_COVER = 1;
+    public static final int TYPE_VIDEO_CLIP_COMPOSE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,10 +26,16 @@ public class MainActivity extends BaseActivity {
     }
 
     public void videoClip(View view) {
-        VideoListActivity.open(this, TYPE_CLIP);
+        VideoListActivity.open(this, TYPE_VIDEO_CLIP);
+    }
+
+    public void toChooseVideoCover(View view)
+    {
+        VideoListActivity.open(this, TYPE_VIDEO_COVER);
     }
 
     public void videoClipAndCompose(View view) {
-        VideoListActivity.open(this, TYPE_CLIP_COMPOSE);
+        VideoListActivity.open(this, TYPE_VIDEO_CLIP_COMPOSE);
     }
+
 }

@@ -7,24 +7,22 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.TextureView;
-import android.widget.ImageView;
-import android.widget.SeekBar;
 
 import com.kk.taurus.playerbase.entity.DataSource;
 import com.kk.taurus.playerbase.event.OnPlayerEventListener;
 import com.kk.taurus.playerbase.render.IRender;
 import com.kk.taurus.playerbase.widget.BaseVideoView;
 import com.github.xch168.videoeditor.R;
-import com.github.xch168.videoeditor.widget.VideoThumbProgressBar;
+import com.github.xch168.videoeditor.widget.ImageSeekBar;
+import com.github.xch168.videoeditor.widget.VideoThumbSeekBar;
 
-public class EditThumbActivity extends BaseActivity implements SeekBar.OnSeekBarChangeListener,
-                                                                    OnPlayerEventListener
+public class EditThumbActivity extends BaseActivity implements ImageSeekBar.OnSeekBarChangeListener,
+                                                               OnPlayerEventListener
 {
-    private static final String TAG = "EditThumbActivity";
+    private static final String TAG = "EditThumb2Activity";
 
     private BaseVideoView mVideoView;
-    private VideoThumbProgressBar mVideoThumbProgressBar;
-    private ImageView mThumbView;
+    private VideoThumbSeekBar mVideoThumbSeekBar;
 
     private long mTotalTime;
 
@@ -51,13 +49,11 @@ public class EditThumbActivity extends BaseActivity implements SeekBar.OnSeekBar
         mVideoView.setRenderType(IRender.RENDER_TYPE_TEXTURE_VIEW);
         mVideoView.start();
 
-        mVideoThumbProgressBar = findViewById(R.id.video_range_slider);
-        mVideoThumbProgressBar.setOnSeekBarChangeListener(this);
-        mVideoThumbProgressBar.setDataSource(mVideoPath);
+        mVideoThumbSeekBar = findViewById(R.id.video_range_slider);
+        mVideoThumbSeekBar.setOnSeekBarChangeListener(this);
+        mVideoThumbSeekBar.setDataSource(mVideoPath);
 
-        mThumbView = findViewById(R.id.iv_thumb);
-
-        mTotalTime = mVideoThumbProgressBar.getTotalTime();
+        mTotalTime = mVideoThumbSeekBar.getTotalTime();
     }
 
     public static void open(Context context, String videoPath)
@@ -80,9 +76,8 @@ public class EditThumbActivity extends BaseActivity implements SeekBar.OnSeekBar
     }
 
     @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+    public void onProgressChanged(ImageSeekBar seekBar, int progress, float percent)
     {
-        float percent = (float)progress / 1000;
         Log.i(TAG, "progress:" + progress + " percent:" + percent);
 
         progress = (int) (mTotalTime * percent);
@@ -94,14 +89,15 @@ public class EditThumbActivity extends BaseActivity implements SeekBar.OnSeekBar
     }
 
     @Override
-    public void onStartTrackingTouch(SeekBar seekBar)
+    public void onStartTrackingTouch(ImageSeekBar seekBar)
     {
-
+        Log.i(TAG, "onStartTrackingTouch");
     }
 
     @Override
-    public void onStopTrackingTouch(SeekBar seekBar)
+    public void onStopTrackingTouch(ImageSeekBar seekBar)
     {
+        Log.i(TAG, "onStopTrackingTouch");
         loadThumb();
     }
 
@@ -118,8 +114,8 @@ public class EditThumbActivity extends BaseActivity implements SeekBar.OnSeekBar
                     mThumbBitmap = null;
                 }
                 mThumbBitmap = ((TextureView)mVideoView.getRender().getRenderView()).getBitmap();
-                mThumbView.setImageBitmap(null);
-                mThumbView.setImageBitmap(mThumbBitmap);
+
+                mVideoThumbSeekBar.setThumbBitmap(mThumbBitmap);
             }
         }, 500);
     }

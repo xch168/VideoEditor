@@ -43,14 +43,6 @@ public class VideoPreviewActivity extends BaseActivity {
         mVideoView.start();
     }
 
-    public void toChooseVideoCover(View view) {
-        EditThumbActivity.open(this, mVideoPath);
-    }
-
-    public void toChooseVideoCover2(View view) {
-        EditThumb2Activity.open(this, mVideoPath);
-    }
-
     public static void open(Context context, String videoPath) {
         Intent intent = new Intent(context, VideoPreviewActivity.class);
         intent.putExtra("video_path", videoPath);

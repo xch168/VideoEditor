@@ -2,6 +2,9 @@
 <manifest package="com.github.xch168.videoeditor"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -10,7 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.VideoClipComposeActivity"></activity>
+
         <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -18,14 +21,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.VideoListActivity"></activity>
-        <activity android:name=".ui.VideoClipActivity"></activity>
-        <activity android:name=".ui.VideoPreviewActivity"></activity>
-        <activity android:name=".ui.EditThumbActivity"></activity>
-        <activity android:name=".ui.EditThumb2Activity"></activity>
+        <activity android:name=".ui.VideoListActivity" />
+        <activity android:name=".ui.VideoClipActivity" />
+        <activity android:name=".ui.VideoPreviewActivity" />
+        <activity android:name=".ui.EditThumbActivity" />
+        <activity android:name=".ui.VideoClipComposeActivity" />
     </application>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
 </manifest>

@@ -57,7 +57,7 @@ public class VideoListActivity extends BaseActivity implements VideoAdapter.OnIt
         setTitle("视频列表");
         setBackBtnVisible(true);
 
-        mIntentType = getIntent().getIntExtra("type", MainActivity.TYPE_CLIP);
+        mIntentType = getIntent().getIntExtra("type", MainActivity.TYPE_VIDEO_CLIP);
 
         mRecyclerView = findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
@@ -151,11 +151,15 @@ public class VideoListActivity extends BaseActivity implements VideoAdapter.OnIt
     @Override
     public void onItemClick(int position, Video video) {
         switch (mIntentType) {
-            case MainActivity.TYPE_CLIP:
+            case MainActivity.TYPE_VIDEO_CLIP:
                 VideoClipActivity.open(this, video.getVideoPath());
                 break;
-            case MainActivity.TYPE_CLIP_COMPOSE:
+            case MainActivity.TYPE_VIDEO_COVER:
+                EditThumbActivity.open(this, video.getVideoPath());
+                break;
+            case MainActivity.TYPE_VIDEO_CLIP_COMPOSE:
                 VideoClipComposeActivity.open(this, video.getVideoPath());
+                break;
         }
     }
 
