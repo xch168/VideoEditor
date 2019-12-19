@@ -107,6 +107,8 @@
 
 #include "libavutil/avassert.h"
 
+#include "android_log.h"
+
 const char program_name[] = "ffmpeg";
 const int program_birth_year = 2000;
 
@@ -4283,6 +4285,15 @@ int ffmpeg_exec(int argc, char **argv)
     int64_t ti;
 
     register_exit(ffmpeg_cleanup);
+
+    if(use_log_report)
+    {
+        av_log_set_callback(ffp_log_callback_report);
+    }
+    else
+    {
+        av_log_set_callback(ffp_log_callback_brief);
+    }
 
     setvbuf(stderr,NULL,_IONBF,0); /* win32 runtime needs this */
 
