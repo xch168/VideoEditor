@@ -17,7 +17,7 @@ import com.m4399.videoeditor.R;
 import com.m4399.videoeditor.widget.ImageSeekBar;
 import com.m4399.videoeditor.widget.VideoThumbSeekBar;
 
-public class EditThumb2Activity extends AppCompatActivity implements ImageSeekBar.OnSeekBarChangeListener,
+public class EditThumb2Activity extends BaseActivity implements ImageSeekBar.OnSeekBarChangeListener,
                                                                      OnPlayerEventListener
 {
     private static final String TAG = "EditThumb2Activity";
@@ -40,6 +40,7 @@ public class EditThumb2Activity extends AppCompatActivity implements ImageSeekBa
         setContentView(R.layout.activity_edit_thumb2);
 
         setTitle("编辑封面");
+        setBackBtnVisible(true);
 
         mVideoPath = getIntent().getStringExtra("video_path");
 

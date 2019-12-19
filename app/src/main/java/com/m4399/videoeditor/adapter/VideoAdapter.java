@@ -24,6 +24,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoItemVie
 
     private Context mContext;
 
+    private OnItemClickListener mOnItemClickListener;
+
     public VideoAdapter(Context context)
     {
         mContext = context;
@@ -37,7 +39,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoItemVie
     }
 
     @Override
-    public void onBindViewHolder(@NonNull VideoItemViewHolder holder, int i)
+    public void onBindViewHolder(@NonNull VideoItemViewHolder holder, final int i)
     {
         final Video video = mVideoList.get(i);
         holder.timeView.setText(TimeUtil.format(video.getDuration()));
@@ -47,7 +49,10 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoItemVie
             @Override
             public void onClick(View v)
             {
-                VideoClipActivity.open(mContext, video.getVideoPath());
+                if (mOnItemClickListener != null)
+                {
+                    mOnItemClickListener.onItemClick(i, video);
+                }
             }
         });
     }
@@ -75,6 +80,16 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoItemVie
             imageView = itemView.findViewById(R.id.iv);
             timeView = itemView.findViewById(R.id.tv_duration);
         }
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener)
+    {
+        mOnItemClickListener = listener;
+    }
+
+    public interface OnItemClickListener
+    {
+        void onItemClick(int position, Video video);
     }
 
 }

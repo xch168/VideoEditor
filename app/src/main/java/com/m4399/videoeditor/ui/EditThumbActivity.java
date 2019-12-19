@@ -18,7 +18,7 @@ import com.kk.taurus.playerbase.widget.BaseVideoView;
 import com.m4399.videoeditor.R;
 import com.m4399.videoeditor.widget.VideoThumbProgressBar;
 
-public class EditThumbActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener,
+public class EditThumbActivity extends BaseActivity implements SeekBar.OnSeekBarChangeListener,
                                                                     OnPlayerEventListener
 {
     private static final String TAG = "EditThumbActivity";
@@ -42,6 +42,7 @@ public class EditThumbActivity extends AppCompatActivity implements SeekBar.OnSe
         setContentView(R.layout.activity_edit_thumb);
 
         setTitle("编辑封面");
+        setBackBtnVisible(true);
 
         mVideoPath = getIntent().getStringExtra("video_path");
 

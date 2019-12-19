@@ -25,7 +25,7 @@ import com.m4399.videoeditor.core.VideoEditor;
 import com.m4399.videoeditor.widget.RangeSeekBar;
 import com.m4399.videoeditor.widget.VideoRangeSlider;
 
-public class VideoClipActivity extends AppCompatActivity implements OnPlayerEventListener,
+public class VideoClipActivity extends BaseActivity implements OnPlayerEventListener,
                                                                     View.OnClickListener,
                                                                     RangeSeekBar.OnRangeSeekBarChangeListener
 {
@@ -72,10 +72,9 @@ public class VideoClipActivity extends AppCompatActivity implements OnPlayerEven
         setContentView(R.layout.activity_video_clip);
 
         setTitle("剪辑视频");
+        setBackBtnVisible(true);
 
         videoPath = getIntent().getStringExtra("video_path");
-
-        Log.i("asdf", "video:" + videoPath);
 
         mPlayBtn = findViewById(R.id.iv);
 

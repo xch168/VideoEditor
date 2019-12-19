@@ -1,28 +1,24 @@
 package com.m4399.videoeditor;
 
 import android.app.Application;
+import android.content.Context;
 
 import com.kk.taurus.playerbase.config.PlayerLibrary;
 
-/**
- * Project Name: VideoEditor
- * File Name:    App.java
- * ClassName:    App
- *
- * Description: TODO.
- *
- * @author XuCanHui
- * @date 2018年09月26日 20:26
- *
- * Copyright (c) 2018年, 4399 Network CO.ltd. All Rights Reserved.
- */
-public class App extends Application
-{
+public class App extends Application {
+    private static Context sContext;
+
     @Override
     public void onCreate() {
         super.onCreate();
 
+        sContext = this;
+
         //初始化库
         PlayerLibrary.init(this);
+    }
+
+    public static Context getContext() {
+        return sContext;
     }
 }

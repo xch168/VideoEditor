@@ -14,7 +14,7 @@ import com.kk.taurus.playerbase.widget.BaseVideoView;
 import com.m4399.videoeditor.R;
 import com.m4399.videoeditor.cover.ControllerCover;
 
-public class VideoPreviewActivity extends AppCompatActivity
+public class VideoPreviewActivity extends BaseActivity
 {
     private BaseVideoView mVideoView;
 
@@ -31,6 +31,7 @@ public class VideoPreviewActivity extends AppCompatActivity
         setContentView(R.layout.activity_video_preview);
 
         setTitle("视频预览");
+        setBackBtnVisible(true);
 
         mVideoPath = getIntent().getStringExtra("video_path");
 

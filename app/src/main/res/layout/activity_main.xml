@@ -7,12 +7,49 @@
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity">
 
-    <Button
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="60dp"
+        android:textSize="18sp"
+        android:textColor="#333333"
+        android:text="视频编辑器"/>
+
+    <TextView
+        android:id="@+id/tv_version"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_title"
+        android:layout_marginTop="5dp"
+        android:textSize="16sp"
+        android:textColor="#888888"
+        tools:text="v1.0.0"/>
+
+    <Button
+        android:id="@+id/btn_video_clip"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_version"
+        android:layout_marginTop="20dp"
         android:text="视频剪辑"
-        android:onClick="videoEdit"/>
+        android:onClick="videoClip"/>
+
+    <Button
+        android:id="@+id/btn_video_clip_compose"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_video_clip"
+        android:text="视频剪辑&amp;合成"
+        android:onClick="videoClipAndCompose"/>
 
 </android.support.constraint.ConstraintLayout>
