@@ -118,9 +118,6 @@ public class VideoClipActivity extends BaseActivity implements OnPlayerEventList
                 mUiHandler.sendEmptyMessage(MSG_UPDATE_PROGRESS);
                 break;
             case PLAYER_EVENT_ON_PAUSE:
-                mPlayBtn.setVisibility(View.VISIBLE);
-                mUiHandler.removeMessages(MSG_UPDATE_PROGRESS);
-                break;
             case PLAYER_EVENT_ON_PLAY_COMPLETE:
                 mPlayBtn.setVisibility(View.VISIBLE);
                 mUiHandler.removeMessages(MSG_UPDATE_PROGRESS);

@@ -3,15 +3,14 @@ package com.github.xch168.videoeditor.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 
+import com.github.xch168.videoeditor.R;
+import com.github.xch168.videoeditor.cover.ControllerCover;
 import com.kk.taurus.playerbase.assist.OnVideoViewEventHandler;
 import com.kk.taurus.playerbase.entity.DataSource;
 import com.kk.taurus.playerbase.receiver.ReceiverGroup;
 import com.kk.taurus.playerbase.render.IRender;
 import com.kk.taurus.playerbase.widget.BaseVideoView;
-import com.github.xch168.videoeditor.R;
-import com.github.xch168.videoeditor.cover.ControllerCover;
 
 public class VideoPreviewActivity extends BaseActivity {
     private BaseVideoView mVideoView;
