@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
     tools:context=".ui.MainActivity">
 
     <ImageView
@@ -26,7 +27,7 @@
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginTop="15dp"
         android:textSize="18sp"
-        android:textColor="#333333"
+        android:textColor="@color/colorAccent"
         android:text="视频编辑器"/>
 
     <TextView
@@ -49,6 +50,8 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_version"
         android:layout_marginTop="15dp"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="#ffffff"
         android:text="视频剪辑"
         android:onClick="videoClip"/>
 
@@ -59,6 +62,9 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_video_clip"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="#ffffff"
         android:text="视频封面"
         android:onClick="toChooseVideoCover"/>
 
@@ -69,6 +75,9 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_video_cover"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="#ffffff"
         android:text="视频剪辑&amp;合成"
         android:onClick="videoClipAndCompose"/>
 
