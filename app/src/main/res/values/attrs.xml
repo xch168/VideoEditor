@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="RangeSeekBar">
+        <attr name="thumbWidth" format="dimension" />
+        <attr name="lineHeight" format="dimension" />
+        <attr name="maskColor" format="color" />
+        <attr name="lineColor" format="color" />
         <attr name="progressThumb" format="reference"/>
         <attr name="leftThumbDrawable" format="reference" />
         <attr name="rightThumbDrawable" format="reference" />
-        <attr name="maskColor" format="color"/>
         <attr name="paddingColor" format="color"/>
+        <attr name="tickCount" format="integer" />
+        <attr name="leftThumbIndex" format="integer" />
+        <attr name="rightThumbIndex" format="integer" />
     </declare-styleable>
+
 </resources>

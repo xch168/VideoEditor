@@ -72,8 +72,8 @@ public class VideoRangeSlider extends FrameLayout {
     }
 
     public void setFrameProgress(float percent) {
-        mRangeSeekBar.showFrameProgress(true);
-        mRangeSeekBar.setFrameProgress(percent);
+//        mRangeSeekBar.showFrameProgress(true);
+//        mRangeSeekBar.setFrameProgress(percent);
     }
 
     public void setDataSource(String path) {
@@ -104,7 +104,7 @@ public class VideoRangeSlider extends FrameLayout {
         return mTotalTime;
     }
 
-    public void setOnRangeSeekBarChangeListener(RangeSeekBar.OnRangeSeekBarChangeListener listener) {
-        mRangeSeekBar.setOnRangeSeekBarChangeListener(listener);
+    public void setOnRangeSeekBarChangeListener(RangeSeekBar.OnRangeChangeListener listener) {
+        mRangeSeekBar.setOnRangeChangeListener(listener);
     }
 }

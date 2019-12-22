@@ -11,7 +11,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
 public class ImageSeekBar extends ViewGroup {
-    private ThumbView mThumbView;
+    private ThumbView2 mThumbView;
 
     private boolean mIsDragging;
     private int mTouchSlop;
@@ -38,7 +38,7 @@ public class ImageSeekBar extends ViewGroup {
 
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
-        mThumbView = new ThumbView(context);
+        mThumbView = new ThumbView2(context);
 
         addView(mThumbView);
 

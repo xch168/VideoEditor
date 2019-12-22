@@ -25,9 +25,8 @@ import com.github.xch168.videoeditor.widget.RangeSeekBar;
 import com.github.xch168.videoeditor.widget.VideoRangeSlider;
 
 public class VideoClipActivity extends BaseActivity implements OnPlayerEventListener,
-                                                                    View.OnClickListener,
-                                                                    RangeSeekBar.OnRangeSeekBarChangeListener
-{
+        View.OnClickListener,
+        RangeSeekBar.OnRangeChangeListener {
     private static final String TAG = "VideoClipActivity";
 
     private static final int MSG_UPDATE_PROGRESS = 1;
@@ -51,10 +50,8 @@ public class VideoClipActivity extends BaseActivity implements OnPlayerEventList
     private Handler mUiHandler = new Handler() {
 
         @Override
-        public void handleMessage(Message msg)
-        {
-            switch (msg.what)
-            {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
                 case MSG_UPDATE_PROGRESS:
                     updateProgress();
 
@@ -65,8 +62,7 @@ public class VideoClipActivity extends BaseActivity implements OnPlayerEventList
     };
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_clip);
 
@@ -97,8 +93,7 @@ public class VideoClipActivity extends BaseActivity implements OnPlayerEventList
         initProgressDialog();
     }
 
-    private void initProgressDialog()
-    {
+    private void initProgressDialog() {
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mProgressDialog.setMax(100);
@@ -108,10 +103,8 @@ public class VideoClipActivity extends BaseActivity implements OnPlayerEventList
     }
 
     @Override
-    public void onPlayerEvent(int eventCode, Bundle bundle)
-    {
-        switch (eventCode)
-        {
+    public void onPlayerEvent(int eventCode, Bundle bundle) {
+        switch (eventCode) {
             case PLAYER_EVENT_ON_START:
             case PLAYER_EVENT_ON_RESUME:
                 mPlayBtn.setVisibility(View.GONE);
@@ -126,31 +119,20 @@ public class VideoClipActivity extends BaseActivity implements OnPlayerEventList
     }
 
     @Override
-    public void onClick(View v)
-    {
-        if (!mVideoView.isInPlaybackState())
-        {
+    public void onClick(View v) {
+        if (!mVideoView.isInPlaybackState()) {
             mVideoView.start();
             return;
         }
-        if (mVideoView.isPlaying())
-        {
+        if (mVideoView.isPlaying()) {
             mVideoView.pause();
-        }
-        else
-        {
-            if (mVideoView.getState() == IPlayer.STATE_PLAYBACK_COMPLETE)
-            {
+        } else {
+            if (mVideoView.getState() == IPlayer.STATE_PLAYBACK_COMPLETE) {
                 mVideoView.start(0);
-            }
-            else
-            {
-                if (!needPlayStart)
-                {
+            } else {
+                if (!needPlayStart) {
                     mVideoView.resume();
-                }
-                else
-                {
+                } else {
                     mVideoView.seekTo((int) mStartTime);
                     mVideoView.start();
                 }
@@ -160,27 +142,20 @@ public class VideoClipActivity extends BaseActivity implements OnPlayerEventList
 
     }
 
-    private void updateProgress()
-    {
-        if (mVideoRangeSlider != null)
-        {
-            mVideoRangeSlider.setFrameProgress(mVideoView.getCurrentPosition() / (float)mVideoView.getDuration());
+    private void updateProgress() {
+        if (mVideoRangeSlider != null) {
+            mVideoRangeSlider.setFrameProgress(mVideoView.getCurrentPosition() / (float) mVideoView.getDuration());
         }
     }
 
-    public void startClipVideo(View view)
-    {
+    public void startClipVideo(View view) {
         showProgressDialog();
-        VideoEditor.cropVideo(videoPath, mStartTime, mEndTime, new FFmpegCmd.OnCmdExecListener()
-        {
+        VideoEditor.cropVideo(videoPath, mStartTime, mEndTime, new FFmpegCmd.OnCmdExecListener() {
             @Override
-            public void onSuccess()
-            {
-                runOnUiThread(new Runnable()
-                {
+            public void onSuccess() {
+                runOnUiThread(new Runnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         hideProgressDialog();
                         Toast.makeText(VideoClipActivity.this, "视频处理成功", Toast.LENGTH_SHORT).show();
                         VideoPreviewActivity.open(VideoClipActivity.this, getSavePath());
@@ -189,94 +164,76 @@ public class VideoClipActivity extends BaseActivity implements OnPlayerEventList
             }
 
             @Override
-            public void onFailure()
-            {
-                runOnUiThread(new Runnable()
-                {
+            public void onFailure() {
+                runOnUiThread(new Runnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         hideProgressDialog();
                     }
                 });
             }
 
             @Override
-            public void onProgress(float progress)
-            {
+            public void onProgress(float progress) {
                 updateProgress(progress);
             }
         });
     }
 
-    public static void open(Context context, String videoPath)
-    {
+    public static void open(Context context, String videoPath) {
         Intent intent = new Intent(context, VideoClipActivity.class);
         intent.putExtra("video_path", videoPath);
         context.startActivity(intent);
     }
 
+    private void showProgressDialog() {
+        mProgressDialog.setProgress(0);
+        mProgressDialog.show();
+    }
+
+    private void hideProgressDialog() {
+        mProgressDialog.hide();
+    }
+
+    private void updateProgress(float progress) {
+        mProgressDialog.setProgress((int) (progress * 100));
+    }
+
+    private static String getSavePath() {
+        return Environment.getExternalStorageDirectory().getPath() + "/VideoEditor/out.mp4";
+    }
+
     @Override
-    public void onRangeChange(int witchSide, float leftValue, float rightValue)
-    {
-        Log.i(TAG, "left:" + leftValue + " right:" + rightValue);
-        mStartTime = (long) (leftValue / 100 * mTotalTime);
-        mEndTime = (long) (rightValue / 100 * mTotalTime);
+    public void onKeyDown(int type) {
+        if (mVideoView != null) {
+            mVideoView.pause();
+        }
+    }
+
+    @Override
+    public void onKeyUp(int type, int lThumbIndex, int rThumbIndex) {
+        needPlayStart = true;
+    }
+
+    @Override
+    public void onRangeChange(RangeSeekBar rangeSeekBar, int type, int lThumbIndex, int rThumbIndex) {
+        mStartTime = (long) ((float)lThumbIndex / 100 * mTotalTime);
+        mEndTime = (long) ((float)rThumbIndex / 100 * mTotalTime);
         long duration = mEndTime - mStartTime;
 
         mVideoRangeSlider.setStartTime(mStartTime);
         mVideoRangeSlider.setEndTime(mEndTime);
         mVideoRangeSlider.setDuration(duration);
 
-        if (mVideoView != null)
-        {
-            switch (witchSide)
-            {
-                case 0:
+        if (mVideoView != null) {
+            switch (type) {
+                case RangeSeekBar.TYPE_LEFT:
                     mVideoView.seekTo((int) mStartTime);
                     break;
-                case 1:
+                case RangeSeekBar.TYPE_RIGHT:
                     mVideoView.seekTo((int) mEndTime);
                     break;
             }
         }
-    }
-
-    @Override
-    public void onStartTrackingTouch()
-    {
-        Log.i(TAG, "onStartTrackingTouch");
-        if (mVideoView != null)
-        {
-            mVideoView.pause();
-        }
-    }
-
-    @Override
-    public void onStopTrackingTouch()
-    {
-        Log.i(TAG, "onStopTrackingTouch");
-        needPlayStart = true;
-    }
-
-    private void showProgressDialog()
-    {
-        mProgressDialog.setProgress(0);
-        mProgressDialog.show();
-    }
-
-    private void hideProgressDialog()
-    {
-        mProgressDialog.hide();
-    }
-
-    private void updateProgress(float progress)
-    {
-        mProgressDialog.setProgress((int) (progress * 100));
-    }
-
-    private static String getSavePath()
-    {
-        return Environment.getExternalStorageDirectory().getPath() + "/VideoEditor/out.mp4";
     }
 }
