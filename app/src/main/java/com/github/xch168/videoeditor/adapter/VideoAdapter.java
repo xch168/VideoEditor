@@ -58,6 +58,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoItemVie
 
     public void setVideoList(List<Video> videoList) {
         mVideoList = videoList;
+        notifyDataSetChanged();
     }
 
     static class VideoItemViewHolder extends RecyclerView.ViewHolder {

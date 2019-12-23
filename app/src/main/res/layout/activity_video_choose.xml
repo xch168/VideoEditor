@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.VideoChooseActivity">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/video_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/tv_tip"/>
+
+    <TextView
+        android:id="@+id/tv_tip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="@+id/select_video_list"
+        app:layout_constraintBottom_toTopOf="@+id/select_video_list"
+        android:layout_marginBottom="10dp"
+        android:textColor="#888888"
+        android:textSize="14sp"
+        android:text="长按拖拽可调整视频顺序"/>
+
+    <Button
+        android:id="@+id/btn_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toRightOf="@+id/select_video_list"
+        app:layout_constraintBottom_toTopOf="@+id/select_video_list"
+        android:textSize="12sp"
+        android:text="下一步"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/select_video_list"
+        android:layout_width="match_parent"
+        android:layout_height="63dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
