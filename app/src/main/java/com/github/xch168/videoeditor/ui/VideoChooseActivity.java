@@ -9,6 +9,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.View;
+import android.widget.Button;
 
 import com.github.xch168.videoeditor.R;
 import com.github.xch168.videoeditor.adapter.SelectVideoAdapter;
@@ -26,10 +28,12 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class VideoChooseActivity extends BaseActivity implements VideoAdapter.OnItemClickListener {
+public class VideoChooseActivity extends BaseActivity implements VideoAdapter.OnItemClickListener, SelectVideoAdapter.OnItemRemoveListener {
 
     private RecyclerView mVideoListView;
     private RecyclerView mSelectVideoListView;
+
+    private Button mNextBtn;
 
     private VideoAdapter mVideoAdapter;
     private SelectVideoAdapter mSelectVideoAdapter;
@@ -50,6 +54,8 @@ public class VideoChooseActivity extends BaseActivity implements VideoAdapter.On
         setTitle("选择视频");
         setBackBtnVisible(true);
 
+        mNextBtn = findViewById(R.id.btn_next);
+
         initVideoListView();
         initSelectVideoListView();
 
@@ -68,10 +74,10 @@ public class VideoChooseActivity extends BaseActivity implements VideoAdapter.On
 
     private void initSelectVideoListView() {
         mSelectVideoAdapter = new SelectVideoAdapter();
+        mSelectVideoAdapter.setOnItemRemoveListener(this);
 
         mSelectVideoListView = findViewById(R.id.select_video_list);
         mSelectVideoListView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        mSelectVideoListView.addItemDecoration(new SpacingDecoration(this, 5, 0, true));
         mSelectVideoListView.setAdapter(mSelectVideoAdapter);
     }
 
@@ -93,8 +99,7 @@ public class VideoChooseActivity extends BaseActivity implements VideoAdapter.On
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
-    {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             loadVideoList();
         }
@@ -102,7 +107,23 @@ public class VideoChooseActivity extends BaseActivity implements VideoAdapter.On
 
     @Override
     public void onItemClick(int position, Video video) {
-        mSelectVideoAdapter.add(video);
+        if (!mSelectVideoAdapter.contains(video)) {
+            mSelectVideoAdapter.add(video);
+            if (!mNextBtn.isEnabled()) {
+                mNextBtn.setEnabled(true);
+            }
+        }
+    }
+
+    @Override
+    public void onItemRemove(int position, Video video) {
+        if (mSelectVideoAdapter.getItemCount() == 0) {
+            mNextBtn.setEnabled(false);
+        }
+    }
+
+    public void handleNextBtnClick(View view) {
+
     }
 
     public static void open(Context context) {

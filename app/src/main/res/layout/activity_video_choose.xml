@@ -26,17 +26,21 @@
 
     <Button
         android:id="@+id/btn_next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="25dp"
         app:layout_constraintRight_toRightOf="@+id/select_video_list"
-        app:layout_constraintBottom_toTopOf="@+id/select_video_list"
+        app:layout_constraintTop_toTopOf="@+id/tv_tip"
+        android:background="@drawable/selector_choose_next_btn_bg"
+        android:textColor="@drawable/selector_choose_next_btn_textcolor"
         android:textSize="12sp"
-        android:text="下一步"/>
+        android:text="下一步"
+        android:enabled="false"
+        android:onClick="handleNextBtnClick"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/select_video_list"
         android:layout_width="match_parent"
-        android:layout_height="63dp"
+        android:layout_height="73dp"
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
         android:layout_marginBottom="20dp"

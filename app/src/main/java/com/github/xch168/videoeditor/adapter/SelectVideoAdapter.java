@@ -19,6 +19,8 @@ public class SelectVideoAdapter extends RecyclerView.Adapter<SelectVideoAdapter.
 
     private List<Video> mVideoList = new ArrayList<>();
 
+    private OnItemRemoveListener mOnItemRemoveListener;
+
     public SelectVideoAdapter() {
 
     }
@@ -30,9 +32,20 @@ public class SelectVideoAdapter extends RecyclerView.Adapter<SelectVideoAdapter.
     }
 
     @Override
-    public void onBindViewHolder(@NonNull VideoItemViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull VideoItemViewHolder holder, final int position) {
         final Video video = mVideoList.get(position);
         Glide.with(holder.picView.getContext()).load(video.getVideoPath()).into(holder.picView);
+        holder.closeView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mVideoList.remove(video);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, mVideoList.size() - position);
+                if (mOnItemRemoveListener != null) {
+                    mOnItemRemoveListener.onItemRemove(position, video);
+                }
+            }
+        });
     }
 
     @Override
@@ -45,13 +58,27 @@ public class SelectVideoAdapter extends RecyclerView.Adapter<SelectVideoAdapter.
         notifyDataSetChanged();
     }
 
+    public boolean contains(Video video) {
+        return mVideoList.contains(video);
+    }
+
     static class VideoItemViewHolder extends RecyclerView.ViewHolder {
         private ImageView picView;
+        private ImageView closeView;
 
         VideoItemViewHolder(@NonNull View itemView) {
             super(itemView);
 
             picView = itemView.findViewById(R.id.iv);
+            closeView = itemView.findViewById(R.id.ic_close);
         }
+    }
+
+    public void setOnItemRemoveListener(OnItemRemoveListener listener) {
+        mOnItemRemoveListener = listener;
+    }
+
+    public interface OnItemRemoveListener {
+        void onItemRemove(int position, Video video);
     }
 }
