@@ -10,6 +10,7 @@ import com.github.xch168.videoeditor.R;
 import com.github.xch168.videoeditor.entity.Video;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -60,6 +61,23 @@ public class SelectVideoAdapter extends RecyclerView.Adapter<SelectVideoAdapter.
 
     public boolean contains(Video video) {
         return mVideoList.contains(video);
+    }
+
+    public void move(int fromPosition, int toPosition) {
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(mVideoList, i, i + 1);
+            }
+        } else {
+            for (int i = fromPosition; i > toPosition; i--) {
+                Collections.swap(mVideoList, i, i - 1);
+            }
+        }
+        notifyItemMoved(fromPosition, toPosition);
+    }
+
+    public List<Video> getVideoList() {
+        return mVideoList;
     }
 
     static class VideoItemViewHolder extends RecyclerView.ViewHolder {

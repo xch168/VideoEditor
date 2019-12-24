@@ -12,6 +12,14 @@ import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.github.xch168.videoeditor.R;
 import com.github.xch168.videoeditor.adapter.SelectVideoAdapter;
 import com.github.xch168.videoeditor.adapter.VideoAdapter;
@@ -20,13 +28,6 @@ import com.github.xch168.videoeditor.helper.VideoManger;
 import com.github.xch168.videoeditor.util.SpacingDecoration;
 
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class VideoChooseActivity extends BaseActivity implements VideoAdapter.OnItemClickListener, SelectVideoAdapter.OnItemRemoveListener {
 
@@ -37,6 +38,8 @@ public class VideoChooseActivity extends BaseActivity implements VideoAdapter.On
 
     private VideoAdapter mVideoAdapter;
     private SelectVideoAdapter mSelectVideoAdapter;
+
+    private ItemTouchHelper mItemDragHelper;
 
     @SuppressLint("HandlerLeak")
     private Handler mUiHandler = new Handler() {
@@ -73,12 +76,25 @@ public class VideoChooseActivity extends BaseActivity implements VideoAdapter.On
     }
 
     private void initSelectVideoListView() {
+        mItemDragHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT, 0) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                mSelectVideoAdapter.move(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                return true;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {}
+        });
+
         mSelectVideoAdapter = new SelectVideoAdapter();
         mSelectVideoAdapter.setOnItemRemoveListener(this);
 
         mSelectVideoListView = findViewById(R.id.select_video_list);
         mSelectVideoListView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         mSelectVideoListView.setAdapter(mSelectVideoAdapter);
+
+        mItemDragHelper.attachToRecyclerView(mSelectVideoListView);
     }
 
     private void loadVideoList() {
