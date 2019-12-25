@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.github.xch168.videoeditor"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.github.xch168.videoeditor">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".App"
-        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.VideoChooseActivity"></activity>
         <activity
             android:name=".ui.MainActivity"
             android:theme="@style/AppTheme.NoTitleBar">
@@ -24,9 +25,8 @@
         <activity android:name=".ui.VideoPreviewActivity" />
         <activity android:name=".ui.EditThumbActivity" />
         <activity android:name=".ui.VideoClipComposeActivity" />
+        <activity android:name=".ui.PictureListActivity"/>
+        <activity android:name=".ui.VideoChooseActivity" />
     </application>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 </manifest>

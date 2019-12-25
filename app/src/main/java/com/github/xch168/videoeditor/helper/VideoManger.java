@@ -14,8 +14,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VideoManger
-{
+public class VideoManger {
     private static VideoManger sInstance;
 
     private ContentResolver mContentResolver;
@@ -33,7 +32,7 @@ public class VideoManger
     private VideoManger() {
         mContentResolver = App.getContext().getContentResolver();
 
-        mHandlerThread = new HandlerThread("video-helper");
+        mHandlerThread = new HandlerThread("video-manger");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
     }
