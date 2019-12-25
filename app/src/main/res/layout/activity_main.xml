@@ -77,8 +77,8 @@
         android:layout_marginTop="10dp"
         android:background="@color/colorPrimaryDark"
         android:textColor="#ffffff"
-        android:text="视频合成"
-        android:onClick="videoCompose"/>
+        android:text="视频合并"
+        android:onClick="videoMerge"/>
 
     <Button
         android:id="@+id/btn_video_clip_compose"

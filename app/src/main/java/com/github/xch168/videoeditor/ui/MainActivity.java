@@ -10,7 +10,7 @@ import com.github.xch168.videoeditor.util.AppUtil;
 public class MainActivity extends BaseActivity {
     public static final int TYPE_VIDEO_CLIP = 0;
     public static final int TYPE_VIDEO_COVER = 1;
-    public static final int TYPE_VIDEO_COMPOSE = 2;
+    public static final int TYPE_VIDEO_MERGE = 2;
     public static final int TYPE_VIDEO_CLIP_COMPOSE = 3;
 
     @Override
@@ -35,7 +35,7 @@ public class MainActivity extends BaseActivity {
         VideoListActivity.open(this, TYPE_VIDEO_COVER);
     }
 
-    public void videoCompose(View view)
+    public void videoMerge(View view)
     {
         VideoChooseActivity.open(this);
     }

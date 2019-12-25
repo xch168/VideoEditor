@@ -11,6 +11,17 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.github.xch168.videoeditor.R;
+import com.github.xch168.videoeditor.adapter.SelectVideoAdapter;
+import com.github.xch168.videoeditor.adapter.VideoAdapter;
+import com.github.xch168.videoeditor.core.VideoEditor;
+import com.github.xch168.videoeditor.entity.Video;
+import com.github.xch168.videoeditor.helper.VideoManger;
+import com.github.xch168.videoeditor.util.SpacingDecoration;
+
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -19,15 +30,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.github.xch168.videoeditor.R;
-import com.github.xch168.videoeditor.adapter.SelectVideoAdapter;
-import com.github.xch168.videoeditor.adapter.VideoAdapter;
-import com.github.xch168.videoeditor.entity.Video;
-import com.github.xch168.videoeditor.helper.VideoManger;
-import com.github.xch168.videoeditor.util.SpacingDecoration;
-
-import java.util.List;
 
 public class VideoChooseActivity extends BaseActivity implements VideoAdapter.OnItemClickListener, SelectVideoAdapter.OnItemRemoveListener {
 
@@ -139,7 +141,44 @@ public class VideoChooseActivity extends BaseActivity implements VideoAdapter.On
     }
 
     public void handleNextBtnClick(View view) {
+        mergeVideo();
+    }
 
+    private void mergeVideo() {
+        if (mSelectVideoAdapter.getItemCount() < 2) {
+            Toast.makeText(this, "至少添加两个视频", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        showProgressDialog();
+        VideoEditor.mergeVideo(mSelectVideoAdapter.getVideoList(), new VideoEditor.OnEditListener() {
+            @Override
+            public void onSuccess() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        hideProgressDialog();
+                        Toast.makeText(VideoChooseActivity.this, "视频合并完成", Toast.LENGTH_SHORT).show();
+
+                        VideoPreviewActivity.open(VideoChooseActivity.this, VideoEditor.getSavePath());
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(VideoChooseActivity.this, "视频合并失败，请重试", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onProgress(float progress) {
+                updateProgress(progress);
+            }
+        });
     }
 
     public static void open(Context context) {

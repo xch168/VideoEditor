@@ -1,28 +1,25 @@
 package com.github.xch168.videoeditor.ui;
 
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.github.xch168.videoeditor.R;
+import com.github.xch168.videoeditor.core.VideoEditor;
+import com.github.xch168.videoeditor.widget.RangeSeekBar;
+import com.github.xch168.videoeditor.widget.VideoRangeSlider;
 import com.kk.taurus.playerbase.entity.DataSource;
 import com.kk.taurus.playerbase.event.OnPlayerEventListener;
 import com.kk.taurus.playerbase.player.IPlayer;
 import com.kk.taurus.playerbase.render.IRender;
 import com.kk.taurus.playerbase.widget.BaseVideoView;
-import com.github.xch168.ffmpeg_cmd.FFmpegCmd;
-import com.github.xch168.videoeditor.R;
-import com.github.xch168.videoeditor.core.VideoEditor;
-import com.github.xch168.videoeditor.widget.RangeSeekBar;
-import com.github.xch168.videoeditor.widget.VideoRangeSlider;
 
 public class VideoClipActivity extends BaseActivity implements OnPlayerEventListener,
         View.OnClickListener,
@@ -35,8 +32,6 @@ public class VideoClipActivity extends BaseActivity implements OnPlayerEventList
     private ImageView mPlayBtn;
     private View mTouchView;
     private VideoRangeSlider mVideoRangeSlider;
-
-    private ProgressDialog mProgressDialog;
 
     private String videoPath;
 
@@ -90,16 +85,6 @@ public class VideoClipActivity extends BaseActivity implements OnPlayerEventList
         mTotalTime = mVideoRangeSlider.getTotalTime();
         mEndTime = mTotalTime;
 
-        initProgressDialog();
-    }
-
-    private void initProgressDialog() {
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        mProgressDialog.setMax(100);
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.setCanceledOnTouchOutside(false);
-        mProgressDialog.setTitle("正在处理");
     }
 
     @Override
@@ -150,7 +135,7 @@ public class VideoClipActivity extends BaseActivity implements OnPlayerEventList
 
     public void startClipVideo(View view) {
         showProgressDialog();
-        VideoEditor.cropVideo(videoPath, mStartTime, mEndTime, new FFmpegCmd.OnCmdExecListener() {
+        VideoEditor.cropVideo(videoPath, mStartTime, mEndTime, new VideoEditor.OnEditListener() {
             @Override
             public void onSuccess() {
                 runOnUiThread(new Runnable() {
@@ -184,19 +169,6 @@ public class VideoClipActivity extends BaseActivity implements OnPlayerEventList
         Intent intent = new Intent(context, VideoClipActivity.class);
         intent.putExtra("video_path", videoPath);
         context.startActivity(intent);
-    }
-
-    private void showProgressDialog() {
-        mProgressDialog.setProgress(0);
-        mProgressDialog.show();
-    }
-
-    private void hideProgressDialog() {
-        mProgressDialog.hide();
-    }
-
-    private void updateProgress(float progress) {
-        mProgressDialog.setProgress((int) (progress * 100));
     }
 
     private static String getSavePath() {

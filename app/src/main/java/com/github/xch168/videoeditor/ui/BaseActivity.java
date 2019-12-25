@@ -1,12 +1,45 @@
 package com.github.xch168.videoeditor.ui;
 
+import android.app.ProgressDialog;
+import android.os.Bundle;
 import android.view.MenuItem;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class BaseActivity extends AppCompatActivity
-{
+public class BaseActivity extends AppCompatActivity {
+
+    private ProgressDialog mProgressDialog;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        initProgressDialog();
+    }
+
+    private void initProgressDialog() {
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        mProgressDialog.setMax(100);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setCanceledOnTouchOutside(false);
+        mProgressDialog.setTitle("正在处理");
+    }
+
+    protected void showProgressDialog() {
+        mProgressDialog.setProgress(0);
+        mProgressDialog.show();
+    }
+
+    protected void hideProgressDialog() {
+        mProgressDialog.hide();
+    }
+
+    protected void updateProgress(float progress) {
+        mProgressDialog.setProgress((int) (progress * 100));
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
