@@ -68,7 +68,7 @@
         android:onClick="toChooseVideoCover"/>
 
     <Button
-        android:id="@+id/btn_video_compose"
+        android:id="@+id/btn_video_merge"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -81,12 +81,25 @@
         android:onClick="videoMerge"/>
 
     <Button
+        android:id="@+id/btn_video_watermark"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_video_merge"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="#ffffff"
+        android:text="视频水印"
+        android:onClick="videoWatermark"/>
+
+    <Button
         android:id="@+id/btn_video_clip_compose"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_video_compose"
+        app:layout_constraintTop_toBottomOf="@+id/btn_video_watermark"
         android:layout_marginTop="10dp"
         android:background="@color/colorPrimaryDark"
         android:textColor="#ffffff"

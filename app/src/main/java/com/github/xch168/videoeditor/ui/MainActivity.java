@@ -11,7 +11,8 @@ public class MainActivity extends BaseActivity {
     public static final int TYPE_VIDEO_CLIP = 0;
     public static final int TYPE_VIDEO_COVER = 1;
     public static final int TYPE_VIDEO_MERGE = 2;
-    public static final int TYPE_VIDEO_CLIP_COMPOSE = 3;
+    public static final int TYPE_VIDEO_WATERMARK = 3;
+    public static final int TYPE_VIDEO_CLIP_COMPOSE = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,9 +41,11 @@ public class MainActivity extends BaseActivity {
         VideoChooseActivity.open(this);
     }
 
+    public void videoWatermark(View view) {
+        VideoListActivity.open(this, TYPE_VIDEO_WATERMARK);
+    }
+
     public void videoClipAndCompose(View view) {
         VideoListActivity.open(this, TYPE_VIDEO_CLIP_COMPOSE);
     }
-
-
 }
