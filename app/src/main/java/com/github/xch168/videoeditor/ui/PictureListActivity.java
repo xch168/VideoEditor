@@ -1,8 +1,11 @@
 package com.github.xch168.videoeditor.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,6 +23,14 @@ public class PictureListActivity extends BaseActivity implements PictureAdapter.
     private RecyclerView mPictureRecyclerView;
 
     private PictureAdapter mPictureAdapter;
+
+    @SuppressLint("HandlerLeak")
+    private Handler mUiHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            mPictureAdapter.setPictureList((List<Picture>) msg.obj);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +62,10 @@ public class PictureListActivity extends BaseActivity implements PictureAdapter.
     private void loadData() {
         PictureManger.getInstance().getAllPicture(new PictureManger.OnLoadCompletionListener() {
             @Override
-            public void onLoadCompletion(List<Picture> pictureList) {
-                mPictureAdapter.setPictureList(pictureList);
+            public void onLoadCompletion(final List<Picture> pictureList) {
+                Message msg = new Message();
+                msg.obj = pictureList;
+                mUiHandler.sendMessage(msg);
             }
         });
     }
