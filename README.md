@@ -20,8 +20,11 @@
 
 ## 参考文章
 
-1. [FFMpeg无损合并视频的多种方法](https://www.jianshu.com/p/a9bccc12229b)
-2. [Android ffmpeg调试信息打印在logcat里](https://blog.csdn.net/u012027644/article/details/56666608)
-3. [FFmpeg给视频添加水印](https://blog.csdn.net/lovelovelovelovelo/article/details/101457105)
-4. [ffmpeg-给视频添加水印常用命令](https://www.jianshu.com/p/9b3375c2e2c1)
-5. [ffmpeg —— 添加水印](https://www.cnblogs.com/zxqstrong/p/4595413.html)
+1. [Android NDK交叉编译FFmpeg](https://xch168.github.io/2018/07/22/android-ndk-ffmpeg-compile/)
+2. [将FFmpeg编译成一个libffmpeg.so库](https://xch168.github.io/2018/08/04/android-ndk-compile-ffmpeg-to-a-so/)
+3. [在Android项目中调用FFmpeg命令](https://xch168.github.io/2018/10/26/android-invoke-ffmpeg-cmd/)
+4. [FFMpeg无损合并视频的多种方法](https://www.jianshu.com/p/a9bccc12229b)
+5. [Android ffmpeg调试信息打印在logcat里](https://blog.csdn.net/u012027644/article/details/56666608)
+6. [FFmpeg给视频添加水印](https://blog.csdn.net/lovelovelovelovelo/article/details/101457105)
+7. [ffmpeg-给视频添加水印常用命令](https://www.jianshu.com/p/9b3375c2e2c1)
+8. [ffmpeg —— 添加水印](https://www.cnblogs.com/zxqstrong/p/4595413.html)
