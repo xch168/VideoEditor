@@ -1,6 +1,13 @@
 # VideoEditor
 ![homePage](image/home.png) ![clip-video](image/clip-video.png)
 
+## FFmpeg编译环境
+
+1. FFmpeg-3.4.4
+2. NDK=android-ndk-r17b
+3. Mac OS 10.15.2 
+
+
 
 ## 参考项目
 
