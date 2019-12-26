@@ -1,6 +1,7 @@
 package com.github.xch168.videoeditor.ui;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -47,6 +48,7 @@ public class PictureListActivity extends BaseActivity implements PictureAdapter.
 
     private void initPictureListView() {
         mPictureAdapter = new PictureAdapter();
+        mPictureAdapter.setOnItemClickListener(this);
 
         mPictureRecyclerView = findViewById(R.id.recycler_view);
         mPictureRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
@@ -56,7 +58,10 @@ public class PictureListActivity extends BaseActivity implements PictureAdapter.
 
     @Override
     public void onItemClick(int position, Picture picture) {
-
+        Intent intent = new Intent();
+        intent.putExtra("picture_path", picture.getFilePath());
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     private void loadData() {
@@ -73,5 +78,10 @@ public class PictureListActivity extends BaseActivity implements PictureAdapter.
     public static void open(Context context) {
         Intent intent = new Intent(context, PictureListActivity.class);
         context.startActivity(intent);
+    }
+
+    public static void openForResult(Context context, int requestCode) {
+        Intent intent = new Intent(context, PictureListActivity.class);
+        ((Activity)context).startActivityForResult(intent, requestCode);
     }
 }

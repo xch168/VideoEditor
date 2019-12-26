@@ -15,4 +15,6 @@
 
 1. [FFMpeg无损合并视频的多种方法](https://www.jianshu.com/p/a9bccc12229b)
 2. [Android ffmpeg调试信息打印在logcat里](https://blog.csdn.net/u012027644/article/details/56666608)
-
+3. [FFmpeg给视频添加水印](https://blog.csdn.net/lovelovelovelovelo/article/details/101457105)
+4. [ffmpeg-给视频添加水印常用命令](https://www.jianshu.com/p/9b3375c2e2c1)
+5. [ffmpeg —— 添加水印](https://www.cnblogs.com/zxqstrong/p/4595413.html)

@@ -161,7 +161,7 @@ public class VideoListActivity extends BaseActivity implements VideoAdapter.OnIt
                 VideoClipComposeActivity.open(this, video.getVideoPath());
                 break;
             case MainActivity.TYPE_VIDEO_WATERMARK:
-                VideoWatermarkActivity.open(this, video.getVideoPath());
+                VideoWatermarkActivity.open(this, video.getVideoPath(), video.getDuration());
         }
     }
 

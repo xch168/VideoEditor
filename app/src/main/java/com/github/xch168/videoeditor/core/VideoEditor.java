@@ -59,6 +59,37 @@ public class VideoEditor {
         execCmd(cmd, duration, listener);
     }
 
+    public static void addPictureWatermark(String videoPath, long duration, String watermarkPath, OnEditListener listener) {
+        StringBuilder param = new StringBuilder();
+        CmdList cmd = new CmdList();
+        cmd.append("ffmpeg");
+        cmd.append("-i").append(videoPath);
+        cmd.append("-vf");
+        param.append("movie=").append(watermarkPath).append(",scale=").append(256).append(":").append(144).append("[watermark];");
+        param.append("[in][watermark] ");
+        param.append("overlay=").append("main_w-overlay_w-").append(25).append(":").append(25).append("[out]");
+        cmd.append(param.toString());
+        cmd.append(getSavePath());
+
+        execCmd(cmd, duration, listener);
+    }
+
+    public static void addTextWatermark(String videoPath, long duration, String textWatermark, OnEditListener listener) {
+        StringBuilder param = new StringBuilder();
+        CmdList cmd = new CmdList();
+        cmd.append("ffmpeg");
+        cmd.append("-i").append(videoPath);
+        cmd.append("-vf");
+        param.append("drawtext=");
+        param.append("text=").append(textWatermark).append(":").append("fontsize=").append(24).append(":").append("fontcolor=").append("white").append(":");
+        param.append("x=").append(10).append(":").append("y=").append(10).append(":");
+        param.append("shadowy=").append(2);
+        cmd.append(param.toString());
+        cmd.append(getSavePath());
+
+        execCmd(cmd, duration, listener);
+    }
+
     private static void execCmd(CmdList cmd, long duration, final OnEditListener listener) {
         String[] cmds = cmd.toArray(new String[cmd.size()]);
         String cmdLog = "";
