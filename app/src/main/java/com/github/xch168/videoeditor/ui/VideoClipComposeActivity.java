@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.github.xch168.videoeditor.R;
+import com.github.xch168.videoeditor.widget.EditorTrackView;
 import com.kk.taurus.playerbase.entity.DataSource;
 import com.kk.taurus.playerbase.event.OnPlayerEventListener;
 import com.kk.taurus.playerbase.player.IPlayer;
@@ -23,6 +24,7 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
     private BaseVideoView mVideoView;
     private ImageView mPlayBtn;
     private View mTouchView;
+    private EditorTrackView mEditorTrackView;
 
     private String videoPath;
 
@@ -66,6 +68,9 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
         mVideoView.setOnPlayerEventListener(this);
         mVideoView.setRenderType(IRender.RENDER_TYPE_TEXTURE_VIEW);
         mVideoView.start();
+
+        mEditorTrackView = findViewById(R.id.editor_track_view);
+        mEditorTrackView.setVideoPath(videoPath);
     }
 
     @Override
