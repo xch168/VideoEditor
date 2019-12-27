@@ -30,7 +30,7 @@ public class Assert {
     }
 
     public static void assertEquals(int expected, int actual) {
-        assertEquals(expected, actual);
+        assertEquals(Integer.valueOf(expected), Integer.valueOf(actual));
     }
 
     public static void assertEquals(Object expected, Object actual) {
