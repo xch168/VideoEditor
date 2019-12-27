@@ -208,4 +208,12 @@ public class VideoClipActivity extends BaseActivity implements OnPlayerEventList
             }
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mVideoView != null) {
+            mVideoView.stopPlayback();
+        }
+    }
 }

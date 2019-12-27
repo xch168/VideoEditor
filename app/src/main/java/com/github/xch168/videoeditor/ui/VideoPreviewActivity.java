@@ -42,6 +42,14 @@ public class VideoPreviewActivity extends BaseActivity {
         mVideoView.start();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mVideoView != null) {
+            mVideoView.stopPlayback();
+        }
+    }
+
     public static void open(Context context, String videoPath) {
         Intent intent = new Intent(context, VideoPreviewActivity.class);
         intent.putExtra("video_path", videoPath);

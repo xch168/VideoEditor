@@ -128,6 +128,14 @@ public class VideoWatermarkActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mVideoView != null) {
+            mVideoView.stopPlayback();
+        }
+    }
+
     public static void open(Context context, String videoPath, long videoDuration) {
         Intent intent = new Intent(context, VideoWatermarkActivity.class);
         intent.putExtra("video_path", videoPath);

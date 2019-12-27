@@ -116,6 +116,14 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mVideoView != null) {
+            mVideoView.stopPlayback();
+        }
+    }
+
     public static void open(Context context, String videoPath) {
         Intent intent = new Intent(context, VideoClipComposeActivity.class);
         intent.putExtra("video_path", videoPath);
