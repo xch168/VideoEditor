@@ -11,4 +11,7 @@
     <color name="controller_bg_light">#00000000</color>
 
     <color name="text_color_disable">#888888</color>
+
+    <color name="white">#FFFFFF</color>
+
 </resources>
