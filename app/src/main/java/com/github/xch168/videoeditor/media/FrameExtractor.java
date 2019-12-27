@@ -16,12 +16,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class FrameExtractor
-{
+public class FrameExtractor {
     private static final String TAG = "FrameExtractor";
 
-    public interface Callback
-    {
+    public interface Callback {
         void onFrameExtracted(ShareableBitmap bitmap, long timestamp);
     }
 
@@ -36,8 +34,7 @@ public class FrameExtractor
     private SparseArray mMetaDataCache = new SparseArray();
     private String mVideoPath;
 
-    public FrameExtractor()
-    {
+    public FrameExtractor() {
         mExecutor = Executors.newSingleThreadExecutor();
 
         int width = 128;
@@ -47,35 +44,29 @@ public class FrameExtractor
     }
 
 
-    private class Task extends AsyncTask<Void, Void, ShareableBitmap>
-    {
+    private class Task extends AsyncTask<Void, Void, ShareableBitmap> {
         private final long timestampNano;
 
         private Callback callback;
 
-        public Task(Callback callback, long timestampNano)
-        {
+        public Task(Callback callback, long timestampNano) {
             this.callback = callback;
             this.timestampNano = timestampNano;
         }
 
         @Override
-        protected ShareableBitmap doInBackground(Void... params)
-        {
-            if (isCancelled())
-            {
+        protected ShareableBitmap doInBackground(Void... params) {
+            if (isCancelled()) {
                 return null;
             }
             long micro = TimeUnit.NANOSECONDS.toMicros(timestampNano);
             Bitmap bmp = mRetriever.getFrameAtTime(micro);
 
-            if (bmp == null)
-            {
+            if (bmp == null) {
                 return null;
             }
 
-            if (isCancelled())
-            {
+            if (isCancelled()) {
                 return null;
             }
 
@@ -85,15 +76,12 @@ public class FrameExtractor
             Rect srcRect = new Rect();
             int bmpWidth = bmp.getWidth();
             int bmpHeight = bmp.getHeight();
-            if (bmpWidth >= bmpHeight)
-            {
+            if (bmpWidth >= bmpHeight) {
                 srcRect.left = (bmpWidth - bmpHeight) / 2;
                 srcRect.right = (bmpWidth - bmpHeight) / 2 + bmpHeight;
                 srcRect.top = 0;
                 srcRect.bottom = bmpHeight;
-            }
-            else
-            {
+            } else {
                 srcRect.left = 0;
                 srcRect.right = bmpWidth;
                 srcRect.top = (bmpHeight - bmpWidth) / 2;
@@ -107,84 +95,61 @@ public class FrameExtractor
         }
 
         @Override
-        protected void onCancelled(ShareableBitmap bitmap)
-        {
-            if (bitmap != null)
-            {
+        protected void onCancelled(ShareableBitmap bitmap) {
+            if (bitmap != null) {
                 bitmap.release();
             }
         }
 
         @Override
-        protected void onPostExecute(ShareableBitmap bitmap)
-        {
+        protected void onPostExecute(ShareableBitmap bitmap) {
             callback.onFrameExtracted(bitmap, timestampNano);
         }
 
     }
 
-    public AsyncTask<Void, Void, ShareableBitmap> newTask(Callback callback, long timestampNano)
-    {
+    public AsyncTask<Void, Void, ShareableBitmap> newTask(Callback callback, long timestampNano) {
         return new Task(callback, timestampNano).executeOnExecutor(mExecutor);
     }
 
-    public boolean setDataSource(String source)
-    {
-        try
-        {
+    public boolean setDataSource(String source) {
+        try {
             mVideoPath = source;
             mRetriever.setDataSource(source);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return false;
         }
         return true;
     }
 
-    public long getVideoDuration()
-    {
+    public long getVideoDuration() {
         Object result;
-        if ((result = mMetaDataCache.get(MediaMetadataRetriever.METADATA_KEY_DURATION)) != null)
-        {
+        if ((result = mMetaDataCache.get(MediaMetadataRetriever.METADATA_KEY_DURATION)) != null) {
             return (Long) result;
-        }
-        else if (mVideoPath != null)
-        {
+        } else if (mVideoPath != null) {
             String durationStr = mRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-            if (durationStr != null && !"".equals(durationStr))
-            {
+            if (durationStr != null && !"".equals(durationStr)) {
                 Long duration = Long.parseLong(durationStr);
                 mMetaDataCache.put(MediaMetadataRetriever.METADATA_KEY_DURATION, duration);
                 return duration;
-            }
-            else
-            {
+            } else {
                 Log.e(TAG, "Retrieve video duration failed");
                 return 0;
             }
-        }
-        else
-        {
+        } else {
             Log.e(TAG, "Has no video source,so duration is 0");
             return 0;
         }
     }
 
-    public void release()
-    {
+    public void release() {
         mExecutor.shutdownNow();
-        while (true)
-        {
-            try
-            {
-                if (mExecutor.awaitTermination(1, TimeUnit.SECONDS))
-                {
+        while (true) {
+            try {
+                if (mExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
                     break;
                 }
-            }
-            catch (InterruptedException e)
-            {
+            } catch (InterruptedException e) {
             }
         }
 
