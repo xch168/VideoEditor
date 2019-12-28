@@ -15,6 +15,8 @@
 2. [EpMediaDemo](https://github.com/yangjie10930/EpMediaDemo)
 3. [UGSVSDK](https://github.com/tencentyun/UGSVSDK)
 4. [阿里云短视频SDK](https://help.aliyun.com/document_detail/53407.html?spm=a2c4g.11186623.6.1093.4cf023cft2fkKS)
+5. [FFmpeg-Video-Editor-Android](https://github.com/bhuvnesh123/FFmpeg-Video-Editor-Android)
+6. [ffmpeg-android-java](https://github.com/WritingMinds/ffmpeg-android-java)
 
 
 
@@ -28,3 +30,4 @@
 6. [FFmpeg给视频添加水印](https://blog.csdn.net/lovelovelovelovelo/article/details/101457105)
 7. [ffmpeg-给视频添加水印常用命令](https://www.jianshu.com/p/9b3375c2e2c1)
 8. [ffmpeg —— 添加水印](https://www.cnblogs.com/zxqstrong/p/4595413.html)
+9. [ffmpeg实现每秒截一张图](https://blog.csdn.net/zongyue_wang/article/details/81911196)
