@@ -2,18 +2,16 @@ package com.github.xch168.videoeditor.widget;
 
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-
-import com.github.xch168.videoeditor.R;
-import com.github.xch168.videoeditor.adapter.ThumbnailAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.github.xch168.videoeditor.adapter.ThumbnailAdapter;
 
 public class EditorMediaTrackView extends FrameLayout {
 
@@ -41,11 +39,12 @@ public class EditorMediaTrackView extends FrameLayout {
         mThumbnailAdapter = new ThumbnailAdapter(mContext);
 
         mRecyclerView = new RecyclerView(mContext);
-        mRecyclerView.setBackgroundColor(Color.WHITE);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false));
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         mRecyclerView.setLayoutParams(layoutParams);
         mRecyclerView.setAdapter(mThumbnailAdapter);
+
+        addView(mRecyclerView);
     }
 
     public void setVideoPath(String path) {

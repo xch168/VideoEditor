@@ -1,35 +1,41 @@
 package com.github.xch168.videoeditor.adapter;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-
-import com.github.xch168.videoeditor.R;
-import com.github.xch168.videoeditor.media.FrameExtractor;
-import com.github.xch168.videoeditor.media.ShareableBitmap;
-import com.github.xch168.videoeditor.util.SizeUtil;
-
-import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
+import com.github.xch168.videoeditor.R;
+import com.github.xch168.videoeditor.media.FrameExtractor;
+import com.github.xch168.videoeditor.media.ShareableBitmap;
+
+import java.util.concurrent.TimeUnit;
+
+import static com.bumptech.glide.load.resource.bitmap.VideoDecoder.FRAME_OPTION;
+
 public class ThumbnailAdapter extends RecyclerView.Adapter<ThumbnailAdapter.ThumbViewHolder> {
 
     // 帧间隔时长 5s
-    private final int FRAME_INTERVAL_TIME = 5_000;
+    private final int FRAME_INTERVAL_TIME_S = 5;
+    private final int FRAME_INTERVAL_TIME_MS = FRAME_INTERVAL_TIME_S * 1000;
 
     private final Context mContext;
 
     private FrameExtractor mFrameExtractor;
 
     private long mDuration;
+    private String mVideoPath;
 
     public ThumbnailAdapter(Context context) {
         mContext = context;
@@ -44,37 +50,44 @@ public class ThumbnailAdapter extends RecyclerView.Adapter<ThumbnailAdapter.Thum
 
     @Override
     public void onBindViewHolder(@NonNull ThumbViewHolder holder, int position) {
+        holder.thumbImage.setImageBitmap(null);
         if (holder.mBitmap != null) {
             holder.mBitmap.release();
             holder.mBitmap = null;
         }
 
-        ViewGroup.LayoutParams params = holder.thumbLayout.getLayoutParams();
-        params.width = SizeUtil.dp2px(mContext, 65);
-        holder.thumbLayout.setLayoutParams(params);
+//        holder.task = mFrameExtractor.newTask(holder, TimeUnit.SECONDS.toNanos(position * FRAME_INTERVAL_TIME_S));
+        loadVideoScreenshot(holder.itemView.getContext(), mVideoPath, holder.thumbImage, TimeUnit.SECONDS.toMicros(position * FRAME_INTERVAL_TIME_S));
+    }
 
-        holder.task = mFrameExtractor.newTask(holder, TimeUnit.SECONDS.toNanos(position * FRAME_INTERVAL_TIME));
+
+
+    @SuppressLint("CheckResult")
+    private void loadVideoScreenshot(final Context context, String uri, ImageView imageView, long frameTimeMicros) {
+        RequestOptions requestOptions = RequestOptions.frameOf(frameTimeMicros);
+        requestOptions.set(FRAME_OPTION, MediaMetadataRetriever.OPTION_CLOSEST);
+        requestOptions.diskCacheStrategy(DiskCacheStrategy.RESOURCE);
+        requestOptions.dontTransform();
+        Glide.with(mContext).load(uri).apply(requestOptions).into(imageView);
     }
 
     @Override
     public int getItemCount() {
         int count = 0;
         if (mDuration > 0) {
-            count = (int) (mDuration / FRAME_INTERVAL_TIME);
+            count = (int) (mDuration / FRAME_INTERVAL_TIME_MS);
         }
-        Log.i("asdf", "count:" + count);
         return count;
     }
 
     public void setVideoPath(String videoPath) {
+        mVideoPath = videoPath;
         mFrameExtractor.setDataSource(videoPath);
         mDuration = mFrameExtractor.getVideoDuration();
-        Log.i("asdf", "duration:" + mDuration);
         notifyDataSetChanged();
     }
 
     static class ThumbViewHolder extends RecyclerView.ViewHolder implements FrameExtractor.Callback {
-        FrameLayout thumbLayout;
         ImageView thumbImage;
 
         ShareableBitmap mBitmap;
@@ -83,7 +96,6 @@ public class ThumbnailAdapter extends RecyclerView.Adapter<ThumbnailAdapter.Thum
         ThumbViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            thumbLayout = itemView.findViewById(R.id.thumb_layout);
             thumbImage = itemView.findViewById(R.id.video_thumb);
         }
 

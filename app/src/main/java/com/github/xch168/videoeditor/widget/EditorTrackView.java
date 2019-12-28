@@ -3,14 +3,13 @@ package com.github.xch168.videoeditor.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.github.xch168.videoeditor.util.SizeUtil;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.github.xch168.videoeditor.util.SizeUtil;
 
 public class EditorTrackView extends FrameLayout {
     private Context mContext;
@@ -39,9 +38,7 @@ public class EditorTrackView extends FrameLayout {
 
     private void initUIComponent() {
         mMediaTrackView = new EditorMediaTrackView(mContext);
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, SizeUtil.dp2px(mContext, 44));
-        layoutParams.gravity = Gravity.BOTTOM;
-        layoutParams.bottomMargin = SizeUtil.dp2px(mContext, 5);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, SizeUtil.dp2px(mContext, ViewGroup.LayoutParams.WRAP_CONTENT));
         mMediaTrackView.setLayoutParams(layoutParams);
     }
 
