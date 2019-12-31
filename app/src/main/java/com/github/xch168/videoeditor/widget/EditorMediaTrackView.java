@@ -4,19 +4,19 @@ package com.github.xch168.videoeditor.widget;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.EdgeEffect;
 import android.widget.OverScroller;
 
-import com.github.xch168.videoeditor.R;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+
+import com.github.xch168.videoeditor.R;
 
 public class EditorMediaTrackView extends View {
     private Context mContext;
@@ -50,7 +50,7 @@ public class EditorMediaTrackView extends View {
 
     private int mDrawOffset;
 
-    private float mCurrentPosition = 0;
+    private float mCurrentScale = 0;
 
     private Paint mScalePaint;
 
@@ -67,6 +67,8 @@ public class EditorMediaTrackView extends View {
 
         mDrawOffset = 10 * mParent.getInterval() / 2;
 
+        minScrollPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, MIN_SCROLL_DP, mContext.getResources().getDisplayMetrics());
+
         mScroller = new OverScroller(mContext);
         mVelocityTracker = VelocityTracker.obtain();
         mMaxVelocity = ViewConfiguration.get(mContext).getScaledMaximumFlingVelocity();
@@ -76,14 +78,30 @@ public class EditorMediaTrackView extends View {
         mScalePaint.setColor(getResources().getColor(R.color.colorAccent));
         mScalePaint.setStrokeWidth(5);
         mScalePaint.setStrokeCap(Paint.Cap.ROUND);
+
+        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                goToScale(mCurrentScale);
+            }
+        });
     }
 
     @Override
     public void computeScroll() {
         if (mScroller.computeScrollOffset()) {
             scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+
+            if (!mScroller.computeScrollOffset()) {
+                int currentScale = Math.round(mCurrentScale);
+                if ((Math.abs(mCurrentScale - currentScale) > 0.001f)) {
+                    scrollBackToCurrentScale(currentScale);
+                }
+            }
             postInvalidate();
         }
+
     }
 
     @Override
@@ -106,7 +124,7 @@ public class EditorMediaTrackView extends View {
             float locationX = (i - mParent.getMinScale()) * mParent.getInterval();
 
             if (i >= mParent.getMinScale() && i <= mParent.getMaxScale()) {
-                canvas.drawLine(locationX, 0, locationX, 5, mScalePaint);
+                canvas.drawLine(locationX, 0, locationX, 15, mScalePaint);
             }
         }
     }
@@ -144,7 +162,7 @@ public class EditorMediaTrackView extends View {
                 if (Math.abs(velocityX) > mMinVelocity) {
                     fling(-velocityX);
                 } else {
-                    scrollBackToCurrentPos();
+                    scrollBackToCurrentScale();
                 }
                 recycleVelocityTracker();
                 parent.requestDisallowInterceptTouchEvent(false);
@@ -153,37 +171,52 @@ public class EditorMediaTrackView extends View {
                 if (!mScroller.isFinished()) {
                     mScroller.abortAnimation();
                 }
-                scrollBackToCurrentPos();
+                scrollBackToCurrentScale();
                 recycleVelocityTracker();
                 parent.requestDisallowInterceptTouchEvent(false);
                 break;
         }
-        return super.onTouchEvent(event);
+        return true;
     }
 
     private void fling(int vX) {
-        mScroller.fling(getScrollX(), 0 , vX, 0, 0, 0, 0, 0);
+        mScroller.fling(getScrollX(), 0 , vX, 0, mMinPosition, mMaxPosition, 0, 0);
         invalidate();
     }
 
     @Override
     public void scrollTo(int x, int y) {
+        if (x < mMinPosition) {
+            x = mMinPosition;
+        }
+        if (x > mMaxPosition) {
+            x = mMaxPosition;
+        }
         if (x != getScrollX()) {
             super.scrollTo(x, y);
         }
-        mCurrentPosition = scrollXToScale(x);
+        mCurrentScale = scrollXToScale(x);
+    }
+
+    private void goToScale(float scale) {
+        mCurrentScale = Math.round(scale);
+        scrollTo(scaleToScrollX(mCurrentScale), 0);
+    }
+
+    private int scaleToScrollX(float scale) {
+        return (int) ((scale - mParent.getMinScale()) / mMaxLength * mLength + mMinPosition);
     }
 
     private float scrollXToScale(int scrollX) {
         return ((float) (scrollX - mMinPosition) / mLength) * mMaxLength + mParent.getMinScale();
     }
 
-    private void scrollBackToCurrentPos() {
-        scrollBackToCurrentPos(Math.round(mCurrentPosition));
+    private void scrollBackToCurrentScale() {
+        scrollBackToCurrentScale(Math.round(mCurrentScale));
     }
 
-    private void scrollBackToCurrentPos(int pos) {
-        float scrollX = scaleToScrollFloatX(pos);
+    private void scrollBackToCurrentScale(int scale) {
+        float scrollX = scaleToScrollFloatX(scale);
         int dx = Math.round((scrollX - SCALE_TO_PX_FACTOR * getScrollX()) / SCALE_TO_PX_FACTOR);
         if (dx > minScrollPx) {
             mScroller.startScroll(getScrollX(), getScrollY(), dx, 0, 500);
@@ -194,15 +227,15 @@ public class EditorMediaTrackView extends View {
 
     }
 
-    private float scaleToScrollFloatX(int pos) {
-        return (((pos - mParent.getMinScale()) / mMaxLength * mLength * SCALE_TO_PX_FACTOR) + mMinPosition * SCALE_TO_PX_FACTOR);
+    private float scaleToScrollFloatX(float scale) {
+        return (((scale - mParent.getMinScale()) / mMaxLength * mLength * SCALE_TO_PX_FACTOR) + mMinPosition * SCALE_TO_PX_FACTOR);
     }
 
     private void refreshSize() {
-        mLength = 0;
+        mLength = (mParent.getMaxScale() - mParent.getMinScale()) * mParent.getInterval();
         mHalfWidth = getWidth() / 2;
         mMinPosition = -mHalfWidth;
-        mMinPosition = mLength - mHalfWidth;
+        mMaxPosition = mLength - mHalfWidth;
     }
 
     private void recycleVelocityTracker() {
@@ -210,6 +243,15 @@ public class EditorMediaTrackView extends View {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
+    }
+
+    public void setCurrentScale(float currentScale) {
+        mCurrentScale = currentScale;
+        goToScale(mCurrentScale);
+    }
+
+    public float getCurrentScale() {
+        return mCurrentScale;
     }
 
     public void setVideoPath(String path) {
