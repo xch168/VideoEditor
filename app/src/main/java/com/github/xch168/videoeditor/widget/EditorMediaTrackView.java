@@ -2,6 +2,8 @@ package com.github.xch168.videoeditor.widget;
 
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.TypedValue;
@@ -11,12 +13,12 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.EdgeEffect;
 import android.widget.OverScroller;
 
 import androidx.annotation.NonNull;
 
 import com.github.xch168.videoeditor.R;
+import com.github.xch168.videoeditor.util.SizeUtil;
 
 public class EditorMediaTrackView extends View {
     private Context mContext;
@@ -36,10 +38,6 @@ public class EditorMediaTrackView extends View {
     // 最小惯性速度
     private int mMinVelocity;
 
-    private EdgeEffect mStartEdgeEffect;
-    private EdgeEffect mEndEdgeEffect;
-    private int mEdgeLength;
-
     private float mLastX = 0;
 
     private int mLength;
@@ -53,11 +51,24 @@ public class EditorMediaTrackView extends View {
     private float mCurrentScale = 0;
 
     private Paint mScalePaint;
+    private Paint mBigScalePaint;
+
+    private Paint mBitmapPaint;
+    private Bitmap mDefaultBitmap;
+
+    private int mItemSize;
+
+    private int mCount = 10;
 
     public EditorMediaTrackView(@NonNull Context context, EditorTrackView parent) {
         super(context);
         mContext = context;
         mParent = parent;
+
+        mItemSize = SizeUtil.dp2px(context, 60);
+        mDefaultBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_default);
+        mDefaultBitmap = Bitmap.createScaledBitmap(mDefaultBitmap, mItemSize, mItemSize, true);
+
 
         initView();
     }
@@ -78,6 +89,14 @@ public class EditorMediaTrackView extends View {
         mScalePaint.setColor(getResources().getColor(R.color.colorAccent));
         mScalePaint.setStrokeWidth(5);
         mScalePaint.setStrokeCap(Paint.Cap.ROUND);
+
+        mBigScalePaint = new Paint();
+        mBigScalePaint.setColor(getResources().getColor(R.color.colorAccent));
+        mBigScalePaint.setStrokeWidth(5);
+        mBigScalePaint.setStrokeCap(Paint.Cap.ROUND);
+
+        mBitmapPaint = new Paint(1);
+        mBitmapPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -117,14 +136,23 @@ public class EditorMediaTrackView extends View {
     }
 
     private void drawScale(Canvas canvas) {
-        float start = (getScaleX() - mDrawOffset) / mParent.getInterval() + mParent.getMinScale();
+        float start = (getScrollX() - mDrawOffset) / mParent.getInterval() + mParent.getMinScale();
         float end = (getScrollX() + canvas.getWidth() + mDrawOffset) / mParent.getInterval() + mParent.getMinScale();
         for (float i = start; i <= end; i++) {
             //将要刻画的刻度转化为位置信息
             float locationX = (i - mParent.getMinScale()) * mParent.getInterval();
 
             if (i >= mParent.getMinScale() && i <= mParent.getMaxScale()) {
-                canvas.drawLine(locationX, 0, locationX, 15, mScalePaint);
+                if (i % mCount == 0) {
+                    canvas.drawLine(locationX, 0, locationX, 30, mBigScalePaint);
+                    if ((int) i != mParent.getMaxScale()) {
+                        canvas.drawBitmap(mDefaultBitmap, locationX, 0f, mBitmapPaint);
+                    }
+
+                } else {
+                    canvas.drawLine(locationX, 0, locationX, 15, mScalePaint);
+                }
+
             }
         }
     }

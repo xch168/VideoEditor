@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -24,7 +25,7 @@ public class EditorTrackView extends FrameLayout {
     private int mMinScale = 0;
     private int mMaxScale = 1000;
 
-    private int mInterval = 18;
+    private int mInterval;
 
     public EditorTrackView(@NonNull Context context) {
         this(context, null);
@@ -37,6 +38,9 @@ public class EditorTrackView extends FrameLayout {
     public EditorTrackView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mContext = context;
+
+        mInterval = SizeUtil.dp2px(context, 60) / 10;
+        Log.i("asdf", "interval:" + mInterval);
 
         initView();
     }
@@ -115,5 +119,9 @@ public class EditorTrackView extends FrameLayout {
     public void setInterval(int interval)
     {
         this.mInterval = interval;
+    }
+
+    public void setCurrentScale(int currentPos) {
+        mMediaTrackView.setCurrentScale(currentPos);
     }
 }
