@@ -17,6 +17,8 @@ import android.widget.OverScroller;
 
 import com.github.xch168.videoeditor.R;
 
+import java.util.Map;
+
 import androidx.annotation.NonNull;
 
 public class EditorMediaTrackView extends View {
@@ -56,6 +58,8 @@ public class EditorMediaTrackView extends View {
     private Paint mBitmapPaint;
     private Bitmap mDefaultBitmap;
 
+    private Map<Integer, Bitmap> mThumbMap;
+
     private int mItemSize;
 
     private int mCount;
@@ -66,6 +70,8 @@ public class EditorMediaTrackView extends View {
         mParent = parent;
 
         mCount = mParent.getCount();
+
+        mThumbMap = mParent.getThumbMap();
 
         mItemSize = mCount * mParent.getInterval();
         mDefaultBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_default);
@@ -157,7 +163,13 @@ public class EditorMediaTrackView extends View {
             if (i >= mParent.getMinScale() && i <= mParent.getMaxScale()) {
                 if (i % mCount == 0) {
                     if ((int) i != mParent.getMaxScale()) {
-                        canvas.drawBitmap(mDefaultBitmap, locationX, 0f, mBitmapPaint);
+                        int index = (int) (Float.parseFloat(valueOfScale(i, mParent.getFactor())) / 50);
+                        Bitmap thumbBitmap = mThumbMap.get(index);
+                        if (thumbBitmap != null) {
+                            canvas.drawBitmap(thumbBitmap, locationX, 0f, mBitmapPaint);
+                        } else {
+                            canvas.drawBitmap(mDefaultBitmap, locationX, 0f, mBitmapPaint);
+                        }
                     }
                     canvas.drawLine(locationX, 0, locationX, 30, mBigScalePaint);
                     canvas.drawText(valueOfScale(i, mParent.getFactor()), locationX, 40, mTextPaint);

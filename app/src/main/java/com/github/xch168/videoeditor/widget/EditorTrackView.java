@@ -2,6 +2,7 @@ package com.github.xch168.videoeditor.widget;
 
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -10,7 +11,10 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.github.xch168.videoeditor.R;
+import com.github.xch168.videoeditor.core.FrameExtractor;
 import com.github.xch168.videoeditor.util.SizeUtil;
+
+import java.util.HashMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,6 +38,9 @@ public class EditorTrackView extends FrameLayout {
 
     private float mFactor = 0.1f;
 
+    private HashMap<Integer, Bitmap> mThumbMap;
+
+    private FrameExtractor mFrameExtractor;
 
     public EditorTrackView(@NonNull Context context) {
         this(context, null);
@@ -50,6 +57,10 @@ public class EditorTrackView extends FrameLayout {
         mInterval = SizeUtil.dp2px(context, 1);
         mHeight = mInterval * mCount;
         mPadding = SizeUtil.dp2px(context, 8);
+
+        mThumbMap = new HashMap<>();
+
+        mFrameExtractor = new FrameExtractor();
 
         initView();
     }
@@ -82,8 +93,7 @@ public class EditorTrackView extends FrameLayout {
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
-    {
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
@@ -110,6 +120,15 @@ public class EditorTrackView extends FrameLayout {
 
     public void setVideoPath(String videoPath) {
         mMediaTrackView.setVideoPath(videoPath);
+        mFrameExtractor.setDataSource(videoPath);
+        mFrameExtractor.setDstSize(mHeight, mHeight);
+        mFrameExtractor.getFrameByInterval(5000, new FrameExtractor.Callback() {
+            @Override
+            public void onFrameExtracted(Bitmap bitmap, long timestamp) {
+                int index = (int) (timestamp / 5000);
+                mThumbMap.put(index, bitmap);
+            }
+        });
     }
 
     public int getMinScale() {
@@ -128,23 +147,19 @@ public class EditorTrackView extends FrameLayout {
         this.mMaxScale = maxScale;
     }
 
-    public int getInterval()
-    {
+    public int getInterval() {
         return mInterval;
     }
 
-    public void setInterval(int interval)
-    {
+    public void setInterval(int interval) {
         this.mInterval = interval;
     }
 
-    public int getCount()
-    {
+    public int getCount() {
         return mCount;
     }
 
-    public void setCount(int count)
-    {
+    public void setCount(int count) {
         this.mCount = count;
     }
 
@@ -152,13 +167,15 @@ public class EditorTrackView extends FrameLayout {
         mMediaTrackView.setCurrentScale(currentPos);
     }
 
-    public float getFactor()
-    {
+    public float getFactor() {
         return mFactor;
     }
 
-    public void setFactor(float factor)
-    {
+    public void setFactor(float factor) {
         this.mFactor = factor;
+    }
+
+    public HashMap<Integer, Bitmap> getThumbMap() {
+        return mThumbMap;
     }
 }
