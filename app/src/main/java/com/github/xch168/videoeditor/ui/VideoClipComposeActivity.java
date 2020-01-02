@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.github.xch168.videoeditor.R;
 import com.github.xch168.videoeditor.widget.EditorTrackView;
@@ -15,6 +16,7 @@ import com.kk.taurus.playerbase.entity.DataSource;
 import com.kk.taurus.playerbase.event.OnPlayerEventListener;
 import com.kk.taurus.playerbase.player.IPlayer;
 import com.kk.taurus.playerbase.render.IRender;
+import com.kk.taurus.playerbase.utils.TimeUtil;
 import com.kk.taurus.playerbase.widget.BaseVideoView;
 
 public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEventListener, View.OnClickListener {
@@ -24,6 +26,7 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
     private BaseVideoView mVideoView;
     private ImageView mPlayBtn;
     private View mTouchView;
+    private TextView mTimeView;
     private EditorTrackView mEditorTrackView;
 
     private String videoPath;
@@ -62,6 +65,8 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
 
         mTouchView = findViewById(R.id.touch_view);
         mTouchView.setOnClickListener(this);
+
+        mTimeView = findViewById(R.id.tv_time);
 
         mVideoView = findViewById(R.id.video_view);
         mVideoView.setDataSource(new DataSource(videoPath));
@@ -113,14 +118,21 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
     }
 
     private void updateProgress() {
+        int currentPos = mVideoView.getCurrentPosition();
+        mTimeView.setText(TimeUtil.getTimeSmartFormat(currentPos) + "/" + TimeUtil.getTimeSmartFormat(mVideoView.getDuration()));
 
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mUiHandler != null) {
+            mUiHandler.removeMessages(MSG_UPDATE_PROGRESS);
+            mUiHandler = null;
+        }
         if (mVideoView != null) {
             mVideoView.stopPlayback();
+            mVideoView = null;
         }
     }
 
