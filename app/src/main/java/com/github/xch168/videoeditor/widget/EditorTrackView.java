@@ -5,15 +5,15 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.github.xch168.videoeditor.R;
 import com.github.xch168.videoeditor.util.SizeUtil;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class EditorTrackView extends FrameLayout {
     private Context mContext;
@@ -23,9 +23,17 @@ public class EditorTrackView extends FrameLayout {
     private EditorMediaTrackView mMediaTrackView;
 
     private int mMinScale = 0;
-    private int mMaxScale = 1000;
+    private int mMaxScale = 3000;
 
     private int mInterval;
+    private int mCount = 50;
+
+    private int mHeight;
+
+    private int mPadding;
+
+    private float mFactor = 0.1f;
+
 
     public EditorTrackView(@NonNull Context context) {
         this(context, null);
@@ -39,13 +47,15 @@ public class EditorTrackView extends FrameLayout {
         super(context, attrs, defStyleAttr);
         mContext = context;
 
-        mInterval = SizeUtil.dp2px(context, 60) / 10;
-        Log.i("asdf", "interval:" + mInterval);
+        mInterval = SizeUtil.dp2px(context, 1);
+        mHeight = mInterval * mCount;
+        mPadding = SizeUtil.dp2px(context, 8);
 
         initView();
     }
 
     private void initView() {
+        setPadding(0, mPadding, 0, mPadding);
         initUIComponent();
         addUIComponent();
 
@@ -55,15 +65,16 @@ public class EditorTrackView extends FrameLayout {
     private void initUIComponent() {
         mCursorDrawable = getResources().getDrawable(R.drawable.shape_cursor);
 
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.gravity = Gravity.CENTER_VERTICAL;
         mMediaTrackView = new EditorMediaTrackView(mContext, this);
         mMediaTrackView.setLayoutParams(layoutParams);
+
     }
 
     private void initCursor() {
         int cursorWidth = SizeUtil.dp2px(mContext, 2);
-        int cursorHeight = SizeUtil.dp2px(mContext, 54);
-        mCursorDrawable.setBounds((getWidth() - cursorWidth) / 2, getHeight() - cursorHeight, (getWidth() + cursorWidth) / 2, getHeight());
+        mCursorDrawable.setBounds((getWidth() - cursorWidth) / 2, 0, (getWidth() + cursorWidth) / 2, getHeight());
     }
 
     private void addUIComponent() {
@@ -71,9 +82,15 @@ public class EditorTrackView extends FrameLayout {
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
+    {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (changed) {
-            mMediaTrackView.layout(0, 0, right - left, bottom - top);
+            mMediaTrackView.layout(0, mPadding, right - left, bottom - top);
         }
     }
 
@@ -121,7 +138,27 @@ public class EditorTrackView extends FrameLayout {
         this.mInterval = interval;
     }
 
-    public void setCurrentScale(int currentPos) {
+    public int getCount()
+    {
+        return mCount;
+    }
+
+    public void setCount(int count)
+    {
+        this.mCount = count;
+    }
+
+    public void setCurrentScale(float currentPos) {
         mMediaTrackView.setCurrentScale(currentPos);
+    }
+
+    public float getFactor()
+    {
+        return mFactor;
+    }
+
+    public void setFactor(float factor)
+    {
+        this.mFactor = factor;
     }
 }

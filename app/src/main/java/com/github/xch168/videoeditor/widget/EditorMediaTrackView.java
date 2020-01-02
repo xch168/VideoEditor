@@ -15,10 +15,9 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.OverScroller;
 
-import androidx.annotation.NonNull;
-
 import com.github.xch168.videoeditor.R;
-import com.github.xch168.videoeditor.util.SizeUtil;
+
+import androidx.annotation.NonNull;
 
 public class EditorMediaTrackView extends View {
     private Context mContext;
@@ -52,23 +51,25 @@ public class EditorMediaTrackView extends View {
 
     private Paint mScalePaint;
     private Paint mBigScalePaint;
+    private Paint mTextPaint;
 
     private Paint mBitmapPaint;
     private Bitmap mDefaultBitmap;
 
     private int mItemSize;
 
-    private int mCount = 10;
+    private int mCount;
 
     public EditorMediaTrackView(@NonNull Context context, EditorTrackView parent) {
         super(context);
         mContext = context;
         mParent = parent;
 
-        mItemSize = SizeUtil.dp2px(context, 60);
+        mCount = mParent.getCount();
+
+        mItemSize = mCount * mParent.getInterval();
         mDefaultBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_default);
         mDefaultBitmap = Bitmap.createScaledBitmap(mDefaultBitmap, mItemSize, mItemSize, true);
-
 
         initView();
     }
@@ -76,7 +77,7 @@ public class EditorMediaTrackView extends View {
     private void initView() {
         mMaxLength = mParent.getMaxScale() - mParent.getMinScale();
 
-        mDrawOffset = 10 * mParent.getInterval() / 2;
+        mDrawOffset = mCount * mParent.getInterval() / 2;
 
         minScrollPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, MIN_SCROLL_DP, mContext.getResources().getDisplayMetrics());
 
@@ -87,16 +88,23 @@ public class EditorMediaTrackView extends View {
 
         mScalePaint = new Paint();
         mScalePaint.setColor(getResources().getColor(R.color.colorAccent));
-        mScalePaint.setStrokeWidth(5);
+        mScalePaint.setStrokeWidth(1);
         mScalePaint.setStrokeCap(Paint.Cap.ROUND);
 
         mBigScalePaint = new Paint();
         mBigScalePaint.setColor(getResources().getColor(R.color.colorAccent));
-        mBigScalePaint.setStrokeWidth(5);
+        mBigScalePaint.setStrokeWidth(1);
         mBigScalePaint.setStrokeCap(Paint.Cap.ROUND);
 
         mBitmapPaint = new Paint(1);
         mBitmapPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+        mTextPaint = new Paint();
+        mTextPaint = new Paint();
+        mTextPaint.setAntiAlias(true);
+        mTextPaint.setColor(getResources().getColor(R.color.colorAccent));
+        mTextPaint.setTextSize(14);
+        mTextPaint.setTextAlign(Paint.Align.CENTER);
 
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -126,6 +134,10 @@ public class EditorMediaTrackView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        int mode = MeasureSpec.getMode(heightMeasureSpec);
+        heightMeasureSpec = MeasureSpec.makeMeasureSpec(mItemSize, mode);
+        setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
     }
 
     @Override
@@ -144,17 +156,31 @@ public class EditorMediaTrackView extends View {
 
             if (i >= mParent.getMinScale() && i <= mParent.getMaxScale()) {
                 if (i % mCount == 0) {
-                    canvas.drawLine(locationX, 0, locationX, 30, mBigScalePaint);
                     if ((int) i != mParent.getMaxScale()) {
                         canvas.drawBitmap(mDefaultBitmap, locationX, 0f, mBitmapPaint);
                     }
-
+                    canvas.drawLine(locationX, 0, locationX, 30, mBigScalePaint);
+                    canvas.drawText(valueOfScale(i, mParent.getFactor()), locationX, 40, mTextPaint);
                 } else {
                     canvas.drawLine(locationX, 0, locationX, 15, mScalePaint);
                 }
-
             }
         }
+    }
+
+    private float factorCache = 0;
+    private String valueOfScale(float scale, float factor) {
+        float dividerCache = 1;
+        if (factor >= 1) {
+            return String.valueOf((int)(scale * factor));
+        } else if (factor > 0) {
+            if (factorCache != factor) {
+                factorCache = factor;
+                dividerCache = 1 / factor;
+            }
+            return String.valueOf(scale / dividerCache);
+        }
+        return "";
     }
 
     @Override

@@ -29,7 +29,8 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
     private TextView mTimeView;
     private EditorTrackView mEditorTrackView;
 
-    private String videoPath;
+    private String mVideoPath;
+    private long mVideoDuration;
 
     private long mStartTime;
     private long mEndTime;
@@ -59,7 +60,8 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
         setTitle("视频剪辑和合成");
         setBackBtnVisible(true);
 
-        videoPath = getIntent().getStringExtra("video_path");
+        mVideoPath = getIntent().getStringExtra("video_path");
+        mVideoDuration = getIntent().getLongExtra("video_duration", 0);
 
         mPlayBtn = findViewById(R.id.iv);
 
@@ -69,13 +71,15 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
         mTimeView = findViewById(R.id.tv_time);
 
         mVideoView = findViewById(R.id.video_view);
-        mVideoView.setDataSource(new DataSource(videoPath));
+        mVideoView.setDataSource(new DataSource(mVideoPath));
         mVideoView.setOnPlayerEventListener(this);
         mVideoView.setRenderType(IRender.RENDER_TYPE_TEXTURE_VIEW);
         mVideoView.start();
 
         mEditorTrackView = findViewById(R.id.editor_track_view);
-        mEditorTrackView.setVideoPath(videoPath);
+        mEditorTrackView.setVideoPath(mVideoPath);
+        int maxScale = (int) (mVideoDuration / 1000 / 5 * mEditorTrackView.getCount());
+        mEditorTrackView.setMaxScale(maxScale);
     }
 
     @Override
@@ -112,7 +116,6 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
                     mVideoView.seekTo((int) mStartTime);
                     mVideoView.start();
                 }
-
             }
         }
     }
@@ -120,7 +123,8 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
     private void updateProgress() {
         int currentPos = mVideoView.getCurrentPosition();
         mTimeView.setText(TimeUtil.getTimeSmartFormat(currentPos) + "/" + TimeUtil.getTimeSmartFormat(mVideoView.getDuration()));
-
+        float ft = currentPos / 100f;
+        mEditorTrackView.setCurrentScale(ft);
     }
 
     @Override
@@ -136,9 +140,10 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
         }
     }
 
-    public static void open(Context context, String videoPath) {
+    public static void open(Context context, String videoPath, long duration) {
         Intent intent = new Intent(context, VideoClipComposeActivity.class);
         intent.putExtra("video_path", videoPath);
+        intent.putExtra("video_duration", duration);
         context.startActivity(intent);
     }
 }

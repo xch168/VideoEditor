@@ -158,7 +158,7 @@ public class VideoListActivity extends BaseActivity implements VideoAdapter.OnIt
                 EditThumbActivity.open(this, video.getVideoPath());
                 break;
             case MainActivity.TYPE_VIDEO_CLIP_COMPOSE:
-                VideoClipComposeActivity.open(this, video.getVideoPath());
+                VideoClipComposeActivity.open(this, video.getVideoPath(), video.getDuration());
                 break;
             case MainActivity.TYPE_VIDEO_WATERMARK:
                 VideoWatermarkActivity.open(this, video.getVideoPath(), video.getDuration());
