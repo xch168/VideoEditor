@@ -28,6 +28,7 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
     private View mTouchView;
     private TextView mTimeView;
     private EditorTrackView mEditorTrackView;
+    private ImageView mPlaySwitchBtn;
 
     private String mVideoPath;
     private long mVideoDuration;
@@ -70,6 +71,8 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
 
         mTimeView = findViewById(R.id.tv_time);
 
+        mPlaySwitchBtn = findViewById(R.id.iv_play_switch);
+
         mVideoView = findViewById(R.id.video_view);
         mVideoView.setDataSource(new DataSource(mVideoPath));
         mVideoView.setOnPlayerEventListener(this);
@@ -88,11 +91,13 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
             case PLAYER_EVENT_ON_START:
             case PLAYER_EVENT_ON_RESUME:
                 mPlayBtn.setVisibility(View.GONE);
+                mPlaySwitchBtn.setSelected(false);
                 mUiHandler.sendEmptyMessage(MSG_UPDATE_PROGRESS);
                 break;
             case PLAYER_EVENT_ON_PAUSE:
             case PLAYER_EVENT_ON_PLAY_COMPLETE:
                 mPlayBtn.setVisibility(View.VISIBLE);
+                mPlaySwitchBtn.setSelected(true);
                 mUiHandler.removeMessages(MSG_UPDATE_PROGRESS);
                 break;
         }
@@ -117,6 +122,14 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
                     mVideoView.start();
                 }
             }
+        }
+    }
+
+    public void handlePlaySwitch(View view) {
+        if (mVideoView.isPlaying()) {
+            mVideoView.pause();
+        } else {
+            mVideoView.resume();
         }
     }
 
