@@ -16,6 +16,7 @@ import android.view.ViewTreeObserver;
 import android.widget.OverScroller;
 
 import com.github.xch168.videoeditor.R;
+import com.github.xch168.videoeditor.util.SizeUtil;
 
 import java.util.Map;
 
@@ -73,7 +74,7 @@ public class EditorMediaTrackView extends View {
 
         mThumbMap = mParent.getThumbMap();
 
-        mItemSize = mCount * mParent.getInterval();
+        mItemSize = SizeUtil.dp2px(context, 38);
         mDefaultBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_default);
         mDefaultBitmap = Bitmap.createScaledBitmap(mDefaultBitmap, mItemSize, mItemSize, true);
 
@@ -105,7 +106,6 @@ public class EditorMediaTrackView extends View {
         mBitmapPaint = new Paint(1);
         mBitmapPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
-        mTextPaint = new Paint();
         mTextPaint = new Paint();
         mTextPaint.setAntiAlias(true);
         mTextPaint.setColor(getResources().getColor(R.color.colorAccent));
@@ -171,10 +171,10 @@ public class EditorMediaTrackView extends View {
                             canvas.drawBitmap(mDefaultBitmap, locationX, 0f, mBitmapPaint);
                         }
                     }
-                    canvas.drawLine(locationX, 0, locationX, 30, mBigScalePaint);
-                    canvas.drawText(valueOfScale(i, mParent.getFactor()), locationX, 40, mTextPaint);
+                    //canvas.drawLine(locationX, 0, locationX, 30, mBigScalePaint);
+                    //canvas.drawText(valueOfScale(i, mParent.getFactor()), locationX, 40, mTextPaint);
                 } else {
-                    canvas.drawLine(locationX, 0, locationX, 15, mScalePaint);
+                    //canvas.drawLine(locationX, 0, locationX, 15, mScalePaint);
                 }
             }
         }
@@ -290,7 +290,6 @@ public class EditorMediaTrackView extends View {
         } else {
             scrollBy(dx, 0);
         }
-
     }
 
     private float scaleToScrollFloatX(float scale) {
@@ -316,8 +315,17 @@ public class EditorMediaTrackView extends View {
         goToScale(mCurrentScale);
     }
 
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        super.onScrollChanged(l, t, oldl, oldt);
+    }
+
     public float getCurrentScale() {
         return mCurrentScale;
+    }
+
+    public int getItemSize() {
+        return mItemSize;
     }
 
     public void setVideoPath(String path) {

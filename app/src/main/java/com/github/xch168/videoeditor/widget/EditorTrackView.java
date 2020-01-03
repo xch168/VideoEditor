@@ -32,8 +32,6 @@ public class EditorTrackView extends FrameLayout {
     private int mInterval;
     private int mCount = 50;
 
-    private int mHeight;
-
     private int mPadding;
 
     private float mFactor = 0.1f;
@@ -55,7 +53,6 @@ public class EditorTrackView extends FrameLayout {
         mContext = context;
 
         mInterval = SizeUtil.dp2px(context, 1);
-        mHeight = mInterval * mCount;
         mPadding = SizeUtil.dp2px(context, 8);
 
         mThumbMap = new HashMap<>();
@@ -80,7 +77,6 @@ public class EditorTrackView extends FrameLayout {
         layoutParams.gravity = Gravity.CENTER_VERTICAL;
         mMediaTrackView = new EditorMediaTrackView(mContext, this);
         mMediaTrackView.setLayoutParams(layoutParams);
-
     }
 
     private void initCursor() {
@@ -121,7 +117,7 @@ public class EditorTrackView extends FrameLayout {
     public void setVideoPath(String videoPath) {
         mMediaTrackView.setVideoPath(videoPath);
         mFrameExtractor.setDataSource(videoPath);
-        mFrameExtractor.setDstSize(mHeight, mHeight);
+        mFrameExtractor.setDstSize(mMediaTrackView.getItemSize(), mMediaTrackView.getItemSize());
         mFrameExtractor.getFrameByInterval(5000, new FrameExtractor.Callback() {
             @Override
             public void onFrameExtracted(Bitmap bitmap, long timestamp) {
