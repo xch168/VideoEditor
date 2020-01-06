@@ -6,12 +6,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.xch168.videoeditor.R;
 import com.github.xch168.videoeditor.widget.EditorTrackView;
+import com.github.xch168.videoeditor.widget.MediaTrackView;
 import com.kk.taurus.playerbase.entity.DataSource;
 import com.kk.taurus.playerbase.event.OnPlayerEventListener;
 import com.kk.taurus.playerbase.player.IPlayer;
@@ -80,9 +82,23 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
         mVideoView.start();
 
         mEditorTrackView = findViewById(R.id.editor_track_view);
+        mEditorTrackView.setOnTrackViewChangeListener(new MediaTrackView.OnTrackViewChangeListener() {
+            @Override
+            public void onStartTrackingTouch() {
+                if (mVideoView.isPlaying()) {
+                    mVideoView.pause();
+                }
+            }
+
+            @Override
+            public void onScaleChanged(int scale) {
+                int currentPos = (int) ((float)scale / mEditorTrackView.getMaxScale() * mVideoView.getDuration());
+                mTimeView.setText(TimeUtil.getTimeSmartFormat(currentPos) + "/" + TimeUtil.getTimeSmartFormat(mVideoView.getDuration()));
+                Log.i("asdf", "seekTo:" + currentPos);
+                mVideoView.seekTo(currentPos);
+            }
+        });
         mEditorTrackView.setVideoPath(mVideoPath);
-        int maxScale = (int) (mVideoDuration / 1000 / 5 * mEditorTrackView.getCount());
-        mEditorTrackView.setMaxScale(maxScale);
     }
 
     @Override

@@ -177,4 +177,8 @@ public class EditorTrackView extends FrameLayout {
     public HashMap<Integer, Bitmap> getThumbMap() {
         return mThumbMap;
     }
+
+    public void setOnTrackViewChangeListener(MediaTrackView.OnTrackViewChangeListener listener) {
+        mMediaTrackView.setOnTrackViewChangeListener(listener);
+    }
 }

@@ -59,6 +59,9 @@ public class MediaTrackView extends View {
 
     private float mLastX;
 
+    private boolean mIsTrackingByUser = false;
+    private OnTrackViewChangeListener mOnTrackViewChangeListener;
+
     public MediaTrackView(Context context, EditorTrackView parent) {
         super(context);
         mContext = context;
@@ -166,9 +169,13 @@ public class MediaTrackView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mLastX = currentX;
+                if (mOnTrackViewChangeListener != null) {
+                    mOnTrackViewChangeListener.onStartTrackingTouch();
+                }
                 parent.requestDisallowInterceptTouchEvent(true);
                 break;
             case MotionEvent.ACTION_MOVE:
+                mIsTrackingByUser = true;
                 float moveX = mLastX - currentX;
                 mLastX = currentX;
                 scrollBy((int) moveX, 0);
@@ -205,6 +212,10 @@ public class MediaTrackView extends View {
             super.scrollTo(x, y);
         }
         mCurrentScale = scrollXToScale(x);
+        Log.i("asdf", "scrollTo:" + mIsTrackingByUser);
+        if (mOnTrackViewChangeListener != null && mIsTrackingByUser) {
+            mOnTrackViewChangeListener.onScaleChanged((int) mCurrentScale);
+        }
     }
 
     @Override
@@ -215,11 +226,6 @@ public class MediaTrackView extends View {
         }
     }
 
-    @Override
-    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        super.onScrollChanged(l, t, oldl, oldt);
-        Log.i("asdf", "scroll:" + oldl + " ==> " + l);
-    }
 
     private void fling(int vX) {
         mScroller.fling(getScrollX(), 0, vX, 0, mMinPosition, mMaxPosition, 0, 0);
@@ -251,6 +257,7 @@ public class MediaTrackView extends View {
     }
 
     public void setCurrentScale(int scale) {
+        mIsTrackingByUser = false;
         goToScale(scale);
     }
 
@@ -264,6 +271,15 @@ public class MediaTrackView extends View {
 
     public int getMaxScale() {
         return mMaxScale;
+    }
+
+    public void setOnTrackViewChangeListener(OnTrackViewChangeListener listener) {
+        mOnTrackViewChangeListener = listener;
+    }
+
+    public interface OnTrackViewChangeListener {
+        void onStartTrackingTouch();
+        void onScaleChanged(int scale);
     }
 
 }
