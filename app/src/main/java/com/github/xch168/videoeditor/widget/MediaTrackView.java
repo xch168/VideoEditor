@@ -24,17 +24,19 @@ public class MediaTrackView extends View {
 
     private int mMinPosition;
     private int mMaxPosition;
-    private int mCurrentPosition;
-    private int mLength;
 
-    private int mMinProgress = 0;
-    private int mMaxProgress = 1000;
-    private int mCurrentProgress = 0;
+    private int mMinScale = 0;
+    private int mMaxScale = 1000;
+    private int mScaleLength;
+    private float mCurrentScale = 0;
 
     private int mHalfWidth;
-    private int mItemSize;
 
+    private int mLength;
+    private int mItemSize;
     private int mItemCount;
+
+    private float mInterval;
 
     private Paint mThumbPaint;
     private Bitmap mDefaultThumb;
@@ -54,6 +56,8 @@ public class MediaTrackView extends View {
     private void initView() {
         mItemSize = SizeUtil.dp2px(mContext, 38);
 
+        mScaleLength = mMaxScale - mMinScale;
+
         mThumbPaint = new Paint(1);
         mThumbPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
@@ -63,7 +67,7 @@ public class MediaTrackView extends View {
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                scrollTo(mMinPosition, 0);
+                goToScale(mMinScale);
             }
         });
     }
@@ -84,10 +88,11 @@ public class MediaTrackView extends View {
     }
 
     private void refreshSize() {
+        mLength = mItemSize * mItemCount;
         mHalfWidth = getWidth() / 2;
         mMinPosition = -mHalfWidth;
-        mMaxPosition = mItemSize * mItemCount - mHalfWidth;
-        mLength = mMaxPosition - mMinPosition;
+        mMaxPosition = mLength - mHalfWidth;
+        mInterval = (float)mLength / mScaleLength;
         Log.i("asdf", "xxxxx:" + mItemCount);
     }
 
@@ -98,13 +103,14 @@ public class MediaTrackView extends View {
 
     private void drawThumbnail(Canvas canvas) {
         Log.i("asdf", "scrollX:" + getScrollX() + " cw:" + canvas.getWidth() + " min:" + mMinPosition + " max:" + mMaxPosition);
-        int start = mMinProgress + getScrollX();
-        int end = mMinProgress + getScrollX() + getWidth();
-        Log.i("asdf", "start:" + start + " end;" + end);
-        for (int pos = start; pos <= end; pos++) {
-            if (isADrawPosition(pos)) {
-                Log.i("asdf", "draw:" + pos);
-                int locationX = pos;
+        Log.i("asdf", "scaleLength:" + mScaleLength + " length:" + mLength);
+        float start = scrollXToScale(getScrollX());
+        float end = (getScrollX() + getWidth()) / mInterval + mMinScale;
+        Log.i("asdf", "start:" + start + " end:" + end);
+        for (float scale = start; scale <= end; scale++) {
+            if (isADrawScale(scale)) {
+                float locationX = (scale - mMinScale) * mInterval;
+                Log.i("asdf", "draw:" + scale + " pos:" + locationX);
                 int index = positionToThumbIndex(locationX);
                 Bitmap drawThumb = mDefaultThumb;
                 if (mThumbMap != null && mThumbMap.get(index) != null) {
@@ -115,18 +121,13 @@ public class MediaTrackView extends View {
         }
     }
 
-    private boolean isADrawPosition(int pos) {
-        return (pos - mMinPosition) % mItemSize == 0;
+    private boolean isADrawScale(float scale) {
+        int locationX = (int) ((scale - mMinScale) * mInterval);
+        return scale >= mMinScale && scale <= mMaxScale && (locationX - mMinPosition) % mItemSize == 0;
     }
 
-    private int getDrawLocationX(int i) {
-        int locationX = mMinPosition + getScrollX();
-
-        return locationX;
-    }
-
-    private int positionToThumbIndex(int pos) {
-        return pos / mItemSize;
+    private int positionToThumbIndex(float pos) {
+        return (int) ((pos - mMinPosition) / mItemSize);
     }
 
     @Override
@@ -166,6 +167,7 @@ public class MediaTrackView extends View {
         if (x != getScrollX()) {
             super.scrollTo(x, y);
         }
+        mCurrentScale = scrollXToScale(x);
     }
 
     @Override
@@ -179,16 +181,25 @@ public class MediaTrackView extends View {
         Log.i("asdf", "scroll:" + oldl + " ==> " + l);
     }
 
+    private void goToScale(float scale) {
+        mCurrentScale = scale;
+        scrollTo(scaleToScrollX(mCurrentScale), 0);
+    }
+
+    private int scaleToScrollX(float scale) {
+        return (int) ((scale - mMinScale) / mScaleLength * mLength + mMinPosition);
+    }
+
+    private float scrollXToScale(int scrollX) {
+        return ((float)(scrollX - mMinPosition) / mLength) * mScaleLength + mMinScale;
+    }
+
     public void setThumbMap(Map<Integer, Bitmap> map) {
         mThumbMap = map;
     }
 
     public void setCurrentPosition(int pos) {
 
-    }
-
-    private int progressToPosition(int progress) {
-        return progress / mMaxProgress * mLength;
     }
 
     public int getItemSize() {
@@ -199,7 +210,4 @@ public class MediaTrackView extends View {
         mItemCount = count;
     }
 
-    public void setCurrentProgress(int progress) {
-        mCurrentProgress = progress;
-    }
 }
