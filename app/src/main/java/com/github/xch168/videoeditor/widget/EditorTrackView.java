@@ -138,7 +138,7 @@ public class EditorTrackView extends FrameLayout {
     }
 
     public int getMaxScale() {
-        return mMaxScale;
+        return mMediaTrackView.getMaxScale();
     }
 
     public void setMaxScale(int maxScale) {
@@ -163,7 +163,7 @@ public class EditorTrackView extends FrameLayout {
 
     public void setCurrentScale(float currentPos) {
 //        mMediaTrackView.setCurrentScale(currentPos);
-        mMediaTrackView.setCurrentPosition((int) currentPos);
+        mMediaTrackView.setCurrentScale((int) currentPos);
     }
 
     public float getFactor() {

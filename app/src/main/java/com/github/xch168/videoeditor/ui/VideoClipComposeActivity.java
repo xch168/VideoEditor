@@ -133,11 +133,12 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void updateProgress() {
         int currentPos = mVideoView.getCurrentPosition();
         mTimeView.setText(TimeUtil.getTimeSmartFormat(currentPos) + "/" + TimeUtil.getTimeSmartFormat(mVideoView.getDuration()));
-        float ft = currentPos / 100f;
-        mEditorTrackView.setCurrentScale(ft);
+        float currentScale = (float)currentPos / mVideoView.getDuration() * mEditorTrackView.getMaxScale();
+        mEditorTrackView.setCurrentScale(currentScale);
     }
 
     @Override

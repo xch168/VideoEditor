@@ -36,11 +36,15 @@ public class MediaTrackView extends View {
     private int mItemSize;
     private int mItemCount;
 
-    private float mInterval;
-    private float mDrawScaleInterval;
+    private int mInterval;
+    private int mDrawScaleInterval;
 
     private Paint mThumbPaint;
     private Bitmap mDefaultThumb;
+
+    private int mDrawOffset;
+
+    private Paint mTextPaint;
 
     private Map<Integer, Bitmap> mThumbMap;
 
@@ -57,7 +61,11 @@ public class MediaTrackView extends View {
     private void initView() {
         mItemSize = SizeUtil.dp2px(mContext, 38);
 
-        mScaleLength = mMaxScale - mMinScale;
+        mTextPaint = new Paint();
+        mTextPaint.setColor(getResources().getColor(R.color.colorAccent));
+        mTextPaint.setTextSize(28);
+        mTextPaint.setTextAlign(Paint.Align.CENTER);
+        mTextPaint.setAntiAlias(true);
 
         mThumbPaint = new Paint(1);
         mThumbPaint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -68,7 +76,7 @@ public class MediaTrackView extends View {
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                goToScale(mMinScale);
+                goToScale(mCurrentScale);
             }
         });
     }
@@ -90,12 +98,14 @@ public class MediaTrackView extends View {
 
     private void refreshSize() {
         mLength = mItemSize * mItemCount;
+        mScaleLength = mLength;
         mHalfWidth = getWidth() / 2;
         mMinPosition = -mHalfWidth;
         mMaxPosition = mLength - mHalfWidth;
-        mInterval = (float)mLength / mScaleLength;
-        mDrawScaleInterval = (float)mScaleLength / mLength * mItemSize;
-        Log.i("asdf", "xxxxx:" + mItemCount);
+        mInterval = mLength / mScaleLength;
+        mDrawScaleInterval = mScaleLength / mLength * mItemSize;
+        mMaxScale = mLength;
+        mDrawOffset = mItemSize / 2;
     }
 
     @Override
@@ -104,11 +114,9 @@ public class MediaTrackView extends View {
     }
 
     private void drawThumbnail(Canvas canvas) {
-        Log.i("asdf", "scrollX:" + getScrollX() + " cw:" + canvas.getWidth() + " min:" + mMinPosition + " max:" + mMaxPosition);
-        Log.i("asdf", "scaleLength:" + mScaleLength + " length:" + mLength);
-        float start = getScaleX() / mLength * mScaleLength + mMinScale;
-        float end = start + getWidth() / mInterval;
-        Log.i("asdf", "start:" + start + " end:" + end + " si:" + mDrawScaleInterval);
+        float start = (getScrollX() - mDrawOffset) + mMinScale;
+        float end = (getScrollX() + mDrawOffset + getWidth()) + mMinScale;
+        Log.i("asdf", "scrollX:" + getScrollX() + " start:" + start + " end:" + end + " si:" + mDrawScaleInterval + " ==> itemSize:" + mItemSize + " itemCount:" + mItemCount  + " length:" + mLength + " || minP:" + mMinPosition + " maxP:" + mMaxPosition);
         for (float scale = start; scale <= end; scale++) {
             if (isADrawScale(scale)) {
                 float locationX = (scale - mMinScale) * mInterval;
@@ -119,16 +127,17 @@ public class MediaTrackView extends View {
                     drawThumb = mThumbMap.get(index);
                 }
                 canvas.drawBitmap(drawThumb, locationX, 0, mThumbPaint);
+                canvas.drawText("" + (index + 1), locationX + 28, 38, mTextPaint);
             }
         }
     }
 
     private boolean isADrawScale(float scale) {
-        return scale >= mMinScale && scale <= mMaxScale && (int)(scale - mMinScale) % (int)mDrawScaleInterval == 0;
+        return scale >= mMinScale && scale <= mMaxScale && scale % mItemSize == 0 && scale != mMaxScale;
     }
 
     private int positionToThumbIndex(float pos) {
-        return (int) ((pos - mMinPosition) / mItemSize);
+        return (int) ((pos - mMinScale) / mItemSize);
     }
 
     @Override
@@ -161,11 +170,9 @@ public class MediaTrackView extends View {
     public void scrollTo(int x, int y) {
         if (x < mMinPosition) {
             x = mMinPosition;
-            Log.i("asdf", "scrollTo:min");
         }
         if (x > mMaxPosition) {
             x = mMaxPosition;
-            Log.i("asdf", "scrollTo:max");
         }
         if (x != getScrollX()) {
             super.scrollTo(x, y);
@@ -175,7 +182,7 @@ public class MediaTrackView extends View {
 
     @Override
     public void computeScroll() {
-
+        super.computeScroll();
     }
 
     @Override
@@ -201,8 +208,8 @@ public class MediaTrackView extends View {
         mThumbMap = map;
     }
 
-    public void setCurrentPosition(int pos) {
-
+    public void setCurrentScale(int scale) {
+        goToScale(scale);
     }
 
     public int getItemSize() {
@@ -211,6 +218,10 @@ public class MediaTrackView extends View {
 
     public void setItemCount(int count) {
         mItemCount = count;
+    }
+
+    public int getMaxScale() {
+        return mMaxScale;
     }
 
 }
