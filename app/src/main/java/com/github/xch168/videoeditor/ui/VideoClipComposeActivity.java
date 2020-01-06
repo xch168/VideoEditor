@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -136,8 +137,8 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
     private void updateProgress() {
         int currentPos = mVideoView.getCurrentPosition();
         mTimeView.setText(TimeUtil.getTimeSmartFormat(currentPos) + "/" + TimeUtil.getTimeSmartFormat(mVideoView.getDuration()));
-        float ft = currentPos / 100f;
-        mEditorTrackView.setCurrentScale(ft);
+        float currentScale = (float)currentPos / mVideoView.getDuration() * mEditorTrackView.getMaxScale();
+        mEditorTrackView.setCurrentScale(currentScale);
     }
 
     @Override
