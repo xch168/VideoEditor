@@ -94,6 +94,7 @@ public class MediaTrackView extends View {
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+                getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 goToScale(mCurrentScale);
             }
         });
@@ -212,7 +213,6 @@ public class MediaTrackView extends View {
             super.scrollTo(x, y);
         }
         mCurrentScale = scrollXToScale(x);
-        Log.i("asdf", "scrollTo:" + mIsTrackingByUser);
         if (mOnTrackViewChangeListener != null && mIsTrackingByUser) {
             mOnTrackViewChangeListener.onScaleChanged((int) mCurrentScale);
         }
