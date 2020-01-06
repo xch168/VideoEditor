@@ -8,9 +8,12 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.OverScroller;
 
 import com.github.xch168.videoeditor.R;
 import com.github.xch168.videoeditor.util.SizeUtil;
@@ -21,6 +24,12 @@ public class MediaTrackView extends View {
     private Context mContext;
 
     private EditorTrackView mParent;
+
+    private OverScroller mScroller;
+
+    private VelocityTracker mVelocityTracker;
+    private int mMinVelocity;
+    private int mMaxVelocity;
 
     private int mMinPosition;
     private int mMaxPosition;
@@ -60,6 +69,12 @@ public class MediaTrackView extends View {
 
     private void initView() {
         mItemSize = SizeUtil.dp2px(mContext, 38);
+
+        mScroller = new OverScroller(mContext);
+
+        mVelocityTracker = VelocityTracker.obtain();
+        mMinVelocity = ViewConfiguration.get(mContext).getScaledMinimumFlingVelocity();
+        mMaxVelocity = ViewConfiguration.get(mContext).getScaledMaximumFlingVelocity();
 
         mTextPaint = new Paint();
         mTextPaint.setColor(getResources().getColor(R.color.colorAccent));
@@ -143,6 +158,10 @@ public class MediaTrackView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float currentX = event.getX();
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+        mVelocityTracker.addMovement(event);
         ViewGroup parent = (ViewGroup) getParent();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -155,11 +174,19 @@ public class MediaTrackView extends View {
                 scrollBy((int) moveX, 0);
                 break;
             case MotionEvent.ACTION_UP:
-
+                mVelocityTracker.computeCurrentVelocity(1000, mMaxVelocity);
+                int velocityX = (int) mVelocityTracker.getXVelocity();
+                if (Math.abs(velocityX) > mMinVelocity) {
+                    fling(-velocityX);
+                }
+                recycleVelocityTracker();
                 parent.requestDisallowInterceptTouchEvent(false);
                 break;
             case MotionEvent.ACTION_CANCEL:
-
+                if (!mScroller.isFinished()) {
+                    mScroller.abortAnimation();
+                }
+                recycleVelocityTracker();
                 parent.requestDisallowInterceptTouchEvent(false);
                 break;
         }
@@ -182,13 +209,21 @@ public class MediaTrackView extends View {
 
     @Override
     public void computeScroll() {
-        super.computeScroll();
+        if (mScroller.computeScrollOffset()) {
+            scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+            postInvalidate();
+        }
     }
 
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
         Log.i("asdf", "scroll:" + oldl + " ==> " + l);
+    }
+
+    private void fling(int vX) {
+        mScroller.fling(getScrollX(), 0, vX, 0, mMinPosition, mMaxPosition, 0, 0);
+        invalidate();
     }
 
     private void goToScale(float scale) {
@@ -202,6 +237,13 @@ public class MediaTrackView extends View {
 
     private float scrollXToScale(int scrollX) {
         return ((float)(scrollX - mMinPosition) / mLength) * mScaleLength + mMinScale;
+    }
+
+    private void recycleVelocityTracker() {
+        if (mVelocityTracker != null) {
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+        }
     }
 
     public void setThumbMap(Map<Integer, Bitmap> map) {
