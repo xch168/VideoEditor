@@ -37,6 +37,7 @@ public class MediaTrackView extends View {
     private int mItemCount;
 
     private float mInterval;
+    private float mDrawScaleInterval;
 
     private Paint mThumbPaint;
     private Bitmap mDefaultThumb;
@@ -93,6 +94,7 @@ public class MediaTrackView extends View {
         mMinPosition = -mHalfWidth;
         mMaxPosition = mLength - mHalfWidth;
         mInterval = (float)mLength / mScaleLength;
+        mDrawScaleInterval = (float)mScaleLength / mLength * mItemSize;
         Log.i("asdf", "xxxxx:" + mItemCount);
     }
 
@@ -104,9 +106,9 @@ public class MediaTrackView extends View {
     private void drawThumbnail(Canvas canvas) {
         Log.i("asdf", "scrollX:" + getScrollX() + " cw:" + canvas.getWidth() + " min:" + mMinPosition + " max:" + mMaxPosition);
         Log.i("asdf", "scaleLength:" + mScaleLength + " length:" + mLength);
-        float start = scrollXToScale(getScrollX());
-        float end = (getScrollX() + getWidth()) / mInterval + mMinScale;
-        Log.i("asdf", "start:" + start + " end:" + end);
+        float start = getScaleX() / mLength * mScaleLength + mMinScale;
+        float end = start + getWidth() / mInterval;
+        Log.i("asdf", "start:" + start + " end:" + end + " si:" + mDrawScaleInterval);
         for (float scale = start; scale <= end; scale++) {
             if (isADrawScale(scale)) {
                 float locationX = (scale - mMinScale) * mInterval;
@@ -122,8 +124,7 @@ public class MediaTrackView extends View {
     }
 
     private boolean isADrawScale(float scale) {
-        int locationX = (int) ((scale - mMinScale) * mInterval);
-        return scale >= mMinScale && scale <= mMaxScale && (locationX - mMinPosition) % mItemSize == 0;
+        return scale >= mMinScale && scale <= mMaxScale && (int)(scale - mMinScale) % (int)mDrawScaleInterval == 0;
     }
 
     private int positionToThumbIndex(float pos) {
@@ -160,9 +161,11 @@ public class MediaTrackView extends View {
     public void scrollTo(int x, int y) {
         if (x < mMinPosition) {
             x = mMinPosition;
+            Log.i("asdf", "scrollTo:min");
         }
         if (x > mMaxPosition) {
             x = mMaxPosition;
+            Log.i("asdf", "scrollTo:max");
         }
         if (x != getScrollX()) {
             super.scrollTo(x, y);
