@@ -10,21 +10,21 @@ import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.github.xch168.videoeditor.R;
 import com.github.xch168.videoeditor.core.FrameExtractor;
 import com.github.xch168.videoeditor.util.SizeUtil;
 
 import java.util.HashMap;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 public class EditorTrackView extends FrameLayout {
     private Context mContext;
 
     private Drawable mCursorDrawable;
 
-    private EditorMediaTrackView mMediaTrackView;
+    private MediaTrackView mMediaTrackView;
 
     private int mMinScale = 0;
     private int mMaxScale = 3000;
@@ -75,7 +75,8 @@ public class EditorTrackView extends FrameLayout {
 
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParams.gravity = Gravity.CENTER_VERTICAL;
-        mMediaTrackView = new EditorMediaTrackView(mContext, this);
+        mMediaTrackView = new MediaTrackView(mContext, this);
+        mMediaTrackView.setThumbMap(mThumbMap);
         mMediaTrackView.setLayoutParams(layoutParams);
     }
 
@@ -115,7 +116,7 @@ public class EditorTrackView extends FrameLayout {
     }
 
     public void setVideoPath(String videoPath) {
-        mMediaTrackView.setVideoPath(videoPath);
+//        mMediaTrackView.setVideoPath(videoPath);
         mFrameExtractor.setDataSource(videoPath);
         mFrameExtractor.setDstSize(mMediaTrackView.getItemSize(), mMediaTrackView.getItemSize());
         mFrameExtractor.getFrameByInterval(5000, new FrameExtractor.Callback() {
@@ -125,6 +126,7 @@ public class EditorTrackView extends FrameLayout {
                 mThumbMap.put(index, bitmap);
             }
         });
+        mMediaTrackView.setItemCount((int) (mFrameExtractor.getVideoDuration() / 5000));
     }
 
     public int getMinScale() {
@@ -136,7 +138,7 @@ public class EditorTrackView extends FrameLayout {
     }
 
     public int getMaxScale() {
-        return mMaxScale;
+        return mMediaTrackView.getMaxScale();
     }
 
     public void setMaxScale(int maxScale) {
@@ -160,7 +162,8 @@ public class EditorTrackView extends FrameLayout {
     }
 
     public void setCurrentScale(float currentPos) {
-        mMediaTrackView.setCurrentScale(currentPos);
+//        mMediaTrackView.setCurrentScale(currentPos);
+        mMediaTrackView.setCurrentScale((int) currentPos);
     }
 
     public float getFactor() {
@@ -173,5 +176,9 @@ public class EditorTrackView extends FrameLayout {
 
     public HashMap<Integer, Bitmap> getThumbMap() {
         return mThumbMap;
+    }
+
+    public void setOnTrackViewChangeListener(MediaTrackView.OnTrackViewChangeListener listener) {
+        mMediaTrackView.setOnTrackViewChangeListener(listener);
     }
 }
