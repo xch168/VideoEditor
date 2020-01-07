@@ -66,7 +66,62 @@
         android:src="@drawable/selector_editor_preview_play_btn"
         android:background="@color/colorPrimary"
         android:onClick="handlePlaySwitch"
-        android:visibility="gone"/>
+        android:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/tv_revoke"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toLeftOf="@+id/tv_cutting"
+        app:layout_constraintTop_toTopOf="@+id/tv_cutting"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_marginRight="25dp"
+        android:drawableTop="@drawable/selector_editor_revoke_ic"
+        android:drawablePadding="5dp"
+        android:gravity="center_vertical"
+        android:textColor="@drawable/selector_editor_menu_text_color"
+        android:textSize="12sp"
+        android:text="撤销"
+        android:enabled="false"
+        android:onClick="handleRevoke"/>
+
+    <TextView
+        android:id="@+id/tv_cutting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_play_switch"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_marginTop="20dp"
+        android:drawableTop="@drawable/selector_editor_cutting_ic"
+        android:drawablePadding="5dp"
+        android:gravity="center_vertical"
+        android:textColor="@drawable/selector_editor_menu_text_color"
+        android:textSize="12sp"
+        android:text="切割"
+        android:enabled="false"
+        android:onClick="handleCutting"/>
+
+    <TextView
+        android:id="@+id/tv_del"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toRightOf="@+id/tv_cutting"
+        app:layout_constraintTop_toTopOf="@+id/tv_cutting"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_marginLeft="25dp"
+        android:drawableTop="@drawable/selector_editor_del_ic"
+        android:drawablePadding="5dp"
+        android:gravity="center_vertical"
+        android:textColor="@drawable/selector_editor_menu_text_color"
+        android:textSize="12sp"
+        android:text="删除"
+        android:enabled="false"
+        android:onClick="handleDel"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

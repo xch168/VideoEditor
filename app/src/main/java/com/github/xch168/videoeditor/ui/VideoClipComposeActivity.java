@@ -31,6 +31,9 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
     private TextView mTimeView;
     private EditorTrackView mEditorTrackView;
     private ImageView mPlaySwitchBtn;
+    private View mCutBtn;
+    private View mDelBtn;
+    private View mRevokeBtn;
 
     private String mVideoPath;
     private long mVideoDuration;
@@ -74,6 +77,10 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
         mTimeView = findViewById(R.id.tv_time);
 
         mPlaySwitchBtn = findViewById(R.id.iv_play_switch);
+
+        mCutBtn = findViewById(R.id.tv_cutting);
+        mDelBtn = findViewById(R.id.tv_del);
+        mRevokeBtn = findViewById(R.id.tv_revoke);
 
         mVideoView = findViewById(R.id.video_view);
         mVideoView.setDataSource(new DataSource(mVideoPath));
@@ -147,6 +154,18 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
         } else {
             mVideoView.resume();
         }
+    }
+
+    public void handleCutting(View view) {
+
+    }
+
+    public void handleRevoke(View view) {
+
+    }
+
+    public void handleDel(View view) {
+
     }
 
     @SuppressLint("SetTextI18n")
