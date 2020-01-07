@@ -169,6 +169,9 @@ public class MediaTrackView extends View {
         ViewGroup parent = (ViewGroup) getParent();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                if (!mScroller.isFinished()) {
+                    mScroller.abortAnimation();
+                }
                 mLastX = currentX;
                 if (mOnTrackViewChangeListener != null) {
                     mOnTrackViewChangeListener.onStartTrackingTouch();
