@@ -146,7 +146,7 @@ public class MediaTrackView extends View {
                     drawThumb = mThumbMap.get(index);
                 }
                 canvas.drawBitmap(drawThumb, locationX, 0, mThumbPaint);
-                canvas.drawText("" + (index + 1), locationX + 28, 38, mTextPaint);
+//                canvas.drawText("" + (index + 1), locationX + 28, 38, mTextPaint);
             }
         }
     }
