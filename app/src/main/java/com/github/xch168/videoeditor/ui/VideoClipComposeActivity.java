@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.github.xch168.videoeditor.R;
 import com.github.xch168.videoeditor.widget.EditorTrackView;
-import com.github.xch168.videoeditor.widget.MediaTrackView;
+import com.github.xch168.videoeditor.widget.EditorMediaTrackView;
 import com.kk.taurus.playerbase.entity.DataSource;
 import com.kk.taurus.playerbase.event.OnPlayerEventListener;
 import com.kk.taurus.playerbase.player.IPlayer;
@@ -89,7 +89,7 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
         mVideoView.start();
 
         mEditorTrackView = findViewById(R.id.editor_track_view);
-        mEditorTrackView.setOnTrackViewChangeListener(new MediaTrackView.OnTrackViewChangeListener() {
+        mEditorTrackView.setOnTrackViewChangeListener(new EditorMediaTrackView.OnTrackViewChangeListener() {
             @Override
             public void onStartTrackingTouch() {
                 if (mVideoView.isPlaying()) {
