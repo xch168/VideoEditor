@@ -38,8 +38,7 @@ public class EditorTrackView extends FrameLayout {
     private int mMinScale = 0;
     private int mMaxScale = 3000;
 
-    private int mScreenWidth;
-    private int mPadding;
+    private int mBorderHeight;
 
     private HashMap<Integer, Bitmap> mThumbMap = new HashMap<>();
 
@@ -59,8 +58,7 @@ public class EditorTrackView extends FrameLayout {
         super(context, attrs, defStyleAttr);
         mContext = context;
 
-        mScreenWidth = getResources().getDisplayMetrics().widthPixels;
-        mPadding = SizeUtil.dp2px(context, 7);
+        mBorderHeight = SizeUtil.dp2px(mContext, 1);
 
         mFrameExtractor = new FrameExtractor();
 
@@ -68,8 +66,6 @@ public class EditorTrackView extends FrameLayout {
     }
 
     private void initView() {
-        setPadding(0, mPadding, 0, mPadding);
-
         initPaint();
         initUIComponent();
         addUIComponent();
@@ -79,7 +75,7 @@ public class EditorTrackView extends FrameLayout {
 
     private void initPaint() {
         mBorderPaint = new Paint();
-        mBorderPaint.setStyle(Paint.Style.STROKE);
+        mBorderPaint.setStyle(Paint.Style.FILL);
         mBorderPaint.setColor(getResources().getColor(R.color.colorAccent));
 
         mMaskPaint = new Paint();
@@ -96,7 +92,6 @@ public class EditorTrackView extends FrameLayout {
         mLeftThumb.setImageResource(R.drawable.ic_progress_left);
         mLeftThumb.setScaleType(ImageView.ScaleType.FIT_END);
         mLeftThumb.setLayoutParams(layoutParams);
-        mLeftThumb.setX(200);
 
         layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, SizeUtil.dp2px(mContext, 40));
         layoutParams.gravity = Gravity.CENTER_VERTICAL;
@@ -104,7 +99,6 @@ public class EditorTrackView extends FrameLayout {
         mRightThumb.setImageResource(R.drawable.ic_progress_right);
         mRightThumb.setScaleType(ImageView.ScaleType.FIT_START);
         mRightThumb.setLayoutParams(layoutParams);
-        mRightThumb.setX(400);
 
         layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParams.gravity = Gravity.CENTER_VERTICAL;
@@ -129,6 +123,9 @@ public class EditorTrackView extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int mode = MeasureSpec.getMode(heightMeasureSpec);
+        heightMeasureSpec = MeasureSpec.makeMeasureSpec(SizeUtil.dp2px(mContext, 54), mode);
+        setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
     }
 
     @Override
@@ -136,14 +133,6 @@ public class EditorTrackView extends FrameLayout {
         super.onSizeChanged(w, h, oldw, oldh);
 
         initCursor();
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        if (changed) {
-            mMediaTrackView.layout(0, mPadding, right - left, bottom - top);
-        }
     }
 
     @Override
@@ -167,6 +156,9 @@ public class EditorTrackView extends FrameLayout {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+
+        updateThumbPosition();
+
 //        drawBorder(canvas);
 //        drawMask(canvas);
     }
@@ -184,9 +176,9 @@ public class EditorTrackView extends FrameLayout {
         mLeftThumb.getHitRect(leftThumbBounds);
         mRightThumb.getHitRect(rightThumbBounds);
         // top
-        canvas.drawRect(leftThumbBounds.right, leftThumbBounds.top + 1, rightThumbBounds.left,  leftThumbBounds.top + 2, mBorderPaint);
+        canvas.drawRect(leftThumbBounds.right, leftThumbBounds.top, rightThumbBounds.left,  rightThumbBounds.top + mBorderHeight, mBorderPaint);
         // bottom
-        canvas.drawRect(leftThumbBounds.right, leftThumbBounds.bottom - 1, rightThumbBounds.left, leftThumbBounds.bottom, mBorderPaint);
+        canvas.drawRect(leftThumbBounds.right, leftThumbBounds.bottom - mBorderHeight, rightThumbBounds.left, leftThumbBounds.bottom, mBorderPaint);
     }
 
     private void drawMask(Canvas canvas) {
@@ -206,12 +198,19 @@ public class EditorTrackView extends FrameLayout {
         bounds.bottom = bottom;
     }
 
-    private void moveLeftThumb(int x) {
+    private void updateThumbPosition() {
+        moveLeftThumb(-mMediaTrackView.getScrollX());
+        moveRightThumb(mMediaTrackView.getMaxScale() - mMediaTrackView.getScrollX());
+    }
 
+    private void moveLeftThumb(int x) {
+        mLeftThumb.setTag(x);
+        mLeftThumb.setX(x - mLeftThumb.getWidth());
     }
 
     private void moveRightThumb(int x) {
-
+        mRightThumb.setTag(x);
+        mRightThumb.setX(x);
     }
 
     private int getLeftThumbPosition() {
