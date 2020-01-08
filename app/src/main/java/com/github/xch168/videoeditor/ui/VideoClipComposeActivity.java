@@ -103,6 +103,8 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
                 mTimeView.setText(TimeUtil.getTimeSmartFormat(currentPos) + "/" + TimeUtil.getTimeSmartFormat(mVideoView.getDuration()));
                 Log.i("asdf", "seekTo:" + currentPos);
                 mVideoView.seekTo(currentPos);
+
+                updateCuttingBtnState();
             }
         });
         mEditorTrackView.setVideoPath(mVideoPath);
@@ -174,6 +176,13 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
         mTimeView.setText(TimeUtil.getTimeSmartFormat(currentPos) + "/" + TimeUtil.getTimeSmartFormat(mVideoView.getDuration()));
         float currentScale = (float)currentPos / mVideoView.getDuration() * mEditorTrackView.getMaxScale();
         mEditorTrackView.setCurrentScale(currentScale);
+
+        updateCuttingBtnState();
+    }
+
+    private void updateCuttingBtnState() {
+        int currentPos = mVideoView.getCurrentPosition();
+        mCutBtn.setEnabled(currentPos >= 1000 && currentPos <= mVideoView.getDuration() - 1000);
     }
 
     @Override
