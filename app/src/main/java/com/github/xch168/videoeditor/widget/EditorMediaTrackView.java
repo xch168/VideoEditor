@@ -71,6 +71,9 @@ public class EditorMediaTrackView extends View {
 
     private void initView() {
         mItemSize = SizeUtil.dp2px(mContext, 38);
+        if (mItemSize % 2 != 0) {
+            mItemSize--;
+        }
 
         mScroller = new OverScroller(mContext);
 

@@ -159,7 +159,7 @@ public class EditorTrackView extends FrameLayout {
 
         updateThumbPosition();
 
-//        drawBorder(canvas);
+        drawBorder(canvas);
 //        drawMask(canvas);
     }
 
