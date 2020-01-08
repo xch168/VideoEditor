@@ -262,6 +262,10 @@ public class EditorMediaTrackView extends View {
         goToScale(scale);
     }
 
+    public int getCurrentScale() {
+        return (int) mCurrentScale;
+    }
+
     public int getItemSize() {
         return mItemSize;
     }

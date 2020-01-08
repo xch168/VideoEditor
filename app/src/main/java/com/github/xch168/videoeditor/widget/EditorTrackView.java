@@ -16,9 +16,12 @@ import android.widget.ImageView;
 
 import com.github.xch168.videoeditor.R;
 import com.github.xch168.videoeditor.core.FrameExtractor;
+import com.github.xch168.videoeditor.entity.VideoPartInfo;
 import com.github.xch168.videoeditor.util.SizeUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -45,6 +48,8 @@ public class EditorTrackView extends FrameLayout {
     private FrameExtractor mFrameExtractor;
 
     private Rect mBounds = new Rect();
+
+    private List<VideoPartInfo> mVideoPartInfoList = new ArrayList<>();
 
     public EditorTrackView(@NonNull Context context) {
         this(context, null);
@@ -240,6 +245,13 @@ public class EditorTrackView extends FrameLayout {
             }
         });
         mMediaTrackView.setItemCount((int) (mFrameExtractor.getVideoDuration() / 5000));
+
+        VideoPartInfo videoPartInfo = new VideoPartInfo();
+        videoPartInfo.setStartTime(0);
+        videoPartInfo.setEndTime(mFrameExtractor.getVideoDuration());
+        videoPartInfo.setStartPosition(0);
+        videoPartInfo.setEndPosition(mMediaTrackView.getMaxScale());
+        mVideoPartInfoList.add(videoPartInfo);
     }
 
     public int getMinScale() {
@@ -256,6 +268,10 @@ public class EditorTrackView extends FrameLayout {
 
     public void setCurrentScale(float currentPos) {
         mMediaTrackView.setCurrentScale((int) currentPos);
+    }
+
+    public int getCurrentScale() {
+        return mMediaTrackView.getCurrentScale();
     }
 
     public HashMap<Integer, Bitmap> getThumbMap() {

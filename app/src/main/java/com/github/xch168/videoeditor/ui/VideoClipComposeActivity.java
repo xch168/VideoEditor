@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.xch168.videoeditor.R;
+import com.github.xch168.videoeditor.entity.VideoPartInfo;
 import com.github.xch168.videoeditor.widget.EditorTrackView;
 import com.github.xch168.videoeditor.widget.EditorMediaTrackView;
 import com.kk.taurus.playerbase.entity.DataSource;
@@ -159,7 +160,14 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
     }
 
     public void handleCutting(View view) {
+        Log.i("asdf", "cut:" + mEditorTrackView.getCurrentScale() + " time:" + mVideoView.getCurrentPosition());
 
+        VideoPartInfo videoPartInfo = new VideoPartInfo();
+    }
+
+    private int getCurrentPartIndex() {
+        int currentScale = mEditorTrackView.getCurrentScale();
+        return 0;
     }
 
     public void handleRevoke(View view) {
