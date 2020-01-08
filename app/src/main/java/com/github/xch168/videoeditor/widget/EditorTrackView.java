@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -29,7 +30,7 @@ public class EditorTrackView extends FrameLayout {
 
     private ImageView mLeftThumb;
     private ImageView mRightThumb;
-    private MediaTrackView mMediaTrackView;
+    private EditorMediaTrackView mMediaTrackView;
 
     private Paint mBorderPaint;
     private Paint mMaskPaint;
@@ -37,16 +38,14 @@ public class EditorTrackView extends FrameLayout {
     private int mMinScale = 0;
     private int mMaxScale = 3000;
 
-    private int mInterval;
-    private int mCount = 50;
-
+    private int mScreenWidth;
     private int mPadding;
 
-    private float mFactor = 0.1f;
-
-    private HashMap<Integer, Bitmap> mThumbMap;
+    private HashMap<Integer, Bitmap> mThumbMap = new HashMap<>();
 
     private FrameExtractor mFrameExtractor;
+
+    private Rect mBounds = new Rect();
 
     public EditorTrackView(@NonNull Context context) {
         this(context, null);
@@ -60,10 +59,8 @@ public class EditorTrackView extends FrameLayout {
         super(context, attrs, defStyleAttr);
         mContext = context;
 
-        mInterval = SizeUtil.dp2px(context, 1);
+        mScreenWidth = getResources().getDisplayMetrics().widthPixels;
         mPadding = SizeUtil.dp2px(context, 7);
-
-        mThumbMap = new HashMap<>();
 
         mFrameExtractor = new FrameExtractor();
 
@@ -111,7 +108,7 @@ public class EditorTrackView extends FrameLayout {
 
         layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParams.gravity = Gravity.CENTER_VERTICAL;
-        mMediaTrackView = new MediaTrackView(mContext, this);
+        mMediaTrackView = new EditorMediaTrackView(mContext, this);
         mMediaTrackView.setThumbMap(mThumbMap);
         mMediaTrackView.setLayoutParams(layoutParams);
     }
@@ -135,6 +132,13 @@ public class EditorTrackView extends FrameLayout {
     }
 
     @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+
+        initCursor();
+    }
+
+    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         if (changed) {
@@ -143,11 +147,28 @@ public class EditorTrackView extends FrameLayout {
     }
 
     @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return true;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+
+        }
+        mMediaTrackView.onTouchEvent(event);
+        if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+
+        }
+        return true;
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        drawBorder(canvas);
-        drawMask(canvas);
+//        drawBorder(canvas);
+//        drawMask(canvas);
     }
 
     @Override
@@ -178,11 +199,11 @@ public class EditorTrackView extends FrameLayout {
         canvas.drawRect(bounds.left, bounds.top, 1000, bounds.bottom, mMaskPaint);
     }
 
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-
-        initCursor();
+    private void setBounds(Rect bounds, int left, int top, int right, int bottom) {
+        bounds.left = left;
+        bounds.top = top;
+        bounds.right = right;
+        bounds.bottom = bottom;
     }
 
     private void moveLeftThumb(int x) {
@@ -191,6 +212,22 @@ public class EditorTrackView extends FrameLayout {
 
     private void moveRightThumb(int x) {
 
+    }
+
+    private int getLeftThumbPosition() {
+        Object tag = mLeftThumb.getTag();
+        if (tag instanceof Integer) {
+            return (Integer) tag;
+        }
+        return 0;
+    }
+
+    private int getRightThumbPosition() {
+        Object tag = mRightThumb.getTag();
+        if (tag instanceof Integer) {
+            return (Integer) tag;
+        }
+        return 0;
     }
 
     public void setVideoPath(String videoPath) {
@@ -218,43 +255,15 @@ public class EditorTrackView extends FrameLayout {
         return mMediaTrackView.getMaxScale();
     }
 
-    public void setMaxScale(int maxScale) {
-        this.mMaxScale = maxScale;
-    }
-
-    public int getInterval() {
-        return mInterval;
-    }
-
-    public void setInterval(int interval) {
-        this.mInterval = interval;
-    }
-
-    public int getCount() {
-        return mCount;
-    }
-
-    public void setCount(int count) {
-        this.mCount = count;
-    }
-
     public void setCurrentScale(float currentPos) {
         mMediaTrackView.setCurrentScale((int) currentPos);
-    }
-
-    public float getFactor() {
-        return mFactor;
-    }
-
-    public void setFactor(float factor) {
-        this.mFactor = factor;
     }
 
     public HashMap<Integer, Bitmap> getThumbMap() {
         return mThumbMap;
     }
 
-    public void setOnTrackViewChangeListener(MediaTrackView.OnTrackViewChangeListener listener) {
+    public void setOnTrackViewChangeListener(EditorMediaTrackView.OnTrackViewChangeListener listener) {
         mMediaTrackView.setOnTrackViewChangeListener(listener);
     }
 }

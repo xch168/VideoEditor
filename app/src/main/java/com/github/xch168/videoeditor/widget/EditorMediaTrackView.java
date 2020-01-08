@@ -6,7 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.TypedValue;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -20,97 +20,74 @@ import com.github.xch168.videoeditor.util.SizeUtil;
 
 import java.util.Map;
 
-import androidx.annotation.NonNull;
-
 public class EditorMediaTrackView extends View {
     private Context mContext;
 
     private EditorTrackView mParent;
 
-    //加入放大倍数来防止精度丢失而导致无限绘制
-    protected static final int SCALE_TO_PX_FACTOR = 100;
-    private static final int MIN_SCROLL_DP = 1;
-    private float minScrollPx = MIN_SCROLL_DP;
-
     private OverScroller mScroller;
 
     private VelocityTracker mVelocityTracker;
-    // 最大惯性速度
-    private int mMaxVelocity;
-    // 最小惯性速度
     private int mMinVelocity;
+    private int mMaxVelocity;
 
-    private float mLastX = 0;
-
-    private int mLength;
-    private int mMaxLength;
-    private int mHalfWidth;
     private int mMinPosition;
     private int mMaxPosition;
 
-    private int mDrawOffset;
-
+    private int mMinScale = 0;
+    private int mMaxScale = 1000;
+    private int mScaleLength;
     private float mCurrentScale = 0;
 
-    private Paint mScalePaint;
-    private Paint mBigScalePaint;
-    private Paint mTextPaint;
+    private int mHalfWidth;
 
-    private Paint mBitmapPaint;
-    private Bitmap mDefaultBitmap;
+    private int mLength;
+    private int mItemSize;
+    private int mItemCount;
+
+    private int mInterval;
+
+    private Paint mThumbPaint;
+    private Bitmap mDefaultThumb;
+
+    private int mDrawOffset;
+
+    private Paint mTextPaint;
 
     private Map<Integer, Bitmap> mThumbMap;
 
-    private int mItemSize;
+    private float mLastX;
 
-    private int mCount;
+    private boolean mIsTrackingByUser = false;
+    private OnTrackViewChangeListener mOnTrackViewChangeListener;
 
-    public EditorMediaTrackView(@NonNull Context context, EditorTrackView parent) {
+    public EditorMediaTrackView(Context context, EditorTrackView parent) {
         super(context);
         mContext = context;
         mParent = parent;
-
-        mCount = mParent.getCount();
-
-        mThumbMap = mParent.getThumbMap();
-
-        mItemSize = SizeUtil.dp2px(context, 38);
-        mDefaultBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_default);
-        mDefaultBitmap = Bitmap.createScaledBitmap(mDefaultBitmap, mItemSize, mItemSize, true);
 
         initView();
     }
 
     private void initView() {
-        mMaxLength = mParent.getMaxScale() - mParent.getMinScale();
-
-        mDrawOffset = mCount * mParent.getInterval() / 2;
-
-        minScrollPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, MIN_SCROLL_DP, mContext.getResources().getDisplayMetrics());
+        mItemSize = SizeUtil.dp2px(mContext, 38);
 
         mScroller = new OverScroller(mContext);
+
         mVelocityTracker = VelocityTracker.obtain();
-        mMaxVelocity = ViewConfiguration.get(mContext).getScaledMaximumFlingVelocity();
         mMinVelocity = ViewConfiguration.get(mContext).getScaledMinimumFlingVelocity();
+        mMaxVelocity = ViewConfiguration.get(mContext).getScaledMaximumFlingVelocity();
 
-        mScalePaint = new Paint();
-        mScalePaint.setColor(getResources().getColor(R.color.colorAccent));
-        mScalePaint.setStrokeWidth(1);
-        mScalePaint.setStrokeCap(Paint.Cap.ROUND);
-
-        mBigScalePaint = new Paint();
-        mBigScalePaint.setColor(getResources().getColor(R.color.colorAccent));
-        mBigScalePaint.setStrokeWidth(1);
-        mBigScalePaint.setStrokeCap(Paint.Cap.ROUND);
-
-        mBitmapPaint = new Paint(1);
-        mBitmapPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-
-        mTextPaint = new Paint();
-        mTextPaint.setAntiAlias(true);
+        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setColor(getResources().getColor(R.color.colorAccent));
-        mTextPaint.setTextSize(14);
+        mTextPaint.setTextSize(28);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
+
+        mThumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mThumbPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+        mDefaultThumb = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_default);
+        mDefaultThumb = Bitmap.createScaledBitmap(mDefaultThumb, mItemSize, mItemSize, true);
 
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -122,83 +99,60 @@ public class EditorMediaTrackView extends View {
     }
 
     @Override
-    public void computeScroll() {
-        if (mScroller.computeScrollOffset()) {
-            scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
-
-            if (!mScroller.computeScrollOffset()) {
-                int currentScale = Math.round(mCurrentScale);
-                if ((Math.abs(mCurrentScale - currentScale) > 0.001f)) {
-                    scrollBackToCurrentScale(currentScale);
-                }
-            }
-            postInvalidate();
-        }
-
-    }
-
-    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
         int mode = MeasureSpec.getMode(heightMeasureSpec);
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(mItemSize, mode);
         setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
-        drawScale(canvas);
-    }
-
-    private void drawScale(Canvas canvas) {
-        float start = (getScrollX() - mDrawOffset) / mParent.getInterval() + mParent.getMinScale();
-        float end = (getScrollX() + canvas.getWidth() + mDrawOffset) / mParent.getInterval() + mParent.getMinScale();
-        for (float i = start; i <= end; i++) {
-            //将要刻画的刻度转化为位置信息
-            float locationX = (i - mParent.getMinScale()) * mParent.getInterval();
-
-            if (i >= mParent.getMinScale() && i <= mParent.getMaxScale()) {
-                if (i % mCount == 0) {
-                    if ((int) i != mParent.getMaxScale()) {
-                        int index = (int) (Float.parseFloat(valueOfScale(i, mParent.getFactor())) / 50);
-                        Bitmap thumbBitmap = mThumbMap.get(index);
-                        if (thumbBitmap != null) {
-                            canvas.drawBitmap(thumbBitmap, locationX, 0f, mBitmapPaint);
-                        } else {
-                            canvas.drawBitmap(mDefaultBitmap, locationX, 0f, mBitmapPaint);
-                        }
-                    }
-                    //canvas.drawLine(locationX, 0, locationX, 30, mBigScalePaint);
-                    //canvas.drawText(valueOfScale(i, mParent.getFactor()), locationX, 40, mTextPaint);
-                } else {
-                    //canvas.drawLine(locationX, 0, locationX, 15, mScalePaint);
-                }
-            }
-        }
-    }
-
-    private float factorCache = 0;
-    private String valueOfScale(float scale, float factor) {
-        float dividerCache = 1;
-        if (factor >= 1) {
-            return String.valueOf((int)(scale * factor));
-        } else if (factor > 0) {
-            if (factorCache != factor) {
-                factorCache = factor;
-                dividerCache = 1 / factor;
-            }
-            return String.valueOf(scale / dividerCache);
-        }
-        return "";
-    }
-
-    @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         refreshSize();
+    }
+
+    private void refreshSize() {
+        mLength = mItemSize * mItemCount;
+        mScaleLength = mLength;
+        mHalfWidth = getWidth() / 2;
+        mMinPosition = -mHalfWidth;
+        mMaxPosition = mLength - mHalfWidth;
+        mInterval = mLength / mScaleLength;
+        mMaxScale = mLength;
+        mDrawOffset = mItemSize / 2;
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        drawThumbnail(canvas);
+    }
+
+    private void drawThumbnail(Canvas canvas) {
+        float start = (getScrollX() - mDrawOffset) + mMinScale;
+        float end = (getScrollX() + mDrawOffset + getWidth()) + mMinScale;
+        Log.i("asdf", "scrollX:" + getScrollX() + " start:" + start + " end:" + end + " ==> itemSize:" + mItemSize + " itemCount:" + mItemCount  + " length:" + mLength + " || minP:" + mMinPosition + " maxP:" + mMaxPosition);
+        for (float scale = start; scale <= end; scale++) {
+            if (isADrawScale(scale)) {
+                float locationX = (scale - mMinScale) * mInterval;
+                Log.i("asdf", "draw:" + scale + " pos:" + locationX);
+                int index = positionToThumbIndex(locationX);
+                Bitmap drawThumb = mDefaultThumb;
+                if (mThumbMap != null && mThumbMap.get(index) != null) {
+                    drawThumb = mThumbMap.get(index);
+                }
+                canvas.drawBitmap(drawThumb, locationX, 0, mThumbPaint);
+//                canvas.drawText("" + (index + 1), locationX + 28, 38, mTextPaint);
+            }
+        }
+    }
+
+    private boolean isADrawScale(float scale) {
+        return scale >= mMinScale && scale <= mMaxScale && scale % mItemSize == 0 && scale != mMaxScale;
+    }
+
+    private int positionToThumbIndex(float pos) {
+        return (int) ((pos - mMinScale) / mItemSize);
     }
 
     @Override
@@ -215,9 +169,13 @@ public class EditorMediaTrackView extends View {
                     mScroller.abortAnimation();
                 }
                 mLastX = currentX;
+                if (mOnTrackViewChangeListener != null) {
+                    mOnTrackViewChangeListener.onStartTrackingTouch();
+                }
                 parent.requestDisallowInterceptTouchEvent(true);
                 break;
             case MotionEvent.ACTION_MOVE:
+                mIsTrackingByUser = true;
                 float moveX = mLastX - currentX;
                 mLastX = currentX;
                 scrollBy((int) moveX, 0);
@@ -227,8 +185,6 @@ public class EditorMediaTrackView extends View {
                 int velocityX = (int) mVelocityTracker.getXVelocity();
                 if (Math.abs(velocityX) > mMinVelocity) {
                     fling(-velocityX);
-                } else {
-                    scrollBackToCurrentScale();
                 }
                 recycleVelocityTracker();
                 parent.requestDisallowInterceptTouchEvent(false);
@@ -237,17 +193,11 @@ public class EditorMediaTrackView extends View {
                 if (!mScroller.isFinished()) {
                     mScroller.abortAnimation();
                 }
-                scrollBackToCurrentScale();
                 recycleVelocityTracker();
                 parent.requestDisallowInterceptTouchEvent(false);
                 break;
         }
         return true;
-    }
-
-    private void fling(int vX) {
-        mScroller.fling(getScrollX(), 0 , vX, 0, mMinPosition, mMaxPosition, 0, 0);
-        invalidate();
     }
 
     @Override
@@ -262,45 +212,35 @@ public class EditorMediaTrackView extends View {
             super.scrollTo(x, y);
         }
         mCurrentScale = scrollXToScale(x);
+        if (mOnTrackViewChangeListener != null && mIsTrackingByUser) {
+            mOnTrackViewChangeListener.onScaleChanged((int) mCurrentScale);
+        }
+    }
+
+    @Override
+    public void computeScroll() {
+        if (mScroller.computeScrollOffset()) {
+            scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+            postInvalidate();
+        }
+    }
+
+    private void fling(int vX) {
+        mScroller.fling(getScrollX(), 0, vX, 0, mMinPosition, mMaxPosition, 0, 0);
+        invalidate();
     }
 
     private void goToScale(float scale) {
-        mCurrentScale = Math.round(scale);
+        mCurrentScale = scale;
         scrollTo(scaleToScrollX(mCurrentScale), 0);
     }
 
     private int scaleToScrollX(float scale) {
-        return (int) ((scale - mParent.getMinScale()) / mMaxLength * mLength + mMinPosition);
+        return (int) ((scale - mMinScale) / mScaleLength * mLength + mMinPosition);
     }
 
     private float scrollXToScale(int scrollX) {
-        return ((float) (scrollX - mMinPosition) / mLength) * mMaxLength + mParent.getMinScale();
-    }
-
-    private void scrollBackToCurrentScale() {
-        scrollBackToCurrentScale(Math.round(mCurrentScale));
-    }
-
-    private void scrollBackToCurrentScale(int scale) {
-        float scrollX = scaleToScrollFloatX(scale);
-        int dx = Math.round((scrollX - SCALE_TO_PX_FACTOR * getScrollX()) / SCALE_TO_PX_FACTOR);
-        if (dx > minScrollPx) {
-            mScroller.startScroll(getScrollX(), getScrollY(), dx, 0, 500);
-            invalidate();
-        } else {
-            scrollBy(dx, 0);
-        }
-    }
-
-    private float scaleToScrollFloatX(float scale) {
-        return (((scale - mParent.getMinScale()) / mMaxLength * mLength * SCALE_TO_PX_FACTOR) + mMinPosition * SCALE_TO_PX_FACTOR);
-    }
-
-    private void refreshSize() {
-        mLength = (mParent.getMaxScale() - mParent.getMinScale()) * mParent.getInterval();
-        mHalfWidth = getWidth() / 2;
-        mMinPosition = -mHalfWidth;
-        mMaxPosition = mLength - mHalfWidth;
+        return ((float)(scrollX - mMinPosition) / mLength) * mScaleLength + mMinScale;
     }
 
     private void recycleVelocityTracker() {
@@ -310,25 +250,34 @@ public class EditorMediaTrackView extends View {
         }
     }
 
-    public void setCurrentScale(float currentScale) {
-        mCurrentScale = currentScale;
-        goToScale(mCurrentScale);
+    public void setThumbMap(Map<Integer, Bitmap> map) {
+        mThumbMap = map;
     }
 
-    @Override
-    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        super.onScrollChanged(l, t, oldl, oldt);
-    }
-
-    public float getCurrentScale() {
-        return mCurrentScale;
+    public void setCurrentScale(int scale) {
+        mIsTrackingByUser = false;
+        goToScale(scale);
     }
 
     public int getItemSize() {
         return mItemSize;
     }
 
-    public void setVideoPath(String path) {
-
+    public void setItemCount(int count) {
+        mItemCount = count;
     }
+
+    public int getMaxScale() {
+        return mMaxScale;
+    }
+
+    public void setOnTrackViewChangeListener(OnTrackViewChangeListener listener) {
+        mOnTrackViewChangeListener = listener;
+    }
+
+    public interface OnTrackViewChangeListener {
+        void onStartTrackingTouch();
+        void onScaleChanged(int scale);
+    }
+
 }
