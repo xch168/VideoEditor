@@ -39,12 +39,6 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
     private String mVideoPath;
     private long mVideoDuration;
 
-    private long mStartTime;
-    private long mEndTime;
-    private long mTotalTime;
-
-    private boolean needPlayStart;
-
     @SuppressLint("HandlerLeak")
     private Handler mUiHandler = new Handler() {
 
@@ -131,6 +125,14 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
 
     @Override
     public void onClick(View v) {
+        handlePlayStateSwitch();
+    }
+
+    public void handlePlaySwitch(View view) {
+        handlePlayStateSwitch();
+    }
+
+    private void handlePlayStateSwitch() {
         if (!mVideoView.isInPlaybackState()) {
             mVideoView.start();
             return;
@@ -141,33 +143,34 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
             if (mVideoView.getState() == IPlayer.STATE_PLAYBACK_COMPLETE) {
                 mVideoView.start(0);
             } else {
-                if (!needPlayStart) {
-                    mVideoView.resume();
-                } else {
-                    mVideoView.seekTo((int) mStartTime);
-                    mVideoView.start();
-                }
+                mVideoView.resume();
             }
-        }
-    }
-
-    public void handlePlaySwitch(View view) {
-        if (mVideoView.isPlaying()) {
-            mVideoView.pause();
-        } else {
-            mVideoView.resume();
         }
     }
 
     public void handleCutting(View view) {
         Log.i("asdf", "cut:" + mEditorTrackView.getCurrentScale() + " time:" + mVideoView.getCurrentPosition());
+        int currentPartIndex = getCurrentPartIndex();
+        VideoPartInfo currentPartInfo = mEditorTrackView.getVideoPartInfo(currentPartIndex);
+        if (currentPartInfo != null) {
+            VideoPartInfo videoPartInfo = new VideoPartInfo();
+            videoPartInfo.setStartTime(mVideoView.getCurrentPosition());
+            videoPartInfo.setEndTime(currentPartInfo.getEndTime());
+            videoPartInfo.setStartScale(mEditorTrackView.getCurrentScale());
+            videoPartInfo.setEndScale(currentPartInfo.getEndScale());
 
-        VideoPartInfo videoPartInfo = new VideoPartInfo();
-    }
+            currentPartInfo.setEndTime(mVideoView.getCurrentPosition());
+            currentPartInfo.setEndScale(mEditorTrackView.getCurrentScale());
 
-    private int getCurrentPartIndex() {
-        int currentScale = mEditorTrackView.getCurrentScale();
-        return 0;
+            mEditorTrackView.getVideoPartInfoList().add(currentPartIndex + 1, videoPartInfo);
+            mEditorTrackView.update();
+
+            if (!mDelBtn.isEnabled()) {
+                mDelBtn.setEnabled(true);
+            }
+            mCutBtn.setEnabled(false);
+        }
+        printAllVideoPartInfo();
     }
 
     public void handleRevoke(View view) {
@@ -190,7 +193,31 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
 
     private void updateCuttingBtnState() {
         int currentPos = mVideoView.getCurrentPosition();
-        mCutBtn.setEnabled(currentPos >= 1000 && currentPos <= mVideoView.getDuration() - 1000);
+        VideoPartInfo curPartInfo = mEditorTrackView.getVideoPartInfo(getCurrentPartIndex());
+        if (curPartInfo != null) {
+            int diffStart = currentPos - curPartInfo.getStartTime();
+            int diffEnd = curPartInfo.getEndTime() - currentPos;
+            mCutBtn.setEnabled(diffStart >= 1000 && diffEnd >= 1000);
+        }
+    }
+
+    private int getCurrentPartIndex() {
+        for (int i = 0; i < mEditorTrackView.getVideoPartInfoList().size(); i++) {
+            VideoPartInfo partInfo = mEditorTrackView.getVideoPartInfoList().get(i);
+            if (partInfo.inTimeRange(mVideoView.getCurrentPosition())) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void printAllVideoPartInfo() {
+        Log.i("part", "======================start===========================");
+        for (int i = 0; i < mEditorTrackView.getVideoPartInfoList().size(); i++) {
+            VideoPartInfo partInfo = mEditorTrackView.getVideoPartInfoList().get(i);
+            Log.i("asdf", "part:" + i + " ==> startT:" + partInfo.getStartTime() + " endT:" + partInfo.getEndTime() + " --> startS:" + partInfo.getStartScale() + " endS:" + partInfo.getEndScale());
+        }
+        Log.i("part", "----------------------end---------------------------");
     }
 
     @Override

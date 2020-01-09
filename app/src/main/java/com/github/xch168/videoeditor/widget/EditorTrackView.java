@@ -110,6 +110,12 @@ public class EditorTrackView extends FrameLayout {
         mMediaTrackView = new EditorMediaTrackView(mContext, this);
         mMediaTrackView.setThumbMap(mThumbMap);
         mMediaTrackView.setLayoutParams(layoutParams);
+        mMediaTrackView.setOnScrollChangeListener(new EditorMediaTrackView.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(int scrollX) {
+                updateThumbPosition(scrollX);
+            }
+        });
     }
 
     private void initCursor() {
@@ -161,9 +167,6 @@ public class EditorTrackView extends FrameLayout {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-
-        updateThumbPosition();
-
         drawBorder(canvas);
 //        drawMask(canvas);
     }
@@ -203,9 +206,22 @@ public class EditorTrackView extends FrameLayout {
         bounds.bottom = bottom;
     }
 
-    private void updateThumbPosition() {
-        moveLeftThumb(-mMediaTrackView.getScrollX());
-        moveRightThumb(mMediaTrackView.getMaxScale() - mMediaTrackView.getScrollX());
+    private void updateThumbPosition(int scrollX) {
+        VideoPartInfo currentPartInfo = getCurrentPartInfo();
+        if (currentPartInfo != null) {
+            moveLeftThumb(currentPartInfo.getStartScale() - scrollX);
+            moveRightThumb(currentPartInfo.getEndScale() - scrollX);
+        }
+    }
+
+    private VideoPartInfo getCurrentPartInfo() {
+        for (int i = 0; i < mVideoPartInfoList.size(); i++) {
+            VideoPartInfo videoPartInfo = mVideoPartInfoList.get(i);
+            if (videoPartInfo.inScaleRange(mMediaTrackView.getCurrentScale())) {
+                return videoPartInfo;
+            }
+        }
+        return null;
     }
 
     private void moveLeftThumb(int x) {
@@ -234,6 +250,11 @@ public class EditorTrackView extends FrameLayout {
         return 0;
     }
 
+    public void update() {
+        updateThumbPosition(mMediaTrackView.getScrollX());
+        invalidate();
+    }
+
     public void setVideoPath(String videoPath) {
         mFrameExtractor.setDataSource(videoPath);
         mFrameExtractor.setDstSize(mMediaTrackView.getItemSize(), mMediaTrackView.getItemSize());
@@ -248,9 +269,9 @@ public class EditorTrackView extends FrameLayout {
 
         VideoPartInfo videoPartInfo = new VideoPartInfo();
         videoPartInfo.setStartTime(0);
-        videoPartInfo.setEndTime(mFrameExtractor.getVideoDuration());
-        videoPartInfo.setStartPosition(0);
-        videoPartInfo.setEndPosition(mMediaTrackView.getMaxScale());
+        videoPartInfo.setEndTime((int) mFrameExtractor.getVideoDuration());
+        videoPartInfo.setStartScale(0);
+        videoPartInfo.setEndScale(mMediaTrackView.getMaxScale());
         mVideoPartInfoList.add(videoPartInfo);
     }
 
@@ -272,6 +293,17 @@ public class EditorTrackView extends FrameLayout {
 
     public int getCurrentScale() {
         return mMediaTrackView.getCurrentScale();
+    }
+
+    public List<VideoPartInfo> getVideoPartInfoList() {
+        return mVideoPartInfoList;
+    }
+
+    public VideoPartInfo getVideoPartInfo(int index) {
+        if (index >= 0 && index < mVideoPartInfoList.size()) {
+            return mVideoPartInfoList.get(index);
+        }
+        return null;
     }
 
     public HashMap<Integer, Bitmap> getThumbMap() {
