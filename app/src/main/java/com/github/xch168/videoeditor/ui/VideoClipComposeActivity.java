@@ -165,9 +165,7 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
             mEditorTrackView.getVideoPartInfoList().add(currentPartIndex + 1, videoPartInfo);
             mEditorTrackView.update();
 
-            if (!mDelBtn.isEnabled()) {
-                mDelBtn.setEnabled(true);
-            }
+            updateDelBtnState();
             mCutBtn.setEnabled(false);
         }
         printAllVideoPartInfo();
@@ -178,7 +176,13 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
     }
 
     public void handleDel(View view) {
+        VideoPartInfo curPartInfo = mEditorTrackView.getVideoPartInfo(getCurrentPartIndex());
+        if (curPartInfo != null) {
+            mEditorTrackView.getVideoPartInfoList().remove(curPartInfo);
+        }
 
+        updateDelBtnState();
+        printAllVideoPartInfo();
     }
 
     @SuppressLint("SetTextI18n")
@@ -199,6 +203,10 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
             int diffEnd = curPartInfo.getEndTime() - currentPos;
             mCutBtn.setEnabled(diffStart >= 1000 && diffEnd >= 1000);
         }
+    }
+
+    private void updateDelBtnState() {
+        mDelBtn.setEnabled(mEditorTrackView.getVideoPartInfoList().size() > 1);
     }
 
     private int getCurrentPartIndex() {
