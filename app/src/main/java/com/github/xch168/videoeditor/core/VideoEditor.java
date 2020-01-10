@@ -9,19 +9,25 @@ import com.github.xch168.ffmpeg_cmd.FFmpegCmd;
 import com.github.xch168.videoeditor.entity.Video;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 public class VideoEditor {
     private static final String TAG = "VideoEditor";
 
     public static void cropVideo(String videoPath, long startTime, long endTime, OnEditListener listener) {
-        long duration = endTime - startTime;
+        cropVideo(videoPath, getSavePath(), startTime, endTime, listener);
+    }
+
+    public static void cropVideo(String videoPath, String dstPath, long startTime, long endTime, OnEditListener listener) {
+        ;long duration = endTime - startTime;
         CmdList cmd = new CmdList();
         cmd.append("ffmpeg");
         cmd.append("-y");
         cmd.append("-ss").append(startTime/ 1000).append("-t").append(duration / 1000).append("-accurate_seek");
         cmd.append("-i").append(videoPath);
-        cmd.append("-codec").append("copy").append(getSavePath());
+        cmd.append("-codec").append("copy").append(dstPath);
 
         execCmd(cmd, duration, listener);
     }
@@ -57,6 +63,47 @@ public class VideoEditor {
         cmd.append(getSavePath());
 
         execCmd(cmd, duration, listener);
+    }
+
+    public static void mergeVideo2(List<Video> videoList, OnEditListener listener) {
+        long duration = 0;
+        for (int i = 0; i < videoList.size(); i++) {
+            Video video = videoList.get(i);
+            duration += video.getDuration();
+        }
+        CmdList cmd = new CmdList();
+        cmd.append("ffmpeg");
+        cmd.append("-f");
+        cmd.append("concat");
+        cmd.append("-i");
+        cmd.append(createPartListFile(videoList));
+        cmd.append("-c").append("copy");
+        cmd.append(getSavePath());
+
+        execCmd(cmd, duration, listener);
+    }
+
+    private static String createPartListFile(List<Video> videoList) {
+        String path = Environment.getExternalStorageDirectory().getPath() + "/VideoEditor/partList.txt";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < videoList.size(); i++) {
+            Video video = videoList.get(i);
+            sb.append("file ").append("'").append(video.getVideoPath()).append("'").append("\n");
+        }
+        File partListFile = new File(path);
+        partListFile.deleteOnExit();
+        try {
+            boolean success = partListFile.createNewFile();
+            if (success) {
+                FileWriter fileWriter = new FileWriter(partListFile);
+                fileWriter.write(sb.toString());
+                fileWriter.flush();
+                fileWriter.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return path;
     }
 
     public static void addPictureWatermark(String videoPath, long duration, String watermarkPath, OnEditListener listener) {

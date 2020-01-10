@@ -34,7 +34,7 @@ public class VideoPartInfo {
 
     public int getDuration()
     {
-        return duration;
+        return endTime - startTime;
     }
 
     public void setDuration(int duration)
@@ -78,5 +78,16 @@ public class VideoPartInfo {
 
     public boolean inScaleRange(int scale) {
         return scale >= startScale && scale < endScale;
+    }
+
+    public VideoPartInfo copy() {
+        VideoPartInfo partInfo = new VideoPartInfo();
+        partInfo.startTime = startTime;
+        partInfo.endTime = endTime;
+        partInfo.duration = duration;
+        partInfo.bounds = new Rect();
+        partInfo.startScale = startScale;
+        partInfo.endScale = endScale;
+        return partInfo;
     }
 }
