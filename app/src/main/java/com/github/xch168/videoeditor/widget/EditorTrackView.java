@@ -42,12 +42,15 @@ public class EditorTrackView extends FrameLayout {
     private int mMaxScale = 3000;
 
     private int mBorderHeight;
+    private int mHalfThumbWidth;
 
     private HashMap<Integer, Bitmap> mThumbMap = new HashMap<>();
 
     private FrameExtractor mFrameExtractor;
 
     private Rect mBounds = new Rect();
+    private Rect mLeftThumbBounds = new Rect();
+    private Rect mRightThumbBounds = new Rect();
 
     private List<VideoPartInfo> mVideoPartInfoList = new ArrayList<>();
 
@@ -141,7 +144,7 @@ public class EditorTrackView extends FrameLayout {
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
+        mHalfThumbWidth = mLeftThumb.getMeasuredWidth() / 2;
 
         initCursor();
     }
@@ -165,38 +168,33 @@ public class EditorTrackView extends FrameLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
         drawBorder(canvas);
-//        drawMask(canvas);
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
 
+        drawMask(canvas);
         mCursorDrawable.draw(canvas);
     }
 
     private void drawBorder(Canvas canvas) {
-        Rect leftThumbBounds = new Rect();
-        Rect rightThumbBounds = new Rect();
-        mLeftThumb.getHitRect(leftThumbBounds);
-        mRightThumb.getHitRect(rightThumbBounds);
+        mLeftThumb.getHitRect(mLeftThumbBounds);
+        mRightThumb.getHitRect(mRightThumbBounds);
         // top
-        canvas.drawRect(leftThumbBounds.right, leftThumbBounds.top, rightThumbBounds.left,  rightThumbBounds.top + mBorderHeight, mBorderPaint);
+        canvas.drawRect(mLeftThumbBounds.right, mLeftThumbBounds.top, mRightThumbBounds.left,  mRightThumbBounds.top + mBorderHeight, mBorderPaint);
         // bottom
-        canvas.drawRect(leftThumbBounds.right, leftThumbBounds.bottom - mBorderHeight, rightThumbBounds.left, leftThumbBounds.bottom, mBorderPaint);
+        canvas.drawRect(mLeftThumbBounds.right, mLeftThumbBounds.bottom - mBorderHeight, mRightThumbBounds.left, mLeftThumbBounds.bottom, mBorderPaint);
     }
 
     private void drawMask(Canvas canvas) {
-        Rect bounds = new Rect();
         // left
-        mLeftThumb.getHitRect(bounds);
-        canvas.drawRect(0, bounds.top, bounds.right, bounds.bottom, mMaskPaint);
+        mLeftThumb.getHitRect(mLeftThumbBounds);
+        canvas.drawRect(-mMediaTrackView.getScrollX(), mLeftThumbBounds.top + mBorderHeight, mLeftThumbBounds.left + mHalfThumbWidth, mLeftThumbBounds.bottom - mBorderHeight, mMaskPaint);
         // right
-        mRightThumb.getHitRect(bounds);
-        canvas.drawRect(bounds.left, bounds.top, 1000, bounds.bottom, mMaskPaint);
+        mRightThumb.getHitRect(mRightThumbBounds);
+        canvas.drawRect(mRightThumbBounds.right - mHalfThumbWidth, mRightThumbBounds.top + mBorderHeight, mMediaTrackView.getMaxScale() - mMediaTrackView.getScrollX(), mRightThumbBounds.bottom - mBorderHeight, mMaskPaint);
     }
 
     private void setBounds(Rect bounds, int left, int top, int right, int bottom) {
