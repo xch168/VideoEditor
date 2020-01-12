@@ -245,16 +245,21 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
     };
 
     private float calcCurrentProgress(float progress) {
-        VideoPartInfo partInfo = mPendingHandleVideoPartList.get(mCurrentIndex);
-        int currentTime = 0;
-        for (int i = 0; i < mCurrentIndex; i++) {
-            VideoPartInfo part = mPendingHandleVideoPartList.get(i);
-            currentTime += part.getDuration();
-            Log.i("asdf", "gg:" + part.getDuration());
+        if (progress > 1) {
+            progress = 1;
         }
-        currentTime += (progress * partInfo.getDuration());
+        int currentTime = 0;
+        if (mCurrentIndex != -1) {
+            VideoPartInfo partInfo = mPendingHandleVideoPartList.get(mCurrentIndex);
+            for (int i = 0; i < mCurrentIndex; i++) {
+                VideoPartInfo part = mPendingHandleVideoPartList.get(i);
+                currentTime += part.getDuration();
+            }
+            currentTime += (progress * partInfo.getDuration());
+        } else {
+            currentTime = (int) ((1 + progress) * mTotalTime / 2);
+        }
         progress = (float)currentTime / mTotalTime;
-        Log.i("asdf", "gg:current:" + currentTime + " total:" + mTotalTime + " progress:" + progress);
         return progress;
     }
 
@@ -279,6 +284,7 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
 
     private void mergeVideo() {
         if (!mVideoPartList.isEmpty()) {
+            mCurrentIndex = -1;
             VideoEditor.mergeVideo2(mVideoPartList, mOnEditListener);
         }
     }
@@ -289,6 +295,7 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
         mPendingHandleVideoPartList = mergeConsecutiveParts();
         mVideoPartList.clear();
         mTotalTime = calcTotalTime();
+        mCurrentIndex = 0;
         cutVideo(mCurrentIndex);
     }
 
