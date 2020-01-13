@@ -60,6 +60,7 @@ public class EditorMediaTrackView extends View {
 
     private boolean mIsTrackingByUser = false;
     private OnTrackViewChangeListener mOnTrackViewChangeListener;
+    private OnScrollChangeListener mOnScrollChangeListener;
 
     public EditorMediaTrackView(Context context, EditorTrackView parent) {
         super(context);
@@ -228,6 +229,14 @@ public class EditorMediaTrackView extends View {
         }
     }
 
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        super.onScrollChanged(l, t, oldl, oldt);
+        if (mOnScrollChangeListener != null) {
+            mOnScrollChangeListener.onScrollChange(l);
+        }
+    }
+
     private void fling(int vX) {
         mScroller.fling(getScrollX(), 0, vX, 0, mMinPosition, mMaxPosition, 0, 0);
         invalidate();
@@ -262,12 +271,17 @@ public class EditorMediaTrackView extends View {
         goToScale(scale);
     }
 
+    public int getCurrentScale() {
+        return (int) mCurrentScale;
+    }
+
     public int getItemSize() {
         return mItemSize;
     }
 
     public void setItemCount(int count) {
         mItemCount = count;
+        mMaxScale = mItemCount * mItemSize;
     }
 
     public int getMaxScale() {
@@ -278,9 +292,17 @@ public class EditorMediaTrackView extends View {
         mOnTrackViewChangeListener = listener;
     }
 
+    public void setOnScrollChangeListener(OnScrollChangeListener listener) {
+        mOnScrollChangeListener = listener;
+    }
+
     public interface OnTrackViewChangeListener {
         void onStartTrackingTouch();
         void onScaleChanged(int scale);
+    }
+
+    public interface OnScrollChangeListener {
+        void onScrollChange(int scrollX);
     }
 
 }

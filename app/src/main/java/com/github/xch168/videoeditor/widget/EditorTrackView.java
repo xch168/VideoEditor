@@ -16,9 +16,12 @@ import android.widget.ImageView;
 
 import com.github.xch168.videoeditor.R;
 import com.github.xch168.videoeditor.core.FrameExtractor;
+import com.github.xch168.videoeditor.entity.VideoPartInfo;
 import com.github.xch168.videoeditor.util.SizeUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,12 +42,17 @@ public class EditorTrackView extends FrameLayout {
     private int mMaxScale = 3000;
 
     private int mBorderHeight;
+    private int mHalfThumbWidth;
 
     private HashMap<Integer, Bitmap> mThumbMap = new HashMap<>();
 
     private FrameExtractor mFrameExtractor;
 
     private Rect mBounds = new Rect();
+    private Rect mLeftThumbBounds = new Rect();
+    private Rect mRightThumbBounds = new Rect();
+
+    private List<VideoPartInfo> mVideoPartInfoList = new ArrayList<>();
 
     public EditorTrackView(@NonNull Context context) {
         this(context, null);
@@ -105,6 +113,12 @@ public class EditorTrackView extends FrameLayout {
         mMediaTrackView = new EditorMediaTrackView(mContext, this);
         mMediaTrackView.setThumbMap(mThumbMap);
         mMediaTrackView.setLayoutParams(layoutParams);
+        mMediaTrackView.setOnScrollChangeListener(new EditorMediaTrackView.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(int scrollX) {
+                updateThumbPosition(scrollX);
+            }
+        });
     }
 
     private void initCursor() {
@@ -130,7 +144,7 @@ public class EditorTrackView extends FrameLayout {
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
+        mHalfThumbWidth = mLeftThumb.getMeasuredWidth() / 2;
 
         initCursor();
     }
@@ -154,41 +168,33 @@ public class EditorTrackView extends FrameLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
-
-        updateThumbPosition();
-
         drawBorder(canvas);
-//        drawMask(canvas);
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
 
+        drawMask(canvas);
         mCursorDrawable.draw(canvas);
     }
 
     private void drawBorder(Canvas canvas) {
-        Rect leftThumbBounds = new Rect();
-        Rect rightThumbBounds = new Rect();
-        mLeftThumb.getHitRect(leftThumbBounds);
-        mRightThumb.getHitRect(rightThumbBounds);
+        mLeftThumb.getHitRect(mLeftThumbBounds);
+        mRightThumb.getHitRect(mRightThumbBounds);
         // top
-        canvas.drawRect(leftThumbBounds.right, leftThumbBounds.top, rightThumbBounds.left,  rightThumbBounds.top + mBorderHeight, mBorderPaint);
+        canvas.drawRect(mLeftThumbBounds.right, mLeftThumbBounds.top, mRightThumbBounds.left,  mRightThumbBounds.top + mBorderHeight, mBorderPaint);
         // bottom
-        canvas.drawRect(leftThumbBounds.right, leftThumbBounds.bottom - mBorderHeight, rightThumbBounds.left, leftThumbBounds.bottom, mBorderPaint);
+        canvas.drawRect(mLeftThumbBounds.right, mLeftThumbBounds.bottom - mBorderHeight, mRightThumbBounds.left, mLeftThumbBounds.bottom, mBorderPaint);
     }
 
     private void drawMask(Canvas canvas) {
-        Rect bounds = new Rect();
         // left
-        mLeftThumb.getHitRect(bounds);
-        canvas.drawRect(0, bounds.top, bounds.right, bounds.bottom, mMaskPaint);
+        mLeftThumb.getHitRect(mLeftThumbBounds);
+        canvas.drawRect(-mMediaTrackView.getScrollX(), mLeftThumbBounds.top + mBorderHeight, mLeftThumbBounds.left + mHalfThumbWidth, mLeftThumbBounds.bottom - mBorderHeight, mMaskPaint);
         // right
-        mRightThumb.getHitRect(bounds);
-        canvas.drawRect(bounds.left, bounds.top, 1000, bounds.bottom, mMaskPaint);
+        mRightThumb.getHitRect(mRightThumbBounds);
+        canvas.drawRect(mRightThumbBounds.right - mHalfThumbWidth, mRightThumbBounds.top + mBorderHeight, mMediaTrackView.getMaxScale() - mMediaTrackView.getScrollX(), mRightThumbBounds.bottom - mBorderHeight, mMaskPaint);
     }
 
     private void setBounds(Rect bounds, int left, int top, int right, int bottom) {
@@ -198,9 +204,22 @@ public class EditorTrackView extends FrameLayout {
         bounds.bottom = bottom;
     }
 
-    private void updateThumbPosition() {
-        moveLeftThumb(-mMediaTrackView.getScrollX());
-        moveRightThumb(mMediaTrackView.getMaxScale() - mMediaTrackView.getScrollX());
+    private void updateThumbPosition(int scrollX) {
+        VideoPartInfo currentPartInfo = getCurrentPartInfo();
+        if (currentPartInfo != null) {
+            moveLeftThumb(currentPartInfo.getStartScale() - scrollX);
+            moveRightThumb(currentPartInfo.getEndScale() - scrollX);
+        }
+    }
+
+    private VideoPartInfo getCurrentPartInfo() {
+        for (int i = 0; i < mVideoPartInfoList.size(); i++) {
+            VideoPartInfo videoPartInfo = mVideoPartInfoList.get(i);
+            if (videoPartInfo.inScaleRange(mMediaTrackView.getCurrentScale())) {
+                return videoPartInfo;
+            }
+        }
+        return null;
     }
 
     private void moveLeftThumb(int x) {
@@ -229,6 +248,11 @@ public class EditorTrackView extends FrameLayout {
         return 0;
     }
 
+    public void update() {
+        updateThumbPosition(mMediaTrackView.getScrollX());
+        invalidate();
+    }
+
     public void setVideoPath(String videoPath) {
         mFrameExtractor.setDataSource(videoPath);
         mFrameExtractor.setDstSize(mMediaTrackView.getItemSize(), mMediaTrackView.getItemSize());
@@ -240,6 +264,13 @@ public class EditorTrackView extends FrameLayout {
             }
         });
         mMediaTrackView.setItemCount((int) (mFrameExtractor.getVideoDuration() / 5000));
+
+        VideoPartInfo videoPartInfo = new VideoPartInfo();
+        videoPartInfo.setStartTime(0);
+        videoPartInfo.setEndTime((int) mFrameExtractor.getVideoDuration());
+        videoPartInfo.setStartScale(0);
+        videoPartInfo.setEndScale(mMediaTrackView.getMaxScale());
+        mVideoPartInfoList.add(videoPartInfo);
     }
 
     public int getMinScale() {
@@ -256,6 +287,21 @@ public class EditorTrackView extends FrameLayout {
 
     public void setCurrentScale(float currentPos) {
         mMediaTrackView.setCurrentScale((int) currentPos);
+    }
+
+    public int getCurrentScale() {
+        return mMediaTrackView.getCurrentScale();
+    }
+
+    public List<VideoPartInfo> getVideoPartInfoList() {
+        return mVideoPartInfoList;
+    }
+
+    public VideoPartInfo getVideoPartInfo(int index) {
+        if (index >= 0 && index < mVideoPartInfoList.size()) {
+            return mVideoPartInfoList.get(index);
+        }
+        return null;
     }
 
     public HashMap<Integer, Bitmap> getThumbMap() {

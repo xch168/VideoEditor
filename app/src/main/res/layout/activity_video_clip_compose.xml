@@ -123,5 +123,18 @@
         android:enabled="false"
         android:onClick="handleDel"/>
 
+    <Button
+        android:id="@+id/btn_handle_video"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="15dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/selector_fun_btn_bg"
+        android:enabled="false"
+        android:text="开始处理"
+        android:textColor="@drawable/selector_choose_next_btn_textcolor"
+        android:onClick="handleVideo"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
