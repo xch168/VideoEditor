@@ -333,7 +333,7 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
     private void updateProgress() {
         int currentPos = mVideoView.getCurrentPosition();
         mTimeView.setText(TimeUtil.getTimeSmartFormat(currentPos) + "/" + TimeUtil.getTimeSmartFormat(mVideoView.getDuration()));
-        float currentScale = (float)currentPos / mVideoView.getDuration() * mEditorTrackView.getMaxScale();
+        int currentScale = (int) ((float)currentPos / mVideoView.getDuration() * mEditorTrackView.getMaxScale());
         mEditorTrackView.setCurrentScale(currentScale);
 
         updateCuttingBtnState();
