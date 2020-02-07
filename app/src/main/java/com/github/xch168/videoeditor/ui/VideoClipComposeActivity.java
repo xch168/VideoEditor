@@ -54,12 +54,10 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
 
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_UPDATE_PROGRESS:
-                    updateProgress();
+            if (msg.what == MSG_UPDATE_PROGRESS) {
+                updateProgress();
 
-                    mUiHandler.sendEmptyMessageDelayed(MSG_UPDATE_PROGRESS, 100);
-                    break;
+                mUiHandler.sendEmptyMessageDelayed(MSG_UPDATE_PROGRESS, 100);
             }
         }
     };
@@ -113,7 +111,7 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
                 mVideoView.seekTo(scaleToCurrentTime(scale));
                 updateProgressText(currentPos);
 
-                updateCuttingBtnState();
+                updateCuBtnState();
             }
 
             private int scaleToCurrentTime(int scale) {
@@ -194,6 +192,8 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
             videoPartInfo.setEndTime(currentPartInfo.getEndTime());
             videoPartInfo.setStartScale(mEditorTrackView.getCurrentScale());
             videoPartInfo.setEndScale(currentPartInfo.getEndScale());
+            videoPartInfo.setInitOffset(calcInitOffset(videoPartInfo.getStartTime()));
+            videoPartInfo.setDrawOffset(calcDrawOffset(videoPartInfo.getStartScale()));
 
             currentPartInfo.setEndTime(mVideoView.getCurrentPosition());
             currentPartInfo.setEndScale(mEditorTrackView.getCurrentScale());
@@ -207,6 +207,15 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
             mCutBtn.setEnabled(false);
         }
         printAllVideoPartInfo();
+    }
+
+    private int calcInitOffset(long startTime) {
+        return Math.round((float)startTime / mVideoDuration * mEditorTrackView.getInitMaxScale());
+    }
+
+    private int calcDrawOffset(int startScale) {
+        int thumbSize = mEditorTrackView.getThumbSize();
+        return startScale % thumbSize;
     }
 
     public void handleRevoke(View view) {
@@ -278,7 +287,6 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
         mEditorHelper.handleVideo(mVideoPartInfoList, mVideoPath);
     }
 
-
     @SuppressLint("SetTextI18n")
     private void updateProgress() {
         int currentPos = mVideoView.getCurrentPosition();
@@ -286,10 +294,10 @@ public class VideoClipComposeActivity extends BaseActivity implements OnPlayerEv
         int currentScale = (int) ((float)currentPos / mVideoView.getDuration() * mEditorTrackView.getMaxScale());
         mEditorTrackView.setCurrentScale(currentScale);
 
-        updateCuttingBtnState();
+        updateCuBtnState();
     }
 
-    private void updateCuttingBtnState() {
+    private void updateCuBtnState() {
         VideoPartInfo curPartInfo = getCurrentPartInfo();
         if (curPartInfo != null) {
             int currentPos = mVideoView.getCurrentPosition();

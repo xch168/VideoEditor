@@ -12,6 +12,9 @@ public class VideoPartInfo {
     private int startScale;
     private int endScale;
 
+    private int drawOffset;
+    private int initOffset;
+
     public long getStartTime()
     {
         return startTime;
@@ -82,6 +85,22 @@ public class VideoPartInfo {
 
     public int getLength() {
         return endScale - startScale;
+    }
+
+    public int getDrawOffset() {
+        return drawOffset;
+    }
+
+    public void setDrawOffset(int drawOffset) {
+        this.drawOffset = drawOffset;
+    }
+
+    public int getInitOffset() {
+        return initOffset;
+    }
+
+    public void setInitOffset(int initOffset) {
+        this.initOffset = initOffset;
     }
 
     public VideoPartInfo clone() {

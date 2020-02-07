@@ -260,6 +260,14 @@ public class EditorTrackView extends FrameLayout {
         return mMediaTrackView.getCurrentScale();
     }
 
+    public int getInitMaxScale() {
+        return mMediaTrackView.getInitMaxScale();
+    }
+
+    public int getThumbSize() {
+        return mMediaTrackView.getThumbSize();
+    }
+
     public VideoPartInfo getVideoPartInfo(int index) {
         if (index >= 0 && index < mVideoPartInfoList.size()) {
             return mVideoPartInfoList.get(index);
