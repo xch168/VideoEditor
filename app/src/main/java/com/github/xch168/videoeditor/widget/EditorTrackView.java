@@ -21,7 +21,6 @@ import com.github.xch168.videoeditor.core.FrameExtractor;
 import com.github.xch168.videoeditor.entity.VideoPartInfo;
 import com.github.xch168.videoeditor.util.SizeUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class EditorTrackView extends FrameLayout {
@@ -44,7 +43,7 @@ public class EditorTrackView extends FrameLayout {
     private Rect mLeftThumbBounds = new Rect();
     private Rect mRightThumbBounds = new Rect();
 
-    private List<VideoPartInfo> mVideoPartInfoList = new ArrayList<>();
+    private List<VideoPartInfo> mVideoPartInfoList;
 
     public EditorTrackView(@NonNull Context context) {
         this(context, null);
@@ -86,18 +85,16 @@ public class EditorTrackView extends FrameLayout {
     private void initUIComponent() {
         mCursorDrawable = getResources().getDrawable(R.drawable.shape_cursor);
 
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, SizeUtil.dp2px(mContext, 40));
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(SizeUtil.dp2px(mContext, 12), SizeUtil.dp2px(mContext, 40));
         layoutParams.gravity = Gravity.CENTER_VERTICAL;
         mLeftThumb = new ImageView(mContext);
         mLeftThumb.setImageResource(R.drawable.ic_progress_left);
-        mLeftThumb.setScaleType(ImageView.ScaleType.FIT_END);
         mLeftThumb.setLayoutParams(layoutParams);
 
-        layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, SizeUtil.dp2px(mContext, 40));
+        layoutParams = new FrameLayout.LayoutParams(SizeUtil.dp2px(mContext, 12), SizeUtil.dp2px(mContext, 40));
         layoutParams.gravity = Gravity.CENTER_VERTICAL;
         mRightThumb = new ImageView(mContext);
         mRightThumb.setImageResource(R.drawable.ic_progress_right);
-        mRightThumb.setScaleType(ImageView.ScaleType.FIT_START);
         mRightThumb.setLayoutParams(layoutParams);
 
         layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -189,7 +186,7 @@ public class EditorTrackView extends FrameLayout {
         mRightThumb.getHitRect(mRightThumbBounds);
         left = mRightThumbBounds.right;
         right = mMediaTrackView.getMaxScale() - mMediaTrackView.getScrollX();
-        if (right > left) {
+        if (left < right) {
             canvas.drawRect(left, mRightThumbBounds.top + mBorderHeight, right, mRightThumbBounds.bottom - mBorderHeight, mMaskPaint);
         }
     }
@@ -202,7 +199,7 @@ public class EditorTrackView extends FrameLayout {
         }
     }
 
-    private VideoPartInfo getCurrentPartInfo() {
+    public VideoPartInfo getCurrentPartInfo() {
         for (int i = 0; i < mVideoPartInfoList.size(); i++) {
             VideoPartInfo videoPartInfo = mVideoPartInfoList.get(i);
             if (videoPartInfo.inScaleRange(mMediaTrackView.getCurrentScale())) {
@@ -245,15 +242,11 @@ public class EditorTrackView extends FrameLayout {
 
     public void setVideoPath(String videoPath) {
         mMediaTrackView.setVideoPath(videoPath);
-
-        VideoPartInfo videoPartInfo = new VideoPartInfo();
-        videoPartInfo.setStartTime(0);
-        videoPartInfo.setEndTime((int) mFrameExtractor.getVideoDuration());
-        videoPartInfo.setStartScale(0);
-        videoPartInfo.setEndScale(mMediaTrackView.getMaxScale());
-        mVideoPartInfoList.add(videoPartInfo);
     }
 
+    public void setMaxScale(int maxScale) {
+        mMediaTrackView.setMaxScale(maxScale);
+    }
 
     public int getMaxScale() {
         return mMediaTrackView.getMaxScale();
@@ -267,10 +260,6 @@ public class EditorTrackView extends FrameLayout {
         return mMediaTrackView.getCurrentScale();
     }
 
-    public List<VideoPartInfo> getVideoPartInfoList() {
-        return mVideoPartInfoList;
-    }
-
     public VideoPartInfo getVideoPartInfo(int index) {
         if (index >= 0 && index < mVideoPartInfoList.size()) {
             return mVideoPartInfoList.get(index);
@@ -280,5 +269,10 @@ public class EditorTrackView extends FrameLayout {
 
     public void setOnTrackViewChangeListener(EditorMediaTrackView.OnTrackViewChangeListener listener) {
         mMediaTrackView.setOnTrackViewChangeListener(listener);
+    }
+
+    public void setVideoPartInfoList(List<VideoPartInfo> videoPartInfoList) {
+        mVideoPartInfoList = videoPartInfoList;
+        mMediaTrackView.setVideoPartInfoList(videoPartInfoList);
     }
 }

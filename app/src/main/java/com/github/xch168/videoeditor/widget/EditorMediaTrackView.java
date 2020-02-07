@@ -18,10 +18,13 @@ import android.widget.OverScroller;
 
 import com.github.xch168.videoeditor.R;
 import com.github.xch168.videoeditor.core.FrameExtractor;
+import com.github.xch168.videoeditor.entity.VideoPartInfo;
 import com.github.xch168.videoeditor.util.SizeUtil;
 
+import java.util.List;
+
 public class EditorMediaTrackView extends View {
-    private static final int THUMB_INTERVAL = 5000;
+    private static final int THUMB_TIME_INTERVAL = 5000;
 
     private Context mContext;
 
@@ -37,6 +40,7 @@ public class EditorMediaTrackView extends View {
     private int mMinScale = 0;
     private int mMaxScale = 1000;
     private int mCurrentScale = 0;
+    private int mInitMaxScale;
     private int mLength;
 
     private int mThumbSize;
@@ -54,6 +58,8 @@ public class EditorMediaTrackView extends View {
     private boolean mIsTrackingByUser = false;
     private OnTrackViewChangeListener mOnTrackViewChangeListener;
     private OnScrollChangeListener mOnScrollChangeListener;
+
+    private List<VideoPartInfo> mVideoPartInfoList;
 
     public EditorMediaTrackView(Context context) {
         super(context);
@@ -110,19 +116,14 @@ public class EditorMediaTrackView extends View {
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
         refreshSize();
     }
 
     private void refreshSize() {
-        if (mFrameExtractor != null) {
-            int count = Math.round((float) mFrameExtractor.getVideoDuration() / THUMB_INTERVAL);
-            mLength = count * mThumbSize;
-        }
         int halfWidth = getWidth() / 2;
+        mLength = mMaxScale;
         mMinPosition = -halfWidth;
         mMaxPosition = mLength - halfWidth;
-        mMaxScale = mLength;
     }
 
     @Override
@@ -273,6 +274,12 @@ public class EditorMediaTrackView extends View {
         return mMaxScale;
     }
 
+    public void setMaxScale(int maxScale) {
+        mMaxScale = maxScale;
+        refreshSize();
+        invalidate();
+    }
+
     public void setVideoPath(String path) {
         loadVideoThumbnails(path);
     }
@@ -282,16 +289,21 @@ public class EditorMediaTrackView extends View {
             mFrameExtractor = new FrameExtractor();
         }
         mFrameExtractor.setVideoPath(path);
+        mInitMaxScale = calcInitMaxScale(mFrameExtractor.getVideoDuration());
+        setMaxScale(mInitMaxScale);
         mFrameExtractor.setDstSize(mThumbSize, mThumbSize);
-        mFrameExtractor.getFrameByInterval(THUMB_INTERVAL, new FrameExtractor.Callback() {
+        mFrameExtractor.getFrameByInterval(THUMB_TIME_INTERVAL, new FrameExtractor.Callback() {
             @Override
             public void onFrameExtracted(Bitmap bitmap, long timestamp) {
-                int index = (int) (timestamp / THUMB_INTERVAL);
+                int index = (int) (timestamp / THUMB_TIME_INTERVAL);
                 mThumbMap.put(index, bitmap);
                 invalidate();
             }
         });
-        refreshSize();
+    }
+
+    private int calcInitMaxScale(long duration) {
+        return (int) (duration / THUMB_TIME_INTERVAL * mThumbSize);
     }
 
     public void setOnTrackViewChangeListener(OnTrackViewChangeListener listener) {
@@ -300,6 +312,10 @@ public class EditorMediaTrackView extends View {
 
     public void setOnScrollChangeListener(OnScrollChangeListener listener) {
         mOnScrollChangeListener = listener;
+    }
+
+    public void setVideoPartInfoList(List<VideoPartInfo> videoPartInfoList) {
+        mVideoPartInfoList = videoPartInfoList;
     }
 
     public interface OnTrackViewChangeListener {

@@ -28,17 +28,17 @@ public class BaseActivity extends AppCompatActivity {
         mProgressDialog.setTitle("正在处理");
     }
 
-    protected void showProgressDialog() {
+    public void showProgressDialog() {
         mProgressDialog.setProgress(0);
         mProgressDialog.show();
     }
 
-    protected void hideProgressDialog() {
+    public void hideProgressDialog() {
         mProgressDialog.hide();
     }
 
-    protected void updateProgress(float progress) {
-        mProgressDialog.setProgress((int) (progress * 100));
+    public void updateProgress(float percent) {
+        mProgressDialog.setProgress((int) (percent * 100));
     }
 
     @Override

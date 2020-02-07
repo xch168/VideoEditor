@@ -65,45 +65,17 @@ public class VideoEditor {
         execCmd(cmd, duration, listener);
     }
 
-    public static void mergeVideo2(List<Video> videoList, OnEditListener listener) {
-        long duration = 0;
-        for (int i = 0; i < videoList.size(); i++) {
-            Video video = videoList.get(i);
-            duration += video.getDuration();
-        }
+    public static void mergeVideo2(String partListFile, long duration, OnEditListener listener) {
         CmdList cmd = new CmdList();
         cmd.append("ffmpeg");
         cmd.append("-f");
         cmd.append("concat");
         cmd.append("-i");
-        cmd.append(createPartListFile(videoList));
+        cmd.append(partListFile);
         cmd.append("-c").append("copy");
         cmd.append(getSavePath());
 
         execCmd(cmd, duration, listener);
-    }
-
-    private static String createPartListFile(List<Video> videoList) {
-        String path = Environment.getExternalStorageDirectory().getPath() + "/VideoEditor/partList.txt";
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < videoList.size(); i++) {
-            Video video = videoList.get(i);
-            sb.append("file ").append("'").append(video.getVideoPath()).append("'").append("\n");
-        }
-        File partListFile = new File(path);
-        partListFile.deleteOnExit();
-        try {
-            boolean success = partListFile.createNewFile();
-            if (success) {
-                FileWriter fileWriter = new FileWriter(partListFile);
-                fileWriter.write(sb.toString());
-                fileWriter.flush();
-                fileWriter.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return path;
     }
 
     public static void addPictureWatermark(String videoPath, long duration, String watermarkPath, OnEditListener listener) {
