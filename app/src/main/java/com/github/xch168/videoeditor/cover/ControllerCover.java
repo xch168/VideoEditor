@@ -328,6 +328,9 @@ public class ControllerCover extends BaseCover implements OnTimerUpdateListener,
     public void onSingleTapUp(MotionEvent event) {}
 
     @Override
+    public void onLongPress(MotionEvent event) {}
+
+    @Override
     public void onDoubleTap(MotionEvent event) {}
 
     @Override
