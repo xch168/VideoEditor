@@ -72,8 +72,8 @@
         android:id="@+id/tv_revoke"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintRight_toLeftOf="@+id/tv_cutting"
-        app:layout_constraintTop_toTopOf="@+id/tv_cutting"
+        app:layout_constraintRight_toLeftOf="@+id/tv_cut"
+        app:layout_constraintTop_toTopOf="@+id/tv_cut"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:layout_marginRight="25dp"
@@ -87,7 +87,7 @@
         android:onClick="handleRevoke"/>
 
     <TextView
-        android:id="@+id/tv_cutting"
+        android:id="@+id/tv_cut"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -103,14 +103,14 @@
         android:textSize="12sp"
         android:text="切割"
         android:enabled="false"
-        android:onClick="handleCutting"/>
+        android:onClick="handleCut"/>
 
     <TextView
         android:id="@+id/tv_del"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintLeft_toRightOf="@+id/tv_cutting"
-        app:layout_constraintTop_toTopOf="@+id/tv_cutting"
+        app:layout_constraintLeft_toRightOf="@+id/tv_cut"
+        app:layout_constraintTop_toTopOf="@+id/tv_cut"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:layout_marginLeft="25dp"

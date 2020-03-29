@@ -4,35 +4,38 @@ package com.github.xch168.videoeditor.entity;
 import android.graphics.Rect;
 
 public class VideoPartInfo {
-    private int startTime;
-    private int endTime;
-    private int duration;
+    private long startTime;
+    private long endTime;
+    private long duration;
 
     private Rect bounds;
     private int startScale;
     private int endScale;
 
-    public int getStartTime()
+    private int drawOffset;
+    private int initOffset;
+
+    public long getStartTime()
     {
         return startTime;
     }
 
-    public void setStartTime(int startTime)
+    public void setStartTime(long startTime)
     {
         this.startTime = startTime;
     }
 
-    public int getEndTime()
+    public long getEndTime()
     {
         return endTime;
     }
 
-    public void setEndTime(int endTime)
+    public void setEndTime(long endTime)
     {
         this.endTime = endTime;
     }
 
-    public int getDuration()
+    public long getDuration()
     {
         return endTime - startTime;
     }
@@ -73,14 +76,34 @@ public class VideoPartInfo {
     }
 
     public boolean inTimeRange(int time) {
-        return time > startTime && time < endTime;
+        return time >= startTime && time < endTime;
     }
 
     public boolean inScaleRange(int scale) {
         return scale >= startScale && scale < endScale;
     }
 
-    public VideoPartInfo copy() {
+    public int getLength() {
+        return endScale - startScale;
+    }
+
+    public int getDrawOffset() {
+        return drawOffset;
+    }
+
+    public void setDrawOffset(int drawOffset) {
+        this.drawOffset = drawOffset;
+    }
+
+    public int getInitOffset() {
+        return initOffset;
+    }
+
+    public void setInitOffset(int initOffset) {
+        this.initOffset = initOffset;
+    }
+
+    public VideoPartInfo clone() {
         VideoPartInfo partInfo = new VideoPartInfo();
         partInfo.startTime = startTime;
         partInfo.endTime = endTime;
@@ -90,4 +113,5 @@ public class VideoPartInfo {
         partInfo.endScale = endScale;
         return partInfo;
     }
+
 }

@@ -74,7 +74,7 @@ public class FrameExtractor {
         return new FrameExtractor.Task(callback, timestampNano).executeOnExecutor(mExecutor);
     }
 
-    public boolean setDataSource(String source) {
+    public boolean setVideoPath(String source) {
         try {
             mVideoPath = source;
             mRetriever.setDataSource(source);
